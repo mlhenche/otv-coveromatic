@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+*.js.map
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+.cache/

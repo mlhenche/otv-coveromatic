@@ -1,0 +1,1637 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <style>
+    /* ============================================
+       OTV CoverOmatic 1.0 — Figma Plugin UI
+       Orange TV look & feel
+       ============================================ */
+
+    :root {
+      --bg-primary: #000000;
+      --bg-secondary: #111111;
+      --bg-tertiary: #1a1a1a;
+      --bg-hover: #262626;
+      --text-primary: #ffffff;
+      --text-secondary: #aaaaaa;
+      --text-muted: #666666;
+      --accent: #ff7900;
+      --accent-hover: #e06a00;
+      --accent-glow: rgba(255, 121, 0, 0.25);
+      --success: #1bc47d;
+      --warning: #ff7900;
+      --error: #f24822;
+      --border: #222222;
+      --radius: 6px;
+      --radius-sm: 4px;
+      --transition: 150ms ease;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'Segoe UI', sans-serif;
+      font-size: 12px;
+      color: var(--text-primary);
+      background: var(--bg-primary);
+      overflow-x: hidden;
+    }
+
+    /* -- Layout -- */
+    .plugin {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    /* -- Header / Brand -- */
+    .header {
+      padding: 10px 12px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-logo {
+      width: 20px;
+      height: 20px;
+      background: var(--accent);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 800;
+      color: #000;
+    }
+
+    .brand-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.3px;
+    }
+
+    .brand-name span {
+      color: var(--accent);
+    }
+
+    .header-key-btn {
+      width: 26px;
+      height: 26px;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--transition);
+    }
+
+    .header-key-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .header-key-btn.connected {
+      border-color: var(--success);
+      color: var(--success);
+    }
+
+    /* -- API Key Section -- */
+    .api-key-section {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-secondary);
+    }
+
+    .api-key-section.collapsed {
+      display: none;
+    }
+
+    .api-key-input-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    .api-key-input-row input {
+      flex: 1;
+      padding: 7px 10px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 11px;
+      outline: none;
+      transition: border-color var(--transition);
+    }
+
+    .api-key-input-row input:focus {
+      border-color: var(--accent);
+    }
+
+    .api-key-input-row button {
+      padding: 7px 14px;
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background var(--transition);
+    }
+
+    .api-key-input-row button:hover {
+      background: var(--accent-hover);
+    }
+
+    /* -- Tabs -- */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-primary);
+    }
+
+    .tab {
+      flex: 1;
+      padding: 9px 0;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all var(--transition);
+      user-select: none;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .tab:hover {
+      color: var(--text-secondary);
+    }
+
+    .tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    /* -- Controls bar (search + orientation toggle) -- */
+    .controls-bar {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .search-input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      flex: 1;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 8px;
+      color: var(--text-muted);
+      font-size: 11px;
+      pointer-events: none;
+    }
+
+    .controls-bar input[type="text"] {
+      width: 100%;
+      padding: 7px 8px 7px 28px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 11px;
+      outline: none;
+      transition: border-color var(--transition);
+    }
+
+    .controls-bar input[type="text"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent-glow);
+    }
+
+    .controls-bar input[type="text"]::placeholder {
+      color: var(--text-muted);
+    }
+
+    /* -- Orientation toggle -- */
+    .orientation-toggle {
+      display: flex;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .orientation-btn {
+      padding: 5px 8px;
+      background: var(--bg-secondary);
+      border: none;
+      color: var(--text-muted);
+      font-size: 14px;
+      cursor: pointer;
+      transition: all var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+
+    .orientation-btn + .orientation-btn {
+      border-left: 1px solid var(--border);
+    }
+
+    .orientation-btn:hover {
+      color: var(--text-secondary);
+      background: var(--bg-tertiary);
+    }
+
+    .orientation-btn.active {
+      background: var(--accent);
+      color: #000;
+    }
+
+    .orientation-btn:disabled {
+      opacity: 0.25;
+      cursor: not-allowed;
+    }
+
+    .orientation-btn:disabled:hover {
+      background: var(--bg-secondary);
+      color: var(--text-muted);
+    }
+
+    /* SVG icons in orientation buttons */
+    .orientation-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* -- Genre filter -- */
+    .genre-bar {
+      padding: 6px 12px;
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+      white-space: nowrap;
+      display: flex;
+      gap: 4px;
+      scrollbar-width: none;
+    }
+
+    .genre-bar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .genre-bar.hidden {
+      display: none !important;
+    }
+
+    .genre-chip {
+      display: inline-block;
+      padding: 4px 10px;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all var(--transition);
+      flex-shrink: 0;
+      user-select: none;
+    }
+
+    .genre-chip:hover {
+      color: var(--text-primary);
+      border-color: var(--text-muted);
+    }
+
+    .genre-chip.active {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+    }
+
+    /* -- Image Grid -- */
+    .grid-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+    }
+
+    .grid-container::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .grid-container::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .grid-container::-webkit-scrollbar-thumb {
+      background: var(--bg-tertiary);
+      border-radius: 2px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    .grid.landscape {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .grid-item {
+      position: relative;
+      aspect-ratio: 2/3;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      cursor: pointer;
+      background: var(--bg-secondary);
+      transition: transform var(--transition), box-shadow var(--transition);
+    }
+
+    .grid.landscape .grid-item {
+      aspect-ratio: 16/9;
+    }
+
+    .grid-item:hover {
+      transform: scale(1.03);
+      box-shadow: 0 4px 20px rgba(255, 121, 0, 0.15);
+    }
+
+    .grid-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      opacity: 0;
+      transition: opacity 300ms ease;
+    }
+
+    .grid-item img.loaded {
+      opacity: 1;
+    }
+
+    .grid-item .overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 24px 8px 8px;
+      background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
+      opacity: 0;
+      transition: opacity var(--transition);
+    }
+
+    .grid-item:hover .overlay {
+      opacity: 1;
+    }
+
+    .overlay-title {
+      font-size: 10px;
+      font-weight: 700;
+      line-height: 1.3;
+      color: #fff;
+    }
+
+    .overlay-year {
+      font-size: 9px;
+      color: var(--accent);
+      margin-top: 2px;
+      font-weight: 600;
+    }
+
+    /* No image placeholder */
+    .grid-item.no-image {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-tertiary);
+    }
+
+    .grid-item.no-image span {
+      font-size: 9px;
+      color: var(--text-muted);
+      text-align: center;
+      padding: 4px;
+    }
+
+    /* -- Loading -- */
+    .loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 0;
+      color: var(--text-secondary);
+      gap: 12px;
+    }
+
+    .spinner {
+      width: 24px;
+      height: 24px;
+      border: 3px solid var(--bg-tertiary);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* -- Empty / Error states -- */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      color: var(--text-secondary);
+      text-align: center;
+      gap: 8px;
+    }
+
+    .empty-state .icon {
+      font-size: 28px;
+      opacity: 0.4;
+    }
+
+    .empty-state p {
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    /* -- Footer -- */
+    .footer {
+      padding: 8px 12px;
+      border-top: 1px solid var(--border);
+      background: var(--bg-secondary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .footer .selection-info {
+      flex: 1;
+      font-size: 10px;
+      color: var(--text-secondary);
+    }
+
+    .footer .selection-info strong {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .btn {
+      padding: 6px 12px;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .btn-reload {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+    }
+
+    .btn-reload:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .btn-reload .reload-icon {
+      display: inline-block;
+      transition: transform 0.3s ease;
+    }
+
+    .btn-reload:hover .reload-icon {
+      transform: rotate(180deg);
+    }
+
+    .btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    /* -- Applying overlay -- */
+    .applying-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      backdrop-filter: blur(6px);
+    }
+
+    .applying-overlay .message {
+      background: var(--bg-secondary);
+      padding: 20px 28px;
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+      border: 1px solid var(--border);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* -- API Log Panel -- */
+    .log-panel {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .log-panel.visible {
+      display: flex;
+    }
+
+    .log-panel::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .log-panel::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .log-panel::-webkit-scrollbar-thumb {
+      background: var(--bg-tertiary);
+      border-radius: 2px;
+    }
+
+    .log-entry {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px 10px;
+      font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
+      font-size: 10px;
+      line-height: 1.5;
+      cursor: pointer;
+      transition: border-color var(--transition);
+    }
+
+    .log-entry:hover {
+      border-color: var(--text-muted);
+    }
+
+    .log-entry.success {
+      border-left: 3px solid var(--success);
+    }
+
+    .log-entry.error {
+      border-left: 3px solid var(--error);
+    }
+
+    .log-entry-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .log-entry-status {
+      font-weight: 700;
+    }
+
+    .log-entry-status.ok {
+      color: var(--success);
+    }
+
+    .log-entry-status.fail {
+      color: var(--error);
+    }
+
+    .log-entry-time {
+      color: var(--text-muted);
+      font-size: 9px;
+    }
+
+    .log-entry-url {
+      color: var(--text-secondary);
+      word-break: break-all;
+      margin-bottom: 2px;
+    }
+
+    .log-entry-duration {
+      color: var(--text-muted);
+      font-size: 9px;
+    }
+
+    .log-entry-body {
+      margin-top: 6px;
+      padding-top: 6px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .log-entry.expanded .log-entry-body {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .log-clear-btn {
+      align-self: flex-end;
+      padding: 4px 10px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-size: 10px;
+      cursor: pointer;
+      transition: all var(--transition);
+      flex-shrink: 0;
+    }
+
+    .log-clear-btn:hover {
+      border-color: var(--error);
+      color: var(--error);
+    }
+
+    .log-empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 11px;
+      padding: 40px 0;
+    }
+
+    /* -- Random Content Button -- */
+    .random-bar {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-primary);
+      display: none;
+      justify-content: center;
+    }
+
+    .random-bar.visible {
+      display: flex;
+    }
+
+    .btn-random {
+      width: 100%;
+      padding: 8px 16px;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+      color: #000;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: 0 2px 8px var(--accent-glow);
+    }
+
+    .btn-random:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px var(--accent-glow);
+    }
+
+    .btn-random:active {
+      transform: translateY(0);
+    }
+
+    .btn-random:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-random .icon {
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="plugin">
+
+    <!-- Header -->
+    <div class="header">
+      <div class="brand">
+        <div class="brand-logo">O</div>
+        <div class="brand-name"><span>CoverOmatic</span> 1.0</div>
+      </div>
+      <button class="header-key-btn" id="headerKeyBtn" onclick="toggleApiKey()" title="API Key TMDB">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path
+            d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- API Key -->
+    <div class="api-key-section collapsed" id="apiKeySection">
+      <div class="api-key-input-row">
+        <input type="password" id="apiKeyInput" placeholder="Pega tu API Key de TMDB..." />
+        <button onclick="saveApiKey()">Guardar</button>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <div class="tab active" data-category="movie" onclick="switchTab('movie')">Cine</div>
+      <div class="tab" data-category="tv" onclick="switchTab('tv')">Series</div>
+      <div class="tab" data-category="person" onclick="switchTab('person')">Personas</div>
+      <div class="tab" data-category="log" onclick="switchTab('log')">Log</div>
+    </div>
+
+    <!-- Controls: Search + Orientation -->
+    <div class="controls-bar">
+      <div class="search-input-wrapper">
+        <span class="search-icon">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+        </span>
+        <input type="text" id="searchInput" placeholder="Buscar películas..." />
+      </div>
+      <div class="orientation-toggle" id="orientationToggle">
+        <button class="orientation-btn active" id="btnPortrait" onclick="setOrientation('portrait')"
+          title="Portrait (Poster)">
+          <svg viewBox="0 0 16 16" fill="currentColor">
+            <rect x="4" y="1" width="8" height="14" rx="1.5" />
+          </svg>
+        </button>
+        <button class="orientation-btn" id="btnLandscape" onclick="setOrientation('landscape')"
+          title="Landscape (Backdrop)">
+          <svg viewBox="0 0 16 16" fill="currentColor">
+            <rect x="1" y="4" width="14" height="8" rx="1.5" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Genre filter -->
+    <div class="genre-bar" id="genreBar"></div>
+
+    <!-- Random Content Button -->
+    <div class="random-bar" id="randomBar">
+      <button class="btn-random" id="btnRandom" onclick="applyRandomContent()">
+        <span class="icon">🎲</span>
+        <span>Contenido aleatorio</span>
+      </button>
+    </div>
+
+    <!-- Grid -->
+    <div class="grid-container" id="gridContainer">
+      <div class="loading" id="loadingState">
+        <div class="spinner"></div>
+        <span>Cargando...</span>
+      </div>
+      <div class="empty-state hidden" id="emptyState">
+        <span class="icon"></span>
+        <p>No se encontraron resultados</p>
+      </div>
+      <div class="grid hidden" id="imageGrid"></div>
+    </div>
+
+    <!-- Log Panel -->
+    <div class="log-panel" id="logPanel">
+      <button class="log-clear-btn" onclick="clearLog()">Limpiar log</button>
+      <div id="logEntries"></div>
+      <div class="log-empty" id="logEmpty">Sin peticiones registradas</div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <div class="selection-info" id="selectionInfo">
+        Selecciona componentes en Figma
+      </div>
+      <button class="btn btn-reload" onclick="reloadImages()" id="reloadBtn">
+        <span class="reload-icon">↻</span> Más
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Applying overlay -->
+  <div class="applying-overlay hidden" id="applyingOverlay">
+    <div class="message">
+      <div class="spinner"></div>
+      Aplicando cover...
+    </div>
+  </div>
+
+  <script>
+    // ============================================
+    // OTV CoverOmatic 1.0 — Plugin UI Logic
+    // ============================================
+
+    // -- State --
+    let apiKey = '';
+    let currentCategory = 'movie';   // movie | tv | person
+    let currentOrientation = 'portrait'; // portrait | landscape
+    let currentQuery = '';
+    let currentPage = 1;
+    let totalPages = 1;
+    let currentResults = [];
+    let selectionCount = 0;
+    let coverCount = 0;
+    let currentGenreId = null;        // null = all genres
+    let genresCache = {};             // { movie: [...], tv: [...] }
+    let apiLog = [];                  // API log entries
+
+    const IMAGE_BASE = 'https://image.tmdb.org/t/p/';
+    const API_BASE = 'https://api.themoviedb.org/3';
+
+    // -- API Log: fetch wrapper --
+    async function tmdbFetch(url) {
+      const maskedUrl = url.replace(/api_key=[^&]+/, 'api_key=***');
+      const startTime = performance.now();
+      const entry = {
+        timestamp: new Date().toLocaleTimeString('es-ES', { hour12: false }),
+        url: maskedUrl,
+        status: null,
+        statusText: '',
+        duration: 0,
+        responsePreview: '',
+        success: false
+      };
+
+      try {
+        const response = await fetch(url);
+        entry.duration = Math.round(performance.now() - startTime);
+        entry.status = response.status;
+        entry.statusText = response.statusText;
+        entry.success = response.ok;
+
+        // Clone to read body for log while returning original
+        const cloned = response.clone();
+        try {
+          const body = await cloned.json();
+          // Summarize response
+          const summary = {};
+          if (body.total_results !== undefined) summary.total_results = body.total_results;
+          if (body.total_pages !== undefined) summary.total_pages = body.total_pages;
+          if (body.results) summary.results_count = body.results.length;
+          if (body.id) summary.id = body.id;
+          if (body.title) summary.title = body.title;
+          if (body.name) summary.name = body.name;
+          if (body.genres) summary.genres = body.genres.length;
+          if (body.status_message) summary.status_message = body.status_message;
+          entry.responsePreview = JSON.stringify(summary, null, 2);
+        } catch (_) {
+          entry.responsePreview = '(no se pudo leer el body)';
+        }
+
+        addLogEntry(entry);
+        return response;
+      } catch (err) {
+        entry.duration = Math.round(performance.now() - startTime);
+        entry.status = 'ERR';
+        entry.statusText = err.message;
+        entry.success = false;
+        entry.responsePreview = err.stack || err.message;
+        addLogEntry(entry);
+        throw err;
+      }
+    }
+
+    function addLogEntry(entry) {
+      apiLog.unshift(entry);
+      if (apiLog.length > 100) apiLog.pop();
+      renderLog();
+    }
+
+    function renderLog() {
+      const container = document.getElementById('logEntries');
+      const empty = document.getElementById('logEmpty');
+      if (!container) return;
+
+      if (apiLog.length === 0) {
+        container.innerHTML = '';
+        empty.classList.remove('hidden');
+        return;
+      }
+      empty.classList.add('hidden');
+
+      container.innerHTML = apiLog.map((e, i) => `
+        <div class="log-entry ${e.success ? 'success' : 'error'}" onclick="this.classList.toggle('expanded')">
+          <div class="log-entry-header">
+            <span class="log-entry-status ${e.success ? 'ok' : 'fail'}">${e.status} ${e.statusText}</span>
+            <span class="log-entry-time">${e.timestamp}</span>
+          </div>
+          <div class="log-entry-url">${escapeHtml(e.url)}</div>
+          <div class="log-entry-duration">${e.duration}ms</div>
+          <div class="log-entry-body">${escapeHtml(e.responsePreview)}</div>
+        </div>
+      `).join('');
+    }
+
+    function clearLog() {
+      apiLog = [];
+      renderLog();
+    }
+
+    // -- DOM refs --
+    const apiKeySection = document.getElementById('apiKeySection');
+    const headerKeyBtn = document.getElementById('headerKeyBtn');
+    const apiKeyInput = document.getElementById('apiKeyInput');
+    const searchInput = document.getElementById('searchInput');
+    const gridContainer = document.getElementById('gridContainer');
+    const imageGrid = document.getElementById('imageGrid');
+    const loadingState = document.getElementById('loadingState');
+    const emptyState = document.getElementById('emptyState');
+    const selectionInfo = document.getElementById('selectionInfo');
+    const reloadBtn = document.getElementById('reloadBtn');
+    const applyingOverlay = document.getElementById('applyingOverlay');
+    const btnPortrait = document.getElementById('btnPortrait');
+    const btnLandscape = document.getElementById('btnLandscape');
+    const genreBar = document.getElementById('genreBar');
+    const logPanel = document.getElementById('logPanel');
+    const randomBar = document.getElementById('randomBar');
+    const btnRandom = document.getElementById('btnRandom');
+
+    // -- Init --
+    (function init() {
+      parent.postMessage({ pluginMessage: { type: 'load-api-key' } }, '*');
+      parent.postMessage({ pluginMessage: { type: 'get-selection' } }, '*');
+      showLoading();
+    })();
+
+    // -- API Key --
+    function toggleApiKey() {
+      apiKeySection.classList.toggle('collapsed');
+    }
+
+    function saveApiKey() {
+      const key = apiKeyInput.value.trim();
+      if (!key) return;
+      apiKey = key;
+      parent.postMessage({ pluginMessage: { type: 'save-api-key', apiKey: apiKey } }, '*');
+      headerKeyBtn.classList.add('connected');
+      apiKeySection.classList.add('collapsed');
+      currentPage = 1;
+      if (currentCategory !== 'person') loadGenres(currentCategory);
+      loadContent();
+    }
+
+    // -- Tabs --
+    function switchTab(category) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelector(`.tab[data-category="${category}"]`).classList.add('active');
+
+      // Log tab — show log panel, hide everything else
+      const controlsBar = document.querySelector('.controls-bar');
+      if (category === 'log') {
+        controlsBar.classList.add('hidden');
+        genreBar.classList.add('hidden');
+        randomBar.classList.remove('visible');
+        gridContainer.classList.add('hidden');
+        logPanel.classList.add('visible');
+        document.querySelector('.footer').classList.add('hidden');
+        renderLog();
+        return;
+      }
+
+      // Normal content tabs — hide log, show content
+      logPanel.classList.remove('visible');
+      controlsBar.classList.remove('hidden');
+      gridContainer.classList.remove('hidden');
+      document.querySelector('.footer').classList.remove('hidden');
+
+      currentCategory = category;
+      currentPage = 1;
+      currentQuery = '';
+      currentGenreId = null;
+      searchInput.value = '';
+
+      const placeholders = {
+        movie: 'Buscar películas...',
+        tv: 'Buscar series...',
+        person: 'Buscar personas...'
+      };
+      searchInput.placeholder = placeholders[category] || 'Buscar...';
+
+      // Persons don't have backdrop_path — force portrait and disable landscape
+      if (category === 'person') {
+        if (currentOrientation === 'landscape') {
+          setOrientation('portrait');
+        }
+        btnLandscape.disabled = true;
+        genreBar.classList.add('hidden');
+      } else {
+        btnLandscape.disabled = false;
+        genreBar.classList.remove('hidden');
+        loadGenres(category);
+      }
+
+      loadContent();
+    }
+
+    // -- Genres --
+    async function loadGenres(category) {
+      if (!apiKey) return;
+
+      // Use cache if available
+      if (genresCache[category]) {
+        renderGenres(genresCache[category]);
+        return;
+      }
+
+      try {
+        const url = `${API_BASE}/genre/${category}/list?api_key=${apiKey}&language=es-ES`;
+        const res = await tmdbFetch(url);
+        if (!res.ok) return;
+        const data = await res.json();
+        genresCache[category] = data.genres || [];
+        renderGenres(genresCache[category]);
+      } catch (e) {
+        console.error('Error loading genres:', e);
+      }
+    }
+
+    function renderGenres(genres) {
+      genreBar.innerHTML = '';
+
+      // "Todos" chip
+      const allChip = document.createElement('span');
+      allChip.className = 'genre-chip' + (currentGenreId === null ? ' active' : '');
+      allChip.textContent = 'Todos';
+      allChip.addEventListener('click', () => selectGenre(null));
+      genreBar.appendChild(allChip);
+
+      for (const genre of genres) {
+        const chip = document.createElement('span');
+        chip.className = 'genre-chip' + (currentGenreId === genre.id ? ' active' : '');
+        chip.textContent = genre.name;
+        chip.addEventListener('click', () => selectGenre(genre.id));
+        genreBar.appendChild(chip);
+      }
+    }
+
+    function selectGenre(genreId) {
+      currentGenreId = genreId;
+      currentPage = 1;
+      // Update active state
+      genreBar.querySelectorAll('.genre-chip').forEach(c => c.classList.remove('active'));
+      event.target.classList.add('active');
+      loadContent();
+    }
+
+    // -- Orientation --
+    function setOrientation(orientation) {
+      if (orientation === 'landscape' && currentCategory === 'person') return;
+      currentOrientation = orientation;
+      currentPage = 1;
+
+      btnPortrait.classList.toggle('active', orientation === 'portrait');
+      btnLandscape.classList.toggle('active', orientation === 'landscape');
+
+      imageGrid.classList.toggle('landscape', orientation === 'landscape');
+
+      loadContent();
+    }
+
+    // -- Search --
+    let searchTimeout = null;
+    searchInput.addEventListener('input', () => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        currentQuery = searchInput.value.trim();
+        currentPage = 1;
+        loadContent();
+      }, 400);
+    });
+
+    // -- Load Content --
+    async function loadContent() {
+      if (!apiKey) {
+        showEmpty('🔑', 'Introduce tu API Key de TMDB para empezar');
+        return;
+      }
+
+      showLoading();
+
+      try {
+        let url;
+        if (currentQuery) {
+          // Search endpoint (genre filtered client-side)
+          url = `${API_BASE}/search/${currentCategory}?api_key=${apiKey}&language=es-ES&query=${encodeURIComponent(currentQuery)}&page=${currentPage}`;
+        } else if (currentGenreId && currentCategory !== 'person') {
+          // Discover endpoint with genre filter
+          url = `${API_BASE}/discover/${currentCategory}?api_key=${apiKey}&language=es-ES&sort_by=popularity.desc&with_genres=${currentGenreId}&page=${currentPage}`;
+        } else {
+          // Trending (no genre, no search)
+          url = `${API_BASE}/trending/${currentCategory}/week?api_key=${apiKey}&language=es-ES&page=${currentPage}`;
+        }
+
+        const response = await tmdbFetch(url);
+        if (!response.ok) {
+          if (response.status === 401) {
+            showEmpty('🔑', 'API Key inválida. Haz clic en el icono de llave para revisarla.');
+            headerKeyBtn.classList.remove('connected');
+            return;
+          }
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        totalPages = data.total_pages || 1;
+
+        // Filter results based on orientation
+        let results = data.results || [];
+
+        // Client-side genre filter for search results
+        if (currentQuery && currentGenreId && currentCategory !== 'person') {
+          results = results.filter(item => item.genre_ids && item.genre_ids.includes(currentGenreId));
+        }
+
+        if (currentOrientation === 'landscape' && currentCategory !== 'person') {
+          currentResults = results.filter(item => item.backdrop_path);
+        } else {
+          currentResults = results.filter(item => {
+            const path = currentCategory === 'person' ? item.profile_path : item.poster_path;
+            return !!path;
+          });
+        }
+
+        if (currentResults.length === 0) {
+          showEmpty('🎬', 'No se encontraron resultados');
+        } else {
+          console.log(`Loaded ${currentResults.length} results for ${currentCategory} (orientation: ${currentOrientation})`);
+          renderGrid();
+        }
+      } catch (err) {
+        console.error('TMDB fetch error:', err);
+        const errorMsg = err.message || 'Error desconocido';
+        showEmpty('⚠️', `Error al conectar con TMDB:\n${errorMsg}\n\nVerifica tu conexión y API Key.`);
+      }
+    }
+
+    // -- Render Grid --
+    function renderGrid() {
+      imageGrid.innerHTML = '';
+      loadingState.classList.add('hidden');
+      emptyState.classList.add('hidden');
+      imageGrid.classList.remove('hidden');
+
+      // Ensure landscape class is correct
+      imageGrid.classList.toggle('landscape', currentOrientation === 'landscape');
+
+      for (const item of currentResults) {
+        let imagePath;
+        if (currentOrientation === 'landscape' && currentCategory !== 'person') {
+          imagePath = item.backdrop_path;
+        } else if (currentCategory === 'person') {
+          imagePath = item.profile_path;
+        } else {
+          imagePath = item.poster_path;
+        }
+
+        const title = item.title || item.name || 'Sin título';
+        const date = item.release_date || item.first_air_date || '';
+        const year = date ? date.substring(0, 4) : '';
+
+        const div = document.createElement('div');
+
+        if (imagePath) {
+          div.className = 'grid-item';
+          // Use appropriate thumbnail size per orientation
+          const thumbSize = currentOrientation === 'landscape' ? 'w780' : 'w342';
+          const thumbUrl = `${IMAGE_BASE}${thumbSize}${imagePath}`;
+          const fullUrl = `${IMAGE_BASE}original${imagePath}`;
+
+          div.innerHTML = `
+            <img src="${thumbUrl}" alt="${escapeHtml(title)}"
+                 onload="this.classList.add('loaded')"
+                 onerror="this.parentElement.classList.add('no-image'); this.style.display='none'; this.parentElement.innerHTML='<span>Error al cargar imagen</span>';" />
+            <div class="overlay">
+              <div class="overlay-title">${escapeHtml(title)}</div>
+              ${year ? `<div class="overlay-year">${year}</div>` : ''}
+            </div>
+          `;
+
+          div.addEventListener('click', () => applyImage(fullUrl, item));
+        } else {
+          div.className = 'grid-item no-image';
+          div.innerHTML = `<span>${escapeHtml(title)}</span>`;
+        }
+
+        imageGrid.appendChild(div);
+      }
+
+      reloadBtn.disabled = currentPage >= totalPages;
+      updateSelectionInfo(); // Update random button visibility
+    }
+
+    // -- Fetch detail (with age certification via append_to_response) --
+    async function fetchDetail(id) {
+      const append = currentCategory === 'movie' ? 'release_dates' : 'content_ratings';
+      const detailUrl = `${API_BASE}/${currentCategory}/${id}?api_key=${apiKey}&language=es-ES&append_to_response=${append}`;
+      const res = await tmdbFetch(detailUrl);
+      if (!res.ok) return null;
+      return await res.json();
+    }
+
+    // -- Extract Spanish age certification from detail response --
+    const AGE_RATING_MAP = { 'A': 'TP', '7': '7', '12': '12', '16': '16', '18': '18' };
+
+    function extractAgeRating(detail) {
+      let certification = '';
+
+      if (currentCategory === 'movie' && detail.release_dates) {
+        const esRelease = detail.release_dates.results.find(r => r.iso_3166_1 === 'ES');
+        if (esRelease) {
+          const entry = esRelease.release_dates.find(rd => rd.certification) || {};
+          certification = entry.certification || '';
+        }
+      } else if (currentCategory === 'tv' && detail.content_ratings) {
+        const esRating = detail.content_ratings.results.find(r => r.iso_3166_1 === 'ES');
+        if (esRating) {
+          certification = esRating.rating || '';
+        }
+      }
+
+      return AGE_RATING_MAP[certification] || '';
+    }
+
+    // -- Map TMDB department to Spanish role label --
+    const DEPARTMENT_MAP = {
+      'Directing': 'Director/a',
+      'Writing': 'Guionista',
+      'Production': 'Productor/a',
+      'Editing': 'Editor/a',
+      'Camera': 'Director/a de fotografía',
+      'Sound': 'Sonido',
+      'Art': 'Dirección de arte',
+      'Costume & Make-Up': 'Vestuario y maquillaje',
+      'Visual Effects': 'Efectos visuales',
+      'Crew': 'Equipo técnico',
+      'Lighting': 'Iluminación',
+    };
+
+    // -- Format duration --
+    function formatDuration(minutes) {
+      if (!minutes || minutes <= 0) return '';
+      const h = Math.floor(minutes / 60);
+      const m = minutes % 60;
+      return `${h}h ${m}min`;
+    }
+
+    // -- Apply Image --
+    async function applyImage(imageUrl, item) {
+      if (coverCount === 0) {
+        alert('No hay frames "cover" en la selección actual.\n\nSelecciona componentes que contengan un frame llamado "cover".');
+        return;
+      }
+
+      applyingOverlay.classList.remove('hidden');
+
+      try {
+        // Build metadata from list data
+        const title = item.title || item.name || '';
+        const rating = item.vote_average ? item.vote_average.toFixed(1) : '';
+        const date = item.release_date || item.first_air_date || '';
+        const year = date ? date.substring(0, 4) : '';
+        let duration = '';
+        let ageRating = '';
+
+        // Fetch detail for duration/seasons (only for movies and TV)
+        if (currentCategory === 'movie' || currentCategory === 'tv') {
+          try {
+            const detail = await fetchDetail(item.id);
+            if (detail) {
+              if (currentCategory === 'movie') {
+                duration = formatDuration(detail.runtime);
+              } else {
+                const n = detail.number_of_seasons;
+                if (n) duration = `${n} temporada${n === 1 ? '' : 's'}`;
+              }
+              ageRating = extractAgeRating(detail);
+            }
+          } catch (detailErr) {
+            // Continue without detail data
+          }
+        }
+
+        // Fetch image bytes
+        const response = await fetch(imageUrl);
+        if (!response.ok) {
+          throw new Error(`Error al descargar la imagen: HTTP ${response.status}`);
+        }
+        const buffer = await response.arrayBuffer();
+        const bytes = Array.from(new Uint8Array(buffer));
+
+        // Build metadata object
+        let metadata = null;
+        if (currentCategory === 'person') {
+          const personName = item.name || '';
+          const dept = item.known_for_department || '';
+          const isActor = dept === 'Acting';
+          const rol = isActor ? '' : (DEPARTMENT_MAP[dept] || dept);
+          metadata = { personName, rol, isActor: isActor };
+        } else {
+          metadata = { title, rating, year, duration, ageRating };
+        }
+
+        parent.postMessage({
+          pluginMessage: {
+            type: 'apply-cover',
+            imageBytes: bytes,
+            metadata: metadata
+          }
+        }, '*');
+
+        setTimeout(() => {
+          applyingOverlay.classList.add('hidden');
+        }, 800);
+      } catch (err) {
+        console.error('Error applying cover:', err);
+        applyingOverlay.classList.add('hidden');
+        alert(`Error al aplicar la cover:\n\n${err.message}\n\nInténtalo de nuevo o prueba con otra imagen.`);
+      }
+    }
+
+    // -- Apply Random Content to Multiple Covers --
+    async function applyRandomContent() {
+      if (coverCount <= 1) {
+        alert('Selecciona múltiples componentes con "cover" para usar contenido aleatorio.');
+        return;
+      }
+
+      // Filter items with valid image paths FIRST
+      const validItems = currentResults.filter(item => {
+        let imagePath;
+        if (currentOrientation === 'landscape' && currentCategory !== 'person') {
+          imagePath = item.backdrop_path;
+        } else if (currentCategory === 'person') {
+          imagePath = item.profile_path;
+        } else {
+          imagePath = item.poster_path;
+        }
+        return !!imagePath;
+      });
+
+      if (validItems.length < coverCount) {
+        alert(`No hay suficientes contenidos con imagen. Se necesitan al menos ${coverCount}.\n\nResultados disponibles: ${validItems.length}\nIntenta cargar más resultados o selecciona menos componentes.`);
+        return;
+      }
+
+      applyingOverlay.classList.remove('hidden');
+
+      try {
+        // Shuffle and pick random items (all guaranteed to have images)
+        const shuffled = [...validItems].sort(() => Math.random() - 0.5);
+        const selectedItems = shuffled.slice(0, coverCount);
+
+        // Build array of cover data
+        const coversData = [];
+
+        for (let i = 0; i < selectedItems.length; i++) {
+          const item = selectedItems[i];
+
+          try {
+            // Determine image path
+            let imagePath;
+            if (currentOrientation === 'landscape' && currentCategory !== 'person') {
+              imagePath = item.backdrop_path;
+            } else if (currentCategory === 'person') {
+              imagePath = item.profile_path;
+            } else {
+              imagePath = item.poster_path;
+            }
+
+            const fullUrl = `${IMAGE_BASE}original${imagePath}`;
+
+            // Build metadata from list data
+            const title = item.title || item.name || '';
+            const rating = item.vote_average ? item.vote_average.toFixed(1) : '';
+            const date = item.release_date || item.first_air_date || '';
+            const year = date ? date.substring(0, 4) : '';
+            let duration = '';
+            let ageRating = '';
+
+            // Fetch detail for duration/seasons (only for movies and TV)
+            if (currentCategory === 'movie' || currentCategory === 'tv') {
+              try {
+                const detail = await fetchDetail(item.id);
+                if (detail) {
+                  if (currentCategory === 'movie') {
+                    duration = formatDuration(detail.runtime);
+                  } else {
+                    const n = detail.number_of_seasons;
+                    if (n) duration = `${n} temporada${n === 1 ? '' : 's'}`;
+                  }
+                  ageRating = extractAgeRating(detail);
+                }
+              } catch (detailErr) {
+                console.warn(`Failed to fetch detail for item ${i}:`, detailErr);
+                // Continue without detail data
+              }
+            }
+
+            // Fetch image bytes
+            const response = await fetch(fullUrl);
+            if (!response.ok) {
+              throw new Error(`Failed to fetch image: HTTP ${response.status}`);
+            }
+            const buffer = await response.arrayBuffer();
+            const bytes = Array.from(new Uint8Array(buffer));
+
+            // Build metadata object
+            let metadata = null;
+            if (currentCategory === 'person') {
+              const personName = item.name || '';
+              const dept = item.known_for_department || '';
+              const isActor = dept === 'Acting';
+              const rol = isActor ? '' : (DEPARTMENT_MAP[dept] || dept);
+              metadata = { personName, rol, isActor: isActor };
+            } else {
+              metadata = { title, rating, year, duration, ageRating };
+            }
+
+            coversData.push({ imageBytes: bytes, metadata: metadata });
+          } catch (itemErr) {
+            console.error(`Error processing item ${i} (${item.title || item.name}):`, itemErr);
+            // Try to continue with next items, but if we don't have enough, throw
+            if (coversData.length < coverCount - (selectedItems.length - i - 1)) {
+              throw new Error(`No se pudieron procesar suficientes contenidos. Error: ${itemErr.message}`);
+            }
+          }
+        }
+
+        // Verify we have enough data
+        if (coversData.length < coverCount) {
+          throw new Error(`Solo se pudieron procesar ${coversData.length} de ${coverCount} contenidos necesarios.`);
+        }
+
+        // Send to sandbox
+        parent.postMessage({
+          pluginMessage: {
+            type: 'apply-multiple-covers',
+            coversData: coversData.slice(0, coverCount) // Ensure exact count
+          }
+        }, '*');
+
+        setTimeout(() => {
+          applyingOverlay.classList.add('hidden');
+        }, 800);
+      } catch (err) {
+        console.error('Error applying random content:', err);
+        applyingOverlay.classList.add('hidden');
+        alert(`Error al aplicar contenido aleatorio:\n\n${err.message}\n\nRevisar la consola para más detalles.`);
+      }
+    }
+
+    // -- Reload / More --
+    function reloadImages() {
+      if (currentPage < totalPages) {
+        currentPage++;
+      } else {
+        currentPage = 1;
+      }
+      loadContent();
+    }
+
+    // -- Messages from Sandbox --
+    window.onmessage = (event) => {
+      const msg = event.data.pluginMessage;
+      if (!msg) return;
+
+      if (msg.type === 'selection-info') {
+        selectionCount = msg.count;
+        coverCount = msg.coverCount;
+        updateSelectionInfo();
+      }
+
+      if (msg.type === 'loaded-api-key') {
+        if (msg.apiKey) {
+          apiKey = msg.apiKey;
+          apiKeyInput.value = apiKey;
+          headerKeyBtn.classList.add('connected');
+          apiKeySection.classList.add('collapsed');
+          if (currentCategory !== 'person') loadGenres(currentCategory);
+          loadContent();
+        } else {
+          apiKeySection.classList.remove('collapsed');
+          showEmpty('🔑', 'Introduce tu API Key de TMDB para empezar');
+        }
+      }
+    };
+
+    function updateSelectionInfo() {
+      if (selectionCount === 0) {
+        selectionInfo.innerHTML = '<span style="color:var(--warning)">Selecciona componentes</span>';
+      } else if (coverCount === 0) {
+        selectionInfo.innerHTML = `${selectionCount} seleccionado(s) · <span style="color:var(--error)">sin "cover"</span>`;
+      } else {
+        selectionInfo.innerHTML = `<strong>${coverCount}</strong> cover(s)`;
+      }
+
+      // Show/hide random button based on cover count and results
+      if (coverCount > 1 && currentResults.length > 0) {
+        randomBar.classList.add('visible');
+
+        // Count valid items with images
+        const validItemsCount = currentResults.filter(item => {
+          let imagePath;
+          if (currentOrientation === 'landscape' && currentCategory !== 'person') {
+            imagePath = item.backdrop_path;
+          } else if (currentCategory === 'person') {
+            imagePath = item.profile_path;
+          } else {
+            imagePath = item.poster_path;
+          }
+          return !!imagePath;
+        }).length;
+
+        // Disable if not enough valid results
+        btnRandom.disabled = validItemsCount < coverCount;
+      } else {
+        randomBar.classList.remove('visible');
+      }
+    }
+
+    // -- Helpers --
+    function showLoading() {
+      imageGrid.classList.add('hidden');
+      emptyState.classList.add('hidden');
+      loadingState.classList.remove('hidden');
+      randomBar.classList.remove('visible');
+    }
+
+    function showEmpty(icon, text) {
+      imageGrid.classList.add('hidden');
+      loadingState.classList.add('hidden');
+      emptyState.classList.remove('hidden');
+      randomBar.classList.remove('visible');
+      emptyState.innerHTML = `
+        <span class="icon">${icon}</span>
+        <p>${text}</p>
+      `;
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+  </script>
+</body>
+
+</html>
