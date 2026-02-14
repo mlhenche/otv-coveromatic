@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>CoverOmatic — Previews</title>
+  <style>
+    /* ============================================
+       OTV CoverOmatic 1.0 — Figma Plugin UI
+       Orange TV look & feel
+       ============================================ */
+    :root {
+      --bg-primary: #000000; --bg-secondary: #111111; --bg-tertiary: #1a1a1a;
+      --bg-hover: #262626; --text-primary: #ffffff; --text-secondary: #aaaaaa;
+      --text-muted: #666666; --accent: #ff7900; --accent-hover: #e06a00;
+      --accent-glow: rgba(255, 121, 0, 0.25); --success: #1bc47d; --warning: #ff7900;
+      --error: #f24822; --border: #222222; --radius: 6px; --radius-sm: 4px;
+      --transition: 150ms ease;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    .plugin-preview-body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'Segoe UI', sans-serif;
+      font-size: 12px; color: var(--text-primary); background: var(--bg-primary);
+      overflow-x: hidden; height: 580px; width: 380px;
+    }
+    .plugin { display: flex; flex-direction: column; height: 100vh; }
+    .header { padding: 10px 12px; background: var(--bg-secondary); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .brand { display: flex; align-items: center; gap: 8px; }
+    .brand-logo { width: 20px; height: 20px; background: var(--accent); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: #000; }
+    .brand-name { font-size: 13px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.3px; }
+    .brand-name span { color: var(--accent); }
+    .header-key-btn { width: 26px; height: 26px; background: none; border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-muted); font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all var(--transition); }
+    .header-key-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .header-key-btn.connected { border-color: var(--success); color: var(--success); }
+    .api-key-section { padding: 10px 12px; border-bottom: 1px solid var(--border); background: var(--bg-secondary); }
+    .api-key-section.collapsed { display: none; }
+    .api-key-input-row { display: flex; gap: 6px; }
+    .api-key-input-row input { flex: 1; padding: 7px 10px; background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 11px; outline: none; transition: border-color var(--transition); }
+    .api-key-input-row input:focus { border-color: var(--accent); }
+    .api-key-input-row button { padding: 7px 14px; background: var(--accent); color: #000; border: none; border-radius: var(--radius-sm); font-size: 11px; font-weight: 700; cursor: pointer; transition: background var(--transition); }
+    .api-key-input-row button:hover { background: var(--accent-hover); }
+    .tabs { display: flex; border-bottom: 1px solid var(--border); background: var(--bg-primary); }
+    .tab { flex: 1; padding: 9px 0; text-align: center; font-size: 11px; font-weight: 600; color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all var(--transition); user-select: none; text-transform: uppercase; letter-spacing: 0.5px; }
+    .tab:hover { color: var(--text-secondary); }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .controls-bar { padding: 8px 12px; border-bottom: 1px solid var(--border); display: flex; gap: 6px; align-items: center; }
+    .search-input-wrapper { position: relative; display: flex; align-items: center; flex: 1; }
+    .search-icon { position: absolute; left: 8px; color: var(--text-muted); font-size: 11px; pointer-events: none; }
+    .controls-bar input[type="text"] { width: 100%; padding: 7px 8px 7px 28px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 11px; outline: none; transition: border-color var(--transition); }
+    .controls-bar input[type="text"]:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-glow); }
+    .controls-bar input[type="text"]::placeholder { color: var(--text-muted); }
+    .orientation-toggle { display: flex; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; flex-shrink: 0; }
+    .orientation-btn { padding: 5px 8px; background: var(--bg-secondary); border: none; color: var(--text-muted); font-size: 14px; cursor: pointer; transition: all var(--transition); display: flex; align-items: center; justify-content: center; line-height: 1; }
+    .orientation-btn + .orientation-btn { border-left: 1px solid var(--border); }
+    .orientation-btn:hover { color: var(--text-secondary); background: var(--bg-tertiary); }
+    .orientation-btn.active { background: var(--accent); color: #000; }
+    .orientation-btn svg { width: 16px; height: 16px; }
+    .genre-bar { padding: 6px 12px; border-bottom: 1px solid var(--border); overflow-x: auto; white-space: nowrap; display: flex; gap: 4px; scrollbar-width: none; }
+    .genre-bar::-webkit-scrollbar { display: none; }
+    .genre-bar.hidden { display: none !important; }
+    .genre-chip { display: inline-block; padding: 4px 10px; font-size: 10px; font-weight: 600; color: var(--text-secondary); background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 12px; cursor: pointer; transition: all var(--transition); flex-shrink: 0; user-select: none; }
+    .genre-chip:hover { color: var(--text-primary); border-color: var(--text-muted); }
+    .genre-chip.active { background: var(--accent); color: #000; border-color: var(--accent); }
+    .grid-container { flex: 1; overflow-y: auto; padding: 8px; }
+    .grid-container::-webkit-scrollbar { width: 4px; }
+    .grid-container::-webkit-scrollbar-track { background: transparent; }
+    .grid-container::-webkit-scrollbar-thumb { background: var(--bg-tertiary); border-radius: 2px; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    .grid.landscape { grid-template-columns: repeat(2, 1fr); }
+    .grid-item { position: relative; aspect-ratio: 2/3; border-radius: var(--radius-sm); overflow: hidden; cursor: pointer; background: var(--bg-secondary); transition: transform var(--transition), box-shadow var(--transition); }
+    .grid.landscape .grid-item { aspect-ratio: 16/9; }
+    .grid-item:hover { transform: scale(1.03); box-shadow: 0 4px 20px rgba(255, 121, 0, 0.15); }
+    .grid-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .grid-item .overlay { position: absolute; bottom: 0; left: 0; right: 0; padding: 24px 8px 8px; background: linear-gradient(transparent, rgba(0, 0, 0, 0.9)); opacity: 0; transition: opacity var(--transition); }
+    .grid-item:hover .overlay { opacity: 1; }
+    .overlay-title { font-size: 10px; font-weight: 700; line-height: 1.3; color: #fff; }
+    .overlay-year { font-size: 9px; color: var(--accent); margin-top: 2px; font-weight: 600; }
+    .loading { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 0; color: var(--text-secondary); gap: 12px; }
+    .spinner { width: 24px; height: 24px; border: 3px solid var(--bg-tertiary); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; color: var(--text-secondary); text-align: center; gap: 8px; }
+    .empty-state .icon { font-size: 28px; opacity: 0.4; }
+    .empty-state p { font-size: 11px; line-height: 1.5; }
+    .footer { padding: 8px 12px; border-top: 1px solid var(--border); background: var(--bg-secondary); display: flex; align-items: center; gap: 8px; }
+    .footer .selection-info { flex: 1; font-size: 10px; color: var(--text-secondary); }
+    .footer .selection-info strong { color: var(--accent); font-weight: 700; }
+    .btn { padding: 6px 12px; border: none; border-radius: var(--radius-sm); font-size: 11px; font-weight: 600; cursor: pointer; transition: all var(--transition); display: flex; align-items: center; gap: 4px; }
+    .btn-reload { background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border); }
+    .btn-reload:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-reload .reload-icon { display: inline-block; transition: transform 0.3s ease; }
+    .btn-reload:hover .reload-icon { transform: rotate(180deg); }
+    .btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .applying-overlay { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.75); display: flex; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(6px); }
+    .applying-overlay .message { background: var(--bg-secondary); padding: 20px 28px; border-radius: var(--radius); display: flex; align-items: center; gap: 12px; font-size: 13px; font-weight: 600; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6); border: 1px solid var(--border); }
+    .hidden { display: none !important; }
+  </style>
+  <style>
+    body {
+      background: #333; color: #fff; font-family: sans-serif;
+      display: flex; flex-wrap: wrap; gap: 20px; padding: 20px;
+    }
+    .preview-container {
+      border: 1px solid #555; border-radius: 8px;
+      padding-bottom: 20px;
+    }
+    .preview-container h2 {
+      margin: 0; padding: 10px 15px; font-size: 16px; border-bottom: 1px solid #555;
+    }
+    .plugin-wrapper {
+      width: 380px; height: 580px;
+      overflow: hidden;
+      margin-top: 15px;
+      margin-left: 15px;
+    }
+    .plugin-wrapper .plugin {
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ======================== PREVIEW 1: API KEY NEEDED ======================== -->
+  <div class="preview-container">
+    <h2>1. API Key Needed</h2>
+    <div class="plugin-wrapper">
+      <div class="plugin-preview-body">
+        <div class="plugin">
+          <div class="header">
+            <div class="brand">
+              <div class="brand-logo">O</div>
+              <div class="brand-name"><span>CoverOmatic</span> 1.0</div>
+            </div>
+            <button class="header-key-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" /></svg>
+            </button>
+          </div>
+          <div class="api-key-section">
+            <div class="api-key-input-row">
+              <input type="password" placeholder="Pega tu API Key de TMDB..." />
+              <button>Guardar</button>
+            </div>
+          </div>
+          <div class="tabs">
+            <div class="tab active">Cine</div><div class="tab">Series</div><div class="tab">Personas</div>
+          </div>
+          <div class="controls-bar">
+            <div class="search-input-wrapper"><span class="search-icon"><svg width="12" height="12" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg></span><input type="text" placeholder="Buscar películas..." /></div>
+            <div class="orientation-toggle"><button class="orientation-btn active"><svg viewBox="0 0 16 16"><rect x="4" y="1" width="8" height="14" rx="1.5" /></svg></button><button class="orientation-btn"><svg viewBox="0 0 16 16"><rect x="1" y="4" width="14" height="8" rx="1.5" /></svg></button></div>
+          </div>
+          <div class="genre-bar"></div>
+          <div class="grid-container">
+            <div class="empty-state">
+              <span class="icon">🔑</span><p>Introduce tu API Key de TMDB para empezar</p>
+            </div>
+          </div>
+          <div class="footer">
+            <div class="selection-info">Selecciona componentes en Figma</div>
+            <button class="btn btn-reload" disabled><span class="reload-icon">↻</span> Más</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================== PREVIEW 2: LOADING STATE ======================== -->
+  <div class="preview-container">
+    <h2>2. Loading</h2>
+    <div class="plugin-wrapper">
+       <div class="plugin-preview-body">
+        <div class="plugin">
+          <div class="header">
+            <div class="brand"><div class="brand-logo">O</div><div class="brand-name"><span>CoverOmatic</span> 1.0</div></div>
+            <button class="header-key-btn connected">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" /></svg>
+            </button>
+          </div>
+          <div class="api-key-section collapsed"></div>
+          <div class="tabs">
+            <div class="tab active">Cine</div><div class="tab">Series</div><div class="tab">Personas</div>
+          </div>
+          <div class="controls-bar">
+             <div class="search-input-wrapper"><span class="search-icon"><svg width="12" height="12" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg></span><input type="text" placeholder="Buscar películas..." /></div>
+            <div class="orientation-toggle"><button class="orientation-btn active"><svg viewBox="0 0 16 16"><rect x="4" y="1" width="8" height="14" rx="1.5" /></svg></button><button class="orientation-btn"><svg viewBox="0 0 16 16"><rect x="1" y="4" width="14" height="8" rx="1.5" /></svg></button></div>
+          </div>
+           <div class="genre-bar">
+            <span class="genre-chip active">Todos</span><span class="genre-chip">Acción</span><span class="genre-chip">Aventura</span><span class="genre-chip">Animación</span>
+          </div>
+          <div class="grid-container">
+            <div class="loading">
+              <div class="spinner"></div><span>Cargando...</span>
+            </div>
+          </div>
+          <div class="footer">
+            <div class="selection-info"><strong>1</strong> cover(s)</div>
+            <button class="btn btn-reload"><span class="reload-icon">↻</span> Más</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================== PREVIEW 3: GRID VIEW (MOVIES) ======================== -->
+  <div class="preview-container">
+    <h2>3. Grid View (Movies - Trending)</h2>
+    <div class="plugin-wrapper">
+       <div class="plugin-preview-body">
+        <div class="plugin">
+          <div class="header">
+            <div class="brand"><div class="brand-logo">O</div><div class="brand-name"><span>CoverOmatic</span> 1.0</div></div>
+            <button class="header-key-btn connected"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" /></svg></button>
+          </div>
+          <div class="api-key-section collapsed"></div>
+          <div class="tabs">
+            <div class="tab active">Cine</div><div class="tab">Series</div><div class="tab">Personas</div>
+          </div>
+          <div class="controls-bar">
+             <div class="search-input-wrapper"><span class="search-icon"><svg width="12" height="12" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg></span><input type="text" placeholder="Buscar películas..." /></div>
+            <div class="orientation-toggle"><button class="orientation-btn active"><svg viewBox="0 0 16 16"><rect x="4" y="1" width="8" height="14" rx="1.5" /></svg></button><button class="orientation-btn"><svg viewBox="0 0 16 16"><rect x="1" y="4" width="14" height="8" rx="1.5" /></svg></button></div>
+          </div>
+          <div class="genre-bar"><span class="genre-chip active">Todos</span><span class="genre-chip">Ciencia ficción</span></div>
+          <div class="grid-container">
+            <div class="grid">
+              <div class="grid-item"><img src="src/dune_2.jpg"><div class="overlay"><div class="overlay-title">Dune: Parte Dos</div><div class="overlay-year">2024</div></div></div>
+              <div class="grid-item"><img src="src/oppenheimer.jpg"><div class="overlay"><div class="overlay-title">Oppenheimer</div><div class="overlay-year">2023</div></div></div>
+              <div class="grid-item"><img src="src/spiderman_atv.jpg"><div class="overlay"><div class="overlay-title">Spider-Man: Cruzando el Multiverso</div><div class="overlay-year">2023</div></div></div>
+              <div class="grid-item"><img src="src/godzilla_minus_one.jpg"><div class="overlay"><div class="overlay-title">Godzilla Minus One</div><div class="overlay-year">2023</div></div></div>
+              <div class="grid-item"><img src="src/barbie.jpg"><div class="overlay"><div class="overlay-title">Barbie</div><div class="overlay-year">2023</div></div></div>
+              <div class="grid-item"><img src="src/super_mario.jpg"><div class="overlay"><div class="overlay-title">Super Mario Bros: La película</div><div class="overlay-year">2023</div></div></div>
+              <div class="grid-item"><img src="src/killers_moon.jpg"><div class="overlay"><div class="overlay-title">Los asesinos de la luna</div><div class="overlay-year">2023</div></div></div>
+              <div class="grid-item"><img src="src/past_lives.jpg"><div class="overlay"><div class="overlay-title">Vidas pasadas</div><div class="overlay-year">2023</div></div></div>
+              <div class="grid-item"><img src="src/anatomy_fall.jpg"><div class="overlay"><div class="overlay-title">Anatomía de una caída</div><div class="overlay-year">2023</div></div></div>
+            </div>
+          </div>
+          <div class="footer">
+            <div class="selection-info"><strong>2</strong> cover(s)</div>
+            <button class="btn btn-reload"><span class="reload-icon">↻</span> Más</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================== PREVIEW 4: LANDSCAPE VIEW (TV) ======================== -->
+  <div class="preview-container">
+    <h2>4. Landscape View (TV)</h2>
+    <div class="plugin-wrapper">
+      <div class="plugin-preview-body">
+        <div class="plugin">
+          <div class="header">
+            <div class="brand"><div class="brand-logo">O</div><div class="brand-name"><span>CoverOmatic</span> 1.0</div></div>
+            <button class="header-key-btn connected"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" /></svg></button>
+          </div>
+          <div class="api-key-section collapsed"></div>
+          <div class="tabs">
+            <div class="tab">Cine</div><div class="tab active">Series</div><div class="tab">Personas</div>
+          </div>
+          <div class="controls-bar">
+             <div class="search-input-wrapper"><span class="search-icon"><svg width="12" height="12" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg></span><input type="text" placeholder="Buscar series..." /></div>
+            <div class="orientation-toggle"><button class="orientation-btn"><svg viewBox="0 0 16 16"><rect x="4" y="1" width="8" height="14" rx="1.5" /></svg></button><button class="orientation-btn active"><svg viewBox="0 0 16 16"><rect x="1" y="4" width="14" height="8" rx="1.5" /></svg></button></div>
+          </div>
+          <div class="genre-bar"><span class="genre-chip active">Todos</span><span class="genre-chip">Drama</span><span class="genre-chip">Misterio</span></div>
+          <div class="grid-container">
+            <div class="grid landscape">
+              <div class="grid-item"><img src="src/fallout.jpg"><div class="overlay"><div class="overlay-title">Fallout</div><div class="overlay-year">2024</div></div></div>
+              <div class="grid-item"><img src="src/3_body_problem.jpg"><div class="overlay"><div class="overlay-title">El problema de los 3 cuerpos</div><div class="overlay-year">2024</div></div></div>
+              <div class="grid-item"><img src="src/shogun.jpg"><div class="overlay"><div class="overlay-title">Shōgun</div><div class="overlay-year">2024</div></div></div>
+              <div class="grid-item"><img src="src/baby_reindeer.jpg"><div class="overlay"><div class="overlay-title">Mi reno de peluche</div><div class="overlay-year">2024</div></div></div>
+              <div class="grid-item"><img src="src/the_bear.jpg"><div class="overlay"><div class="overlay-title">The Bear</div><div class="overlay-year">2022</div></div></div>
+              <div class="grid-item"><img src="src/bridgerton.jpg"><div class="overlay"><div class="overlay-title">Los Bridgerton</div><div class="overlay-year">2020</div></div></div>
+            </div>
+          </div>
+          <div class="footer">
+            <div class="selection-info"><span style="color:var(--error)">0 covers</span></div>
+            <button class="btn btn-reload"><span class="reload-icon">↻</span> Más</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================== PREVIEW 5: PEOPLE VIEW ======================== -->
+  <div class="preview-container">
+    <h2>5. People View</h2>
+    <div class="plugin-wrapper">
+       <div class="plugin-preview-body">
+        <div class="plugin">
+          <div class="header">
+            <div class="brand"><div class="brand-logo">O</div><div class="brand-name"><span>CoverOmatic</span> 1.0</div></div>
+            <button class="header-key-btn connected"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" /></svg></button>
+          </div>
+          <div class="api-key-section collapsed"></div>
+          <div class="tabs">
+            <div class="tab">Cine</div><div class="tab">Series</div><div class="tab active">Personas</div>
+          </div>
+          <div class="controls-bar">
+             <div class="search-input-wrapper"><span class="search-icon"><svg width="12" height="12" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg></span><input type="text" placeholder="Buscar personas..." /></div>
+            <div class="orientation-toggle"><button class="orientation-btn active"><svg viewBox="0 0 16 16"><rect x="4" y="1" width="8" height="14" rx="1.5" /></svg></button><button class="orientation-btn" disabled><svg viewBox="0 0 16 16"><rect x="1" y="4" width="14" height="8" rx="1.5" /></svg></button></div>
+          </div>
+          <div class="genre-bar hidden"></div>
+          <div class="grid-container">
+            <div class="grid">
+              <div class="grid-item"><img src="src/chalamet.jpg"><div class="overlay"><div class="overlay-title">Timothée Chalamet</div></div></div>
+              <div class="grid-item"><img src="src/zendaya.jpg"><div class="overlay"><div class="overlay-title">Zendaya</div></div></div>
+              <div class="grid-item"><img src="src/anya_taylor_joy.jpg"><div class="overlay"><div class="overlay-title">Anya Taylor-Joy</div></div></div>
+              <div class="grid-item"><img src="src/cillian_murphy.jpg"><div class="overlay"><div class="overlay-title">Cillian Murphy</div></div></div>
+              <div class="grid-item"><img src="src/margot_robbie.jpg"><div class="overlay"><div class="overlay-title">Margot Robbie</div></div></div>
+              <div class="grid-item"><img src="src/ryan_gosling.jpg"><div class="overlay"><div class="overlay-title">Ryan Gosling</div></div></div>
+              <div class="grid-item"><img src="src/florence_pugh.jpg"><div class="overlay"><div class="overlay-title">Florence Pugh</div></div></div>
+              <div class="grid-item"><img src="src/jenna_ortega.jpg"><div class="overlay"><div class="overlay-title">Jenna Ortega</div></div></div>
+              <div class="grid-item"><img src="src/pedro_pascal.jpg"><div class="overlay"><div class="overlay-title">Pedro Pascal</div></div></div>
+            </div>
+          </div>
+          <div class="footer">
+            <div class="selection-info"><strong>1</strong> cover(s)</div>
+            <button class="btn btn-reload"><span class="reload-icon">↻</span> Más</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================== PREVIEW 6: APPLYING COVER ======================== -->
+  <div class="preview-container">
+    <h2>6. Applying Cover</h2>
+    <div class="plugin-wrapper">
+       <div class="plugin-preview-body" style="position:relative;">
+        <div class="plugin">
+          <div class="header">
+            <div class="brand"><div class="brand-logo">O</div><div class="brand-name"><span>CoverOmatic</span> 1.0</div></div>
+            <button class="header-key-btn connected"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" /></svg></button>
+          </div>
+          <div class="api-key-section collapsed"></div>
+          <div class="tabs">
+            <div class="tab active">Cine</div><div class="tab">Series</div><div class="tab">Personas</div>
+          </div>
+          <div class="controls-bar">
+             <div class="search-input-wrapper"><span class="search-icon"><svg width="12" height="12" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg></span><input type="text" placeholder="Buscar películas..." /></div>
+            <div class="orientation-toggle"><button class="orientation-btn active"><svg viewBox="0 0 16 16"><rect x="4" y="1" width="8" height="14" rx="1.5" /></svg></button><button class="orientation-btn"><svg viewBox="0 0 16 16"><rect x="1" y="4" width="14" height="8" rx="1.5" /></svg></button></div>
+          </div>
+          <div class="genre-bar"><span class="genre-chip active">Todos</span><span class="genre-chip">Ciencia ficción</span></div>
+          <div class="grid-container">
+            <div class="grid">
+              <div class="grid-item"><img src="src/dune_2.jpg"><div class="overlay"><div class="overlay-title">Dune: Parte Dos</div><div class="overlay-year">2024</div></div></div>
+              <div class="grid-item"><img src="src/oppenheimer.jpg"><div class="overlay"><div class="overlay-title">Oppenheimer</div><div class="overlay-year">2023</div></div></div>
+              <div class="grid-item"><img src="src/spiderman_atv.jpg"><div class="overlay"><div class="overlay-title">Spider-Man: Cruzando el Multiverso</div><div class="overlay-year">2023</div></div></div>
+              <div class="grid-item"><img src="src/godzilla_minus_one.jpg"><div class="overlay"><div class="overlay-title">Godzilla Minus One</div><div class="overlay-year">2023</div></div></div>
+            </div>
+          </div>
+          <div class="footer">
+            <div class="selection-info"><strong>2</strong> cover(s)</div>
+            <button class="btn btn-reload"><span class="reload-icon">↻</span> Más</button>
+          </div>
+        </div>
+        <div class="applying-overlay">
+          <div class="message"><div class="spinner"></div>Aplicando cover...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
