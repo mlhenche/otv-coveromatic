@@ -116,20 +116,35 @@ async function fillMetadata(nodes, metadata) {
                         if (currentNode === node)
                             break;
                     }
-                    try {
-                        ageTag.setProperties({ rating: metadata.ageRating });
+                    // Find and set the rating property
+                    const props = ageTag.componentProperties;
+                    let ratingKey = null;
+                    for (const key of Object.keys(props)) {
+                        if (key === 'rating' || key.startsWith('rating#')) {
+                            ratingKey = key;
+                            break;
+                        }
                     }
-                    catch (e) {
+                    if (ratingKey) {
                         try {
-                            const props = ageTag.componentProperties;
-                            for (const key of Object.keys(props)) {
-                                if (key === 'rating' || key.startsWith('rating#')) {
-                                    ageTag.setProperties({ [key]: metadata.ageRating });
-                                    break;
-                                }
+                            // Force the property change by swapping to main component first
+                            const mainComponent = ageTag.mainComponent;
+                            if (mainComponent) {
+                                // Swap to main component to reset overrides
+                                ageTag.swapComponent(mainComponent);
+                            }
+                            // Now set the new property value
+                            ageTag.setProperties({ [ratingKey]: metadata.ageRating });
+                        }
+                        catch (e) {
+                            // Fallback: try direct set
+                            try {
+                                ageTag.setProperties({ [ratingKey]: metadata.ageRating });
+                            }
+                            catch (_) {
+                                // Property change failed
                             }
                         }
-                        catch (_) { /* variant value not available */ }
                     }
                     // Restore original visibility states (in reverse order)
                     for (let i = visibilityStates.length - 1; i >= 0; i--) {

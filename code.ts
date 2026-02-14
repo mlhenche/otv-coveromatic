@@ -125,18 +125,35 @@ async function fillMetadata(nodes: readonly SceneNode[], metadata: Metadata) {
                         if (currentNode === node) break;
                     }
 
-                    try {
-                        ageTag.setProperties({ rating: metadata.ageRating });
-                    } catch (e) {
+                    // Find and set the rating property
+                    const props = ageTag.componentProperties;
+                    let ratingKey: string | null = null;
+
+                    for (const key of Object.keys(props)) {
+                        if (key === 'rating' || key.startsWith('rating#')) {
+                            ratingKey = key;
+                            break;
+                        }
+                    }
+
+                    if (ratingKey) {
                         try {
-                            const props = ageTag.componentProperties;
-                            for (const key of Object.keys(props)) {
-                                if (key === 'rating' || key.startsWith('rating#')) {
-                                    ageTag.setProperties({ [key]: metadata.ageRating });
-                                    break;
-                                }
+                            // Force the property change by swapping to main component first
+                            const mainComponent = ageTag.mainComponent;
+                            if (mainComponent) {
+                                // Swap to main component to reset overrides
+                                ageTag.swapComponent(mainComponent);
                             }
-                        } catch (_) { /* variant value not available */ }
+                            // Now set the new property value
+                            ageTag.setProperties({ [ratingKey]: metadata.ageRating });
+                        } catch (e) {
+                            // Fallback: try direct set
+                            try {
+                                ageTag.setProperties({ [ratingKey]: metadata.ageRating });
+                            } catch (_) {
+                                // Property change failed
+                            }
+                        }
                     }
 
                     // Restore original visibility states (in reverse order)
