@@ -17,3 +17,7 @@ node_modules/
 # Temporary files
 *.tmp
 .cache/
+
+# Local files (never upload to repository)
+gitignore/
+.mcp.json
