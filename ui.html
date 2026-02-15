@@ -830,6 +830,207 @@
     .btn-random .icon {
       font-size: 14px;
     }
+
+    /* -- Person Search Mode Toggle -- */
+    .person-search-mode-toggle {
+      display: flex;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      flex-shrink: 0;
+      background: var(--bg-secondary);
+    }
+
+    .person-search-mode-toggle.hidden {
+      display: none !important;
+    }
+
+    .mode-btn {
+      padding: 6px 10px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+      white-space: nowrap;
+    }
+
+    .mode-btn + .mode-btn {
+      border-left: 1px solid var(--border);
+    }
+
+    .mode-btn:hover:not(.active) {
+      color: var(--text-primary);
+      background: var(--bg-hover);
+    }
+
+    .mode-btn.active {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    /* -- Autocomplete Dropdown -- */
+    .autocomplete-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      margin-top: 4px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      max-height: 280px;
+      overflow-y: auto;
+      z-index: 50;
+    }
+
+    .autocomplete-dropdown.hidden {
+      display: none !important;
+    }
+
+    .autocomplete-dropdown::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .autocomplete-dropdown::-webkit-scrollbar-thumb {
+      background: var(--bg-tertiary);
+      border-radius: 2px;
+    }
+
+    .autocomplete-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 12px;
+      cursor: pointer;
+      transition: all var(--transition);
+      border-bottom: 1px solid var(--border);
+      gap: 10px;
+    }
+
+    .autocomplete-item:last-child {
+      border-bottom: none;
+    }
+
+    .autocomplete-item:hover {
+      background: var(--bg-hover);
+    }
+
+    .autocomplete-item-poster {
+      width: 32px;
+      height: 48px;
+      border-radius: 4px;
+      background: var(--bg-tertiary);
+      flex-shrink: 0;
+      object-fit: cover;
+    }
+
+    .autocomplete-item-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .autocomplete-item-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-primary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .autocomplete-item-meta {
+      font-size: 9px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .autocomplete-empty {
+      padding: 16px 12px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 10px;
+    }
+
+    .autocomplete-loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      gap: 8px;
+      color: var(--text-secondary);
+      font-size: 11px;
+    }
+
+    .autocomplete-loading .spinner {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* -- Content Context Bar -- */
+    .content-context-bar {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-tertiary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .content-context-bar.hidden {
+      display: none !important;
+    }
+
+    .content-context-info {
+      flex: 1;
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .context-label {
+      font-size: 9px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      flex-shrink: 0;
+    }
+
+    .context-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .context-clear-btn {
+      width: 20px;
+      height: 20px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1;
+      cursor: pointer;
+      transition: all var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .context-clear-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
   </style>
 </head>
 
@@ -880,6 +1081,10 @@
 
     <!-- Controls: Search + Orientation -->
     <div class="controls-bar">
+      <div class="person-search-mode-toggle hidden" id="personSearchModeToggle">
+        <button class="mode-btn active" id="btnByName" onclick="setPersonSearchMode('by-name')">Por nombre</button>
+        <button class="mode-btn" id="btnByContent" onclick="setPersonSearchMode('by-content')">Por contenido</button>
+      </div>
       <div class="search-input-wrapper">
         <span class="search-icon">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
@@ -889,6 +1094,7 @@
           </svg>
         </span>
         <input type="text" id="searchInput" placeholder="Buscar películas..." />
+        <div class="autocomplete-dropdown hidden" id="autocompleteDropdown"></div>
       </div>
       <div class="orientation-toggle" id="orientationToggle">
         <button class="orientation-btn active" id="btnPortrait" onclick="setOrientation('portrait')"
@@ -908,6 +1114,15 @@
 
     <!-- Genre filter -->
     <div class="genre-bar" id="genreBar"></div>
+
+    <!-- Content context bar (visible when a movie/series is selected in person-by-content mode) -->
+    <div class="content-context-bar hidden" id="contentContextBar">
+      <div class="content-context-info">
+        <span class="context-label">Personas de:</span>
+        <span class="context-title" id="contextTitle"></span>
+      </div>
+      <button class="context-clear-btn" onclick="clearSelectedContent()" title="Limpiar selección">×</button>
+    </div>
 
     <!-- Random Content Button -->
     <div class="random-bar" id="randomBar">
@@ -975,6 +1190,12 @@
     let currentGenreId = null;        // null = all genres
     let genresCache = {};             // { movie: [...], tv: [...] }
     let apiLog = [];                  // API log entries
+
+    // -- Person search by content state --
+    let personSearchMode = 'by-name';     // 'by-name' | 'by-content'
+    let contentAutocomplete = [];         // Autocomplete results
+    let selectedContent = null;           // { id, title, media_type }
+    let autocompleteTimer = null;         // Debounce timer
 
     const IMAGE_BASE = 'https://image.tmdb.org/t/p/';
     const API_BASE = 'https://api.themoviedb.org/3';
@@ -1144,7 +1365,7 @@
       const placeholders = {
         movie: 'Buscar películas...',
         tv: 'Buscar series...',
-        person: 'Buscar personas...'
+        person: personSearchMode === 'by-content' ? 'Buscar película o serie...' : 'Buscar personas...'
       };
       searchInput.placeholder = placeholders[category] || 'Buscar...';
 
@@ -1155,10 +1376,14 @@
         }
         btnLandscape.disabled = true;
         genreBar.classList.add('hidden');
+        document.getElementById('personSearchModeToggle').classList.remove('hidden');
       } else {
         btnLandscape.disabled = false;
         genreBar.classList.remove('hidden');
         loadGenres(category);
+        document.getElementById('personSearchModeToggle').classList.add('hidden');
+        // Reset person search state when leaving Personas tab
+        resetPersonSearchState();
       }
 
       loadContent();
@@ -1228,12 +1453,226 @@
       loadContent();
     }
 
+    // -- Person Search by Content --
+    function setPersonSearchMode(mode) {
+      personSearchMode = mode;
+      document.getElementById('btnByName').classList.toggle('active', mode === 'by-name');
+      document.getElementById('btnByContent').classList.toggle('active', mode === 'by-content');
+
+      // Reset state
+      clearSelectedContent();
+      searchInput.value = '';
+      currentQuery = '';
+      currentPage = 1;
+      hideAutocomplete();
+
+      // Update placeholder
+      if (mode === 'by-content') {
+        searchInput.placeholder = 'Buscar película o serie...';
+      } else {
+        searchInput.placeholder = 'Buscar personas...';
+      }
+
+      loadContent();
+    }
+
+    function resetPersonSearchState() {
+      personSearchMode = 'by-name';
+      selectedContent = null;
+      contentAutocomplete = [];
+      document.getElementById('btnByName').classList.add('active');
+      document.getElementById('btnByContent').classList.remove('active');
+      document.getElementById('contentContextBar').classList.add('hidden');
+      hideAutocomplete();
+    }
+
+    async function loadContentAutocomplete(query) {
+      if (!apiKey) return;
+
+      const dropdown = document.getElementById('autocompleteDropdown');
+      dropdown.classList.remove('hidden');
+      dropdown.innerHTML = '<div class="autocomplete-loading"><div class="spinner"></div>Buscando...</div>';
+
+      try {
+        const url = `${API_BASE}/search/multi?api_key=${apiKey}&language=es-ES&query=${encodeURIComponent(query)}&page=1`;
+        const response = await tmdbFetch(url);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const data = await response.json();
+        // Filter only movies and tv shows
+        contentAutocomplete = (data.results || [])
+          .filter(item => item.media_type === 'movie' || item.media_type === 'tv')
+          .slice(0, 10);
+
+        renderAutocomplete();
+      } catch (err) {
+        console.error('Autocomplete error:', err);
+        dropdown.innerHTML = '<div class="autocomplete-empty">Error al buscar contenido</div>';
+      }
+    }
+
+    function renderAutocomplete() {
+      const dropdown = document.getElementById('autocompleteDropdown');
+
+      if (contentAutocomplete.length === 0) {
+        dropdown.innerHTML = '<div class="autocomplete-empty">No se encontraron películas ni series</div>';
+        return;
+      }
+
+      dropdown.innerHTML = '';
+      for (const item of contentAutocomplete) {
+        const title = item.title || item.name || 'Sin título';
+        const date = item.release_date || item.first_air_date || '';
+        const year = date ? date.substring(0, 4) : '';
+        const typeLabel = item.media_type === 'movie' ? 'Película' : 'Serie';
+        const posterPath = item.poster_path;
+
+        const div = document.createElement('div');
+        div.className = 'autocomplete-item';
+
+        const posterHtml = posterPath
+          ? `<img class="autocomplete-item-poster" src="${IMAGE_BASE}w92${posterPath}" alt="" />`
+          : `<div class="autocomplete-item-poster"></div>`;
+
+        div.innerHTML = `
+          ${posterHtml}
+          <div class="autocomplete-item-info">
+            <div class="autocomplete-item-title">${escapeHtml(title)}</div>
+            <div class="autocomplete-item-meta">${typeLabel}${year ? ' · ' + year : ''}</div>
+          </div>
+        `;
+
+        div.addEventListener('click', () => selectContentItem(item.id, title, item.media_type));
+        dropdown.appendChild(div);
+      }
+    }
+
+    function hideAutocomplete() {
+      const dropdown = document.getElementById('autocompleteDropdown');
+      dropdown.classList.add('hidden');
+      dropdown.innerHTML = '';
+      contentAutocomplete = [];
+    }
+
+    function selectContentItem(id, title, mediaType) {
+      selectedContent = { id, title, media_type: mediaType };
+      hideAutocomplete();
+
+      // Show context bar
+      const contextBar = document.getElementById('contentContextBar');
+      document.getElementById('contextTitle').textContent = title;
+      contextBar.classList.remove('hidden');
+
+      // Clear search input
+      searchInput.value = '';
+      searchInput.placeholder = 'Buscar película o serie...';
+
+      // Load credits
+      loadContentCredits(id, mediaType);
+    }
+
+    async function loadContentCredits(contentId, mediaType) {
+      if (!apiKey) return;
+
+      showLoading();
+
+      try {
+        const url = `${API_BASE}/${mediaType}/${contentId}/credits?api_key=${apiKey}&language=es-ES`;
+        const response = await tmdbFetch(url);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const data = await response.json();
+
+        // Get first 15 actors with profile photo
+        const cast = (data.cast || [])
+          .filter(p => p.profile_path)
+          .slice(0, 15);
+
+        // Get key crew (directors, writers, producers) with profile photo
+        const keyRoles = ['Director', 'Screenplay', 'Writer', 'Producer', 'Executive Producer'];
+        const crew = (data.crew || [])
+          .filter(p => p.profile_path && keyRoles.includes(p.job))
+          .slice(0, 5);
+
+        // Deduplicate by person ID
+        const seen = new Set();
+        const people = [];
+        for (const person of [...cast, ...crew]) {
+          if (!seen.has(person.id)) {
+            seen.add(person.id);
+            people.push(person);
+          }
+        }
+
+        if (people.length === 0) {
+          showEmpty('👤', 'No se encontraron personas con foto para este contenido');
+          return;
+        }
+
+        // Map to the format expected by renderGrid
+        currentResults = people.map(p => ({
+          id: p.id,
+          name: p.name,
+          profile_path: p.profile_path,
+          known_for_department: p.known_for_department || (p.job ? 'Crew' : 'Acting'),
+          character: p.character || p.job || ''
+        }));
+        totalPages = 1;
+        currentPage = 1;
+
+        renderGrid();
+      } catch (err) {
+        console.error('Credits fetch error:', err);
+        showEmpty('⚠️', `Error al cargar créditos:\n${err.message}`);
+      }
+    }
+
+    function clearSelectedContent() {
+      selectedContent = null;
+      document.getElementById('contentContextBar').classList.add('hidden');
+      document.getElementById('contextTitle').textContent = '';
+      searchInput.value = '';
+      currentQuery = '';
+      currentPage = 1;
+
+      if (currentCategory === 'person') {
+        if (personSearchMode === 'by-content') {
+          searchInput.placeholder = 'Buscar película o serie...';
+        } else {
+          searchInput.placeholder = 'Buscar personas...';
+        }
+        loadContent();
+      }
+    }
+
+    // Close autocomplete when clicking outside
+    document.addEventListener('click', (e) => {
+      const dropdown = document.getElementById('autocompleteDropdown');
+      const searchWrapper = document.querySelector('.search-input-wrapper');
+      if (!searchWrapper.contains(e.target)) {
+        hideAutocomplete();
+      }
+    });
+
     // -- Search --
     let searchTimeout = null;
     searchInput.addEventListener('input', () => {
       clearTimeout(searchTimeout);
+      const query = searchInput.value.trim();
+
+      // In person-by-content mode, show autocomplete instead of searching persons
+      if (currentCategory === 'person' && personSearchMode === 'by-content') {
+        clearTimeout(autocompleteTimer);
+        if (query.length >= 3) {
+          autocompleteTimer = setTimeout(() => loadContentAutocomplete(query), 300);
+        } else {
+          hideAutocomplete();
+        }
+        return;
+      }
+
       searchTimeout = setTimeout(() => {
-        currentQuery = searchInput.value.trim();
+        currentQuery = query;
         currentPage = 1;
         loadContent();
       }, 400);
@@ -1243,6 +1682,11 @@
     async function loadContent() {
       if (!apiKey) {
         showEmpty('🔑', 'Introduce tu API Key de TMDB para empezar');
+        return;
+      }
+
+      // If we have a selected content in person-by-content mode, don't reload
+      if (selectedContent && currentCategory === 'person' && personSearchMode === 'by-content') {
         return;
       }
 
