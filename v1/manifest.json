@@ -1,0 +1,14 @@
+{
+  "name": "OTV CoverOmatic 1.0",
+  "id": "tmdb-covers-plugin",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html",
+  "editorType": ["figma"],
+  "networkAccess": {
+    "allowedDomains": [
+      "https://api.themoviedb.org",
+      "https://image.tmdb.org"
+    ]
+  }
+}
