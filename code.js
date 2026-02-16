@@ -91,6 +91,7 @@ async function fillMetadata(nodes, metadata) {
                 { name: 'rating', value: metadata.rating },
                 { name: 'year', value: metadata.year },
                 { name: 'duration', value: metadata.duration },
+                { name: 'sinopsis', value: metadata.sinopsis },
             ];
             for (const field of fields) {
                 if (!field.value)
@@ -158,6 +159,24 @@ async function fillMetadata(nodes, metadata) {
         }
     }
 }
+// -- Find the metadata scope for a cover node --
+// Walks up from the cover to find the nearest ancestor that contains text nodes.
+// This ensures each cover's metadata is applied to its own component, not just the first.
+function findMetadataScope(coverNode) {
+    let current = coverNode.parent;
+    while (current && current.type !== 'PAGE' && current.type !== 'DOCUMENT') {
+        const sceneNode = current;
+        let hasText = false;
+        walkTree(sceneNode, (n) => {
+            if (!hasText && n.type === 'TEXT')
+                hasText = true;
+        });
+        if (hasText)
+            return sceneNode;
+        current = sceneNode.parent;
+    }
+    return coverNode.parent || coverNode;
+}
 // -- Find all "cover" nodes in the selection (including hidden) --
 function findCoverNodes(nodes) {
     const covers = [];
@@ -204,9 +223,16 @@ figma.ui.onmessage = async (msg) => {
                 ];
             }
         }
-        // Fill metadata text nodes if provided
+        // Fill metadata for each cover's component scope
         if (msg.metadata) {
-            await fillMetadata(figma.currentPage.selection, msg.metadata);
+            const scopesDone = new Set();
+            for (const cover of coverNodes) {
+                const scope = findMetadataScope(cover);
+                if (!scopesDone.has(scope.id)) {
+                    scopesDone.add(scope.id);
+                    await fillMetadata([scope], msg.metadata);
+                }
+            }
         }
         figma.notify(`✅ Cover aplicada a ${coverNodes.length} elemento(s).`);
     }
@@ -233,12 +259,10 @@ figma.ui.onmessage = async (msg) => {
                     }
                 ];
             }
-            // Fill metadata for this specific component
+            // Fill metadata scoped to this cover's component
             if (coverData.metadata) {
-                const parentNode = figma.currentPage.selection[i];
-                if (parentNode) {
-                    await fillMetadata([parentNode], coverData.metadata);
-                }
+                const scope = findMetadataScope(coverNode);
+                await fillMetadata([scope], coverData.metadata);
             }
         }
         figma.notify(`✅ ${applyCount} cover(s) aplicadas con contenido aleatorio.`);

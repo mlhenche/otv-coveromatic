@@ -1875,6 +1875,7 @@
         const year = date ? date.substring(0, 4) : '';
         let duration = '';
         let ageRating = '';
+        let sinopsis = '';
 
         // Fetch detail for duration/seasons (only for movies and TV)
         if (currentCategory === 'movie' || currentCategory === 'tv') {
@@ -1888,6 +1889,7 @@
                 if (n) duration = `${n} temporada${n === 1 ? '' : 's'}`;
               }
               ageRating = extractAgeRating(detail);
+              sinopsis = detail.overview || '';
             }
           } catch (detailErr) {
             // Continue without detail data
@@ -1911,7 +1913,7 @@
           const rol = isActor ? '' : (DEPARTMENT_MAP[dept] || dept);
           metadata = { personName, rol, isActor: isActor };
         } else {
-          metadata = { title, rating, year, duration, ageRating };
+          metadata = { title, rating, year, duration, ageRating, sinopsis };
         }
 
         parent.postMessage({
@@ -1990,6 +1992,7 @@
             const year = date ? date.substring(0, 4) : '';
             let duration = '';
             let ageRating = '';
+            let sinopsis = '';
 
             // Fetch detail for duration/seasons (only for movies and TV)
             if (currentCategory === 'movie' || currentCategory === 'tv') {
@@ -2003,6 +2006,7 @@
                     if (n) duration = `${n} temporada${n === 1 ? '' : 's'}`;
                   }
                   ageRating = extractAgeRating(detail);
+                  sinopsis = detail.overview || '';
                 }
               } catch (detailErr) {
                 console.warn(`Failed to fetch detail for item ${i}:`, detailErr);
@@ -2027,7 +2031,7 @@
               const rol = isActor ? '' : (DEPARTMENT_MAP[dept] || dept);
               metadata = { personName, rol, isActor: isActor };
             } else {
-              metadata = { title, rating, year, duration, ageRating };
+              metadata = { title, rating, year, duration, ageRating, sinopsis };
             }
 
             coversData.push({ imageBytes: bytes, metadata: metadata });

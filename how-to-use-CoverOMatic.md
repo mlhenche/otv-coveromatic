@@ -39,6 +39,7 @@ Si quieres que el plugin también rellene textos, añade estos elementos:
   ├─ ⭐ rating        ← Puntuación (ej: "7.5")
   ├─ 📅 year          ← Año
   ├─ ⏱️  duration     ← Duración o temporadas
+  ├─ 📄 sinopsis      ← Sinopsis del contenido
   └─ 🎭 ageTag        ← Clasificación por edad (componente con variantes)
 ```
 
@@ -60,6 +61,7 @@ Si quieres que el plugin también rellene textos, añade estos elementos:
 | `rating` | TEXT | Valoración TMDB | ❌ No |
 | `year` | TEXT | Año de estreno | ❌ No |
 | `duration` | TEXT | Duración o temporadas | ❌ No |
+| `sinopsis` | TEXT | Sinopsis del contenido | ❌ No |
 | `name` | TEXT | Nombre de persona | ❌ No |
 | `rol` | TEXT | Rol de persona | ❌ No |
 | `ageTag` | INSTANCE | Clasificación edad | ❌ No |

@@ -98,6 +98,7 @@ async function fillMetadata(nodes: readonly SceneNode[], metadata: Metadata) {
                 { name: 'rating', value: metadata.rating },
                 { name: 'year', value: metadata.year },
                 { name: 'duration', value: metadata.duration },
+                { name: 'sinopsis', value: metadata.sinopsis },
             ];
 
             for (const field of fields) {
@@ -169,6 +170,23 @@ async function fillMetadata(nodes: readonly SceneNode[], metadata: Metadata) {
     }
 }
 
+// -- Find the metadata scope for a cover node --
+// Walks up from the cover to find the nearest ancestor that contains text nodes.
+// This ensures each cover's metadata is applied to its own component, not just the first.
+function findMetadataScope(coverNode: SceneNode): SceneNode {
+    let current: BaseNode | null = coverNode.parent;
+    while (current && current.type !== 'PAGE' && current.type !== 'DOCUMENT') {
+        const sceneNode = current as SceneNode;
+        let hasText = false;
+        walkTree(sceneNode, (n) => {
+            if (!hasText && n.type === 'TEXT') hasText = true;
+        });
+        if (hasText) return sceneNode;
+        current = sceneNode.parent;
+    }
+    return (coverNode.parent as SceneNode) || coverNode;
+}
+
 // -- Find all "cover" nodes in the selection (including hidden) --
 function findCoverNodes(nodes: readonly SceneNode[]): SceneNode[] {
     const covers: SceneNode[] = [];
@@ -194,6 +212,7 @@ interface MovieTvMetadata {
     year: string;
     duration: string;
     ageRating: string;
+    sinopsis: string;
 }
 
 interface PersonMetadata {
@@ -253,9 +272,16 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
             }
         }
 
-        // Fill metadata text nodes if provided
+        // Fill metadata for each cover's component scope
         if (msg.metadata) {
-            await fillMetadata(figma.currentPage.selection, msg.metadata);
+            const scopesDone = new Set<string>();
+            for (const cover of coverNodes) {
+                const scope = findMetadataScope(cover);
+                if (!scopesDone.has(scope.id)) {
+                    scopesDone.add(scope.id);
+                    await fillMetadata([scope], msg.metadata);
+                }
+            }
         }
 
         figma.notify(`✅ Cover aplicada a ${coverNodes.length} elemento(s).`);
@@ -290,12 +316,10 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
                 ];
             }
 
-            // Fill metadata for this specific component
+            // Fill metadata scoped to this cover's component
             if (coverData.metadata) {
-                const parentNode = figma.currentPage.selection[i];
-                if (parentNode) {
-                    await fillMetadata([parentNode], coverData.metadata);
-                }
+                const scope = findMetadataScope(coverNode);
+                await fillMetadata([scope], coverData.metadata);
             }
         }
 
