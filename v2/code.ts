@@ -7,10 +7,23 @@ figma.showUI(__html__, { width: 380, height: 580, themeColors: true });
 function sendSelection() {
     const selection = figma.currentPage.selection;
     const coverCount = findCoverNodes(selection).length;
+    const titleTreatmentCount = findTitleTreatmentNodes(selection).length;
+
+    // Detect component type from names
+    const names = selection.map(n => n.name.toLowerCase());
+    let componentType = 'unknown';
+    for (const name of names) {
+        if (name.includes('card') && name.includes('portrait')) { componentType = 'card-portrait'; break; }
+        if (name.includes('card') && name.includes('landscape')) { componentType = 'card-landscape'; break; }
+        if (name.includes('slideshow') || name.includes('vps')) { componentType = 'vps'; break; }
+    }
+
     figma.ui.postMessage({
         type: 'selection-info',
         count: selection.length,
-        coverCount: coverCount
+        coverCount: coverCount,
+        titleTreatmentCount: titleTreatmentCount,
+        componentType: componentType
     });
 }
 
@@ -29,6 +42,11 @@ function isCoverNode(node: SceneNode): boolean {
     return node.name.trim().toLowerCase() === 'cover' && 'fills' in node;
 }
 
+// -- Check if a node is a valid "titleTreatment" target --
+function isTitleTreatmentNode(node: SceneNode): boolean {
+    return node.name.trim().toLowerCase() === 'titletreatment' && 'fills' in node;
+}
+
 // -- Find a text node by name inside a parent (including hidden) --
 function findTextNode(parent: SceneNode, name: string): TextNode | null {
     let result: TextNode | null = null;
@@ -38,6 +56,17 @@ function findTextNode(parent: SceneNode, name: string): TextNode | null {
         }
     });
     return result;
+}
+
+// -- Find all text nodes by name inside a parent (including hidden) --
+function findAllTextNodes(parent: SceneNode, name: string): TextNode[] {
+    const results: TextNode[] = [];
+    walkTree(parent, (node) => {
+        if (node.type === 'TEXT' && node.name.trim().toLowerCase() === name) {
+            results.push(node as TextNode);
+        }
+    });
+    return results;
 }
 
 // -- Find a component instance by name inside a parent (including hidden) --
@@ -104,6 +133,42 @@ async function fillMetadata(nodes: readonly SceneNode[], metadata: Metadata) {
             for (const field of fields) {
                 if (!field.value) continue;
                 await setTextContent(node, field.name, field.value);
+            }
+
+            // Fill genres (VPS only: genre, genre2, genre3)
+            if (metadata.genres && metadata.genres.length > 0) {
+                const genreNames = ['genre', 'genre2', 'genre3'];
+
+                // Fill each genre slot
+                for (let i = 0; i < genreNames.length; i++) {
+                    const genreNode = findTextNode(node, genreNames[i]);
+
+                    if (i < metadata.genres.length) {
+                        // Fill and show genre
+                        if (genreNode) {
+                            await setTextContent(node, genreNames[i], metadata.genres[i]);
+                            genreNode.visible = true;
+                        }
+                    } else {
+                        // Hide unused genre slots
+                        if (genreNode) genreNode.visible = false;
+                    }
+                }
+
+                // Handle all separators (they all have the same name "separator")
+                const allSeparators = findAllTextNodes(node, 'separator');
+                const numGenres = metadata.genres.length;
+
+                // Show separators between genres, hide the rest
+                // Example: 2 genres = show 1 separator (between genre1 and genre2)
+                // Example: 1 genre = hide all separators
+                for (let i = 0; i < allSeparators.length; i++) {
+                    if (i < numGenres - 1) {
+                        allSeparators[i].visible = true;
+                    } else {
+                        allSeparators[i].visible = false;
+                    }
+                }
             }
 
             // Set ageTag variant "rating" property
@@ -200,6 +265,19 @@ function findCoverNodes(nodes: readonly SceneNode[]): SceneNode[] {
     return covers;
 }
 
+// -- Find all "titleTreatment" nodes in the selection (including hidden) --
+function findTitleTreatmentNodes(nodes: readonly SceneNode[]): SceneNode[] {
+    const titleTreatments: SceneNode[] = [];
+    for (const node of nodes) {
+        walkTree(node, (child) => {
+            if (isTitleTreatmentNode(child)) {
+                titleTreatments.push(child);
+            }
+        });
+    }
+    return titleTreatments;
+}
+
 // -- Listen to selection changes --
 figma.on('selectionchange', () => {
     sendSelection();
@@ -213,6 +291,7 @@ interface MovieTvMetadata {
     duration: string;
     ageRating: string;
     sinopsis: string;
+    genres?: string[];
 }
 
 interface PersonMetadata {
@@ -225,15 +304,26 @@ type Metadata = MovieTvMetadata | PersonMetadata;
 
 interface CoverData {
     imageBytes: number[];
+    titleTreatmentBytes?: number[];
+    metadata: Metadata | null;
+}
+
+interface CoverUrlData {
+    coverUrl: string;
+    titleTreatmentUrl?: string;
     metadata: Metadata | null;
 }
 
 interface PluginMessage {
     type: string;
     imageBytes?: number[];
+    titleTreatmentBytes?: number[];
+    coverUrl?: string;
+    titleTreatmentUrl?: string;
     apiKey?: string;
     metadata?: Metadata | null;
     coversData?: CoverData[];
+    coversUrlData?: CoverUrlData[];
 }
 
 figma.ui.onmessage = async (msg: PluginMessage) => {
@@ -260,6 +350,7 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
             return;
         }
 
+        // Apply cover image
         for (const cover of coverNodes) {
             if ('fills' in cover) {
                 (cover as GeometryMixin & SceneNode).fills = [
@@ -269,6 +360,25 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
                         scaleMode: 'FILL'
                     }
                 ];
+            }
+        }
+
+        // Apply title treatment if provided
+        if (msg.titleTreatmentBytes) {
+            const ttBytes = new Uint8Array(msg.titleTreatmentBytes);
+            const ttImage = figma.createImage(ttBytes);
+            const ttNodes = findTitleTreatmentNodes(figma.currentPage.selection);
+
+            for (const ttNode of ttNodes) {
+                if ('fills' in ttNode) {
+                    (ttNode as GeometryMixin & SceneNode).fills = [
+                        {
+                            type: 'IMAGE',
+                            imageHash: ttImage.hash,
+                            scaleMode: 'FIT'
+                        }
+                    ];
+                }
             }
         }
 
@@ -284,7 +394,130 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
             }
         }
 
-        figma.notify(`✅ Cover aplicada a ${coverNodes.length} elemento(s).`);
+        const ttCount = msg.titleTreatmentBytes ? findTitleTreatmentNodes(figma.currentPage.selection).length : 0;
+        const message = ttCount > 0
+            ? `✅ Cover y título aplicados a ${coverNodes.length} elemento(s).`
+            : `✅ Cover aplicada a ${coverNodes.length} elemento(s).`;
+        figma.notify(message);
+    }
+
+    // -- Apply cover via URL (OTV CDN - uses figma.createImageAsync to bypass CORS) --
+    if (msg.type === 'apply-cover-url' && msg.coverUrl) {
+        const coverNodes = findCoverNodes(figma.currentPage.selection);
+
+        if (coverNodes.length === 0) {
+            figma.notify('⚠️ No se encontró ningún frame llamado "cover" en la selección.', { error: true });
+            figma.ui.postMessage({ type: 'apply-done', success: false });
+            return;
+        }
+
+        try {
+            const image = await figma.createImageAsync(msg.coverUrl);
+
+            for (const cover of coverNodes) {
+                if ('fills' in cover) {
+                    (cover as GeometryMixin & SceneNode).fills = [
+                        { type: 'IMAGE', imageHash: image.hash, scaleMode: 'FILL' }
+                    ];
+                }
+            }
+
+            // Apply title treatment if URL provided
+            if (msg.titleTreatmentUrl) {
+                try {
+                    const ttImage = await figma.createImageAsync(msg.titleTreatmentUrl);
+                    const ttNodes = findTitleTreatmentNodes(figma.currentPage.selection);
+                    for (const ttNode of ttNodes) {
+                        if ('fills' in ttNode) {
+                            (ttNode as GeometryMixin & SceneNode).fills = [
+                                { type: 'IMAGE', imageHash: ttImage.hash, scaleMode: 'FIT' }
+                            ];
+                        }
+                    }
+                } catch (e) {
+                    // Title treatment load failed, continue without it
+                }
+            }
+
+            // Fill metadata
+            if (msg.metadata) {
+                const scopesDone = new Set<string>();
+                for (const cover of coverNodes) {
+                    const scope = findMetadataScope(cover);
+                    if (!scopesDone.has(scope.id)) {
+                        scopesDone.add(scope.id);
+                        await fillMetadata([scope], msg.metadata);
+                    }
+                }
+            }
+
+            const ttCount = msg.titleTreatmentUrl ? findTitleTreatmentNodes(figma.currentPage.selection).length : 0;
+            const message = ttCount > 0
+                ? `✅ Cover y título aplicados a ${coverNodes.length} elemento(s).`
+                : `✅ Cover aplicada a ${coverNodes.length} elemento(s).`;
+            figma.notify(message);
+            figma.ui.postMessage({ type: 'apply-done', success: true });
+        } catch (e) {
+            figma.notify('⚠️ Error al cargar la imagen.', { error: true });
+            figma.ui.postMessage({ type: 'apply-done', success: false, error: (e as Error).message });
+        }
+    }
+
+    // -- Apply multiple covers via URL (OTV CDN) --
+    if (msg.type === 'apply-multiple-covers-url' && msg.coversUrlData) {
+        const coverNodes = findCoverNodes(figma.currentPage.selection);
+
+        if (coverNodes.length === 0) {
+            figma.notify('⚠️ No se encontró ningún frame llamado "cover" en la selección.', { error: true });
+            figma.ui.postMessage({ type: 'apply-done', success: false });
+            return;
+        }
+
+        const coversUrlData = msg.coversUrlData;
+        const applyCount = Math.min(coverNodes.length, coversUrlData.length);
+
+        try {
+            for (let i = 0; i < applyCount; i++) {
+                const coverNode = coverNodes[i];
+                const coverData = coversUrlData[i];
+
+                const image = await figma.createImageAsync(coverData.coverUrl);
+                if ('fills' in coverNode) {
+                    (coverNode as GeometryMixin & SceneNode).fills = [
+                        { type: 'IMAGE', imageHash: image.hash, scaleMode: 'FILL' }
+                    ];
+                }
+
+                // Title treatment
+                if (coverData.titleTreatmentUrl) {
+                    try {
+                        const ttImage = await figma.createImageAsync(coverData.titleTreatmentUrl);
+                        const scope = findMetadataScope(coverNode);
+                        const ttNodes = findTitleTreatmentNodes([scope]);
+                        if (ttNodes.length > 0) {
+                            const ttNode = ttNodes[0];
+                            if ('fills' in ttNode) {
+                                (ttNode as GeometryMixin & SceneNode).fills = [
+                                    { type: 'IMAGE', imageHash: ttImage.hash, scaleMode: 'FIT' }
+                                ];
+                            }
+                        }
+                    } catch (_) { /* skip failed title treatment */ }
+                }
+
+                // Metadata
+                if (coverData.metadata) {
+                    const scope = findMetadataScope(coverNode);
+                    await fillMetadata([scope], coverData.metadata);
+                }
+            }
+
+            figma.notify(`✅ ${applyCount} cover(s) aplicadas con contenido aleatorio.`);
+            figma.ui.postMessage({ type: 'apply-done', success: true });
+        } catch (e) {
+            figma.notify('⚠️ Error al cargar imágenes.', { error: true });
+            figma.ui.postMessage({ type: 'apply-done', success: false, error: (e as Error).message });
+        }
     }
 
     if (msg.type === 'apply-multiple-covers' && msg.coversData) {
@@ -314,6 +547,28 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
                         scaleMode: 'FILL'
                     }
                 ];
+            }
+
+            // Apply title treatment if provided
+            if (coverData.titleTreatmentBytes) {
+                const ttBytes = new Uint8Array(coverData.titleTreatmentBytes);
+                const ttImage = figma.createImage(ttBytes);
+
+                const scope = findMetadataScope(coverNode);
+                const ttNodes = findTitleTreatmentNodes([scope]);
+
+                if (ttNodes.length > 0) {
+                    const ttNode = ttNodes[0];
+                    if ('fills' in ttNode) {
+                        (ttNode as GeometryMixin & SceneNode).fills = [
+                            {
+                                type: 'IMAGE',
+                                imageHash: ttImage.hash,
+                                scaleMode: 'FIT'
+                            }
+                        ];
+                    }
+                }
             }
 
             // Fill metadata scoped to this cover's component

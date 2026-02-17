@@ -8,7 +8,8 @@
   "networkAccess": {
     "allowedDomains": [
       "https://api.themoviedb.org",
-      "https://image.tmdb.org"
+      "https://image.tmdb.org",
+      "https://pc.orangetv.orange.es"
     ]
   }
 }

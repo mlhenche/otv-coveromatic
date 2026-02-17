@@ -6,7 +6,7 @@
         ],
         "strict": true,
         "typeRoots": [
-            "./node_modules/@figma"
+            "../node_modules/@figma"
         ]
     },
     "files": [
