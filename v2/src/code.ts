@@ -85,7 +85,7 @@ async function getComponentNameAsync(inst: InstanceNode): Promise<string> {
 // -- Returns true if a component name matches a card type (portrait, landscape or reparto) --
 function isCardComponentName(name: string): boolean {
     const n = name.toLowerCase();
-    return n.includes('card') && (n.includes('portrait') || n.includes('landscape') || n.includes('reparto'));
+    return n.includes('card') && (n.includes('portrait') || n.includes('landscape') || n.includes('reparto') || n.includes('chapter'));
 }
 
 // -- Sync: build card cache from nodes using only mainComponent.name (no await).
@@ -139,6 +139,90 @@ function findTitleTreatmentNodes(nodes: readonly SceneNode[], excludeIds: Set<st
         });
     }
     return titleTreatments;
+}
+
+// -- Helper: check if component name is a chapter card --
+function isChapterCardComponent(name: string): boolean {
+    const n = name.toLowerCase();
+    // Match: card_chapters, card-chapters, CardChapters, chapter, chapters, etc.
+    return n.includes('chapter');
+}
+
+// -- Find chapter card instances (sync - uses only mainComponent.name) --
+function findChapterCardInstancesSync(nodes: readonly SceneNode[]): InstanceNode[] {
+    const chapterCards: InstanceNode[] = [];
+    for (const node of nodes) {
+        walkTree(node, (child) => {
+            if (child.type === 'INSTANCE') {
+                const inst = child as InstanceNode;
+                const compName = inst.mainComponent?.name || '';
+                if (compName && isChapterCardComponent(compName)) {
+                    chapterCards.push(inst);
+                }
+            }
+        });
+    }
+    return chapterCards;
+}
+
+// -- Find chapter card instances (async - resolves remote components) --
+async function findChapterCardInstancesAsync(nodes: readonly SceneNode[]): Promise<InstanceNode[]> {
+    const chapterCards: InstanceNode[] = [];
+    const allInstances: InstanceNode[] = [];
+
+    // First, check if any of the selected nodes themselves are instances
+    for (const node of nodes) {
+        if (node.type === 'INSTANCE') {
+            allInstances.push(node as InstanceNode);
+        }
+    }
+
+    // Then collect all nested instances
+    for (const node of nodes) {
+        walkTree(node, (child) => {
+            if (child.type === 'INSTANCE' && !allInstances.includes(child as InstanceNode)) {
+                allInstances.push(child as InstanceNode);
+            }
+        });
+    }
+
+    // Check each instance (check instance name OR component name OR ComponentSet parent name)
+    for (const inst of allInstances) {
+        const instanceName = inst.name;
+        const syncName = inst.mainComponent?.name || '';
+
+        // First check instance name (handles ComponentSets where mainComponent is a variant)
+        if (isChapterCardComponent(instanceName)) {
+            chapterCards.push(inst);
+            continue;
+        }
+
+        // Then check mainComponent name (sync)
+        if (syncName && isChapterCardComponent(syncName)) {
+            chapterCards.push(inst);
+            continue;
+        }
+
+        // Check if mainComponent's parent is a ComponentSet with "chapter" in name
+        // (handles custom instance names like "card01" when component is a variant of card_chapters)
+        if (inst.mainComponent?.parent?.type === 'COMPONENT_SET') {
+            const componentSetName = inst.mainComponent.parent.name;
+            if (isChapterCardComponent(componentSetName)) {
+                chapterCards.push(inst);
+                continue;
+            }
+        }
+
+        // Finally try async for remote components
+        if (!syncName) {
+            const asyncName = await getComponentNameAsync(inst);
+            if (isChapterCardComponent(asyncName)) {
+                chapterCards.push(inst);
+            }
+        }
+    }
+
+    return chapterCards;
 }
 
 // -- Helper: set text content on a named text node --
@@ -260,6 +344,7 @@ function typeFromName(name: string): string {
     const n = name.toLowerCase();
     if (n.includes('card') && n.includes('portrait')) return 'card-portrait';
     if (n.includes('card') && n.includes('landscape')) return 'card-landscape';
+    if (n.includes('card') && n.includes('chapter')) return 'card-chapters';
     if (n.includes('slideshow') || n.includes('vps')) return 'vps';
     return 'unknown';
 }
@@ -341,7 +426,14 @@ async function sendSelection() {
 
     const coverCount = findCoverNodes(selection, cachedAllCardIds).length;
     const titleTreatmentCount = findTitleTreatmentNodes(selection, cachedAllCardIds).length;
-    figma.ui.postMessage({ type: 'selection-info', count: selection.length, coverCount, titleTreatmentCount, componentType });
+
+    // Always count chapter card instances (even if componentType is unknown/frame)
+    // This handles: single card, multiple cards, or frame containing cards
+    const chapterInstances = await findChapterCardInstancesAsync(selection);
+    if (myVersion !== selectionVersion) return; // stale check
+    const chapterCardCount = chapterInstances.length;
+
+    figma.ui.postMessage({ type: 'selection-info', count: selection.length, coverCount, titleTreatmentCount, componentType, chapterCardCount });
 }
 
 // -- Listen to selection changes --
@@ -382,6 +474,16 @@ interface CoverUrlData {
     metadata: Metadata | null;
 }
 
+interface EpisodeCoverData {
+    coverUrl: string;
+    metadata: {
+        title: string;
+        chapter: string;
+        duration: string;
+        sinopsis: string;
+    };
+}
+
 interface PluginMessage {
     type: string;
     imageBytes?: number[];
@@ -392,6 +494,7 @@ interface PluginMessage {
     metadata?: Metadata | null;
     coversData?: CoverData[];
     coversUrlData?: CoverUrlData[];
+    episodesData?: EpisodeCoverData[];
 }
 
 figma.ui.onmessage = async (msg: PluginMessage) => {
@@ -600,6 +703,69 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
         }
 
         figma.notify(`✅ ${applyCount} cover(s) aplicadas con contenido aleatorio.`);
+    }
+
+    // -- Apply episode covers to card_chapters --
+    if (msg.type === 'apply-episode-covers' && msg.episodesData) {
+        const selection = figma.currentPage.selection;
+        const episodesData = msg.episodesData;
+
+        // Find chapter card instances (not just covers - this handles custom instance names)
+        const chapterInstances = await findChapterCardInstancesAsync(selection);
+
+        if (chapterInstances.length === 0) {
+            figma.notify('⚠️ No se encontraron componentes card_chapters en la selección.', { error: true });
+            figma.ui.postMessage({ type: 'apply-done', success: false });
+            return;
+        }
+
+        const applyCount = Math.min(chapterInstances.length, episodesData.length);
+
+        try {
+            for (let i = 0; i < applyCount; i++) {
+                const chapterCard = chapterInstances[i];
+                const epData = episodesData[i];
+
+                // Find the cover node inside this specific card instance
+                let coverNode: SceneNode | null = null;
+                walkTree(chapterCard, (child) => {
+                    if (!coverNode && isCoverNode(child)) {
+                        coverNode = child;
+                    }
+                });
+
+                if (!coverNode) continue; // Skip if no cover found in this card
+
+                // Apply still image
+                if (epData.coverUrl) {
+                    const image = await figma.createImageAsync(epData.coverUrl);
+                    if ('fills' in coverNode) {
+                        (coverNode as GeometryMixin & SceneNode).fills = [
+                            { type: 'IMAGE', imageHash: image.hash, scaleMode: 'FILL' }
+                        ];
+                    }
+                }
+
+                // Apply episode metadata to the card instance (not just the cover scope)
+                if (epData.metadata) {
+                    const fields = [
+                        { name: 'title', value: epData.metadata.title },
+                        { name: 'chapter', value: epData.metadata.chapter },
+                        { name: 'duration', value: epData.metadata.duration },
+                        { name: 'sinopsis', value: epData.metadata.sinopsis },
+                    ];
+                    for (const field of fields) {
+                        if (field.value) await setTextContent(chapterCard, field.name, field.value);
+                    }
+                }
+            }
+
+            figma.notify(`✅ ${applyCount} capítulo(s) aplicado(s).`);
+            figma.ui.postMessage({ type: 'apply-done', success: true });
+        } catch (e) {
+            figma.notify('⚠️ Error al aplicar capítulos.', { error: true });
+            figma.ui.postMessage({ type: 'apply-done', success: false, error: (e as Error).message });
+        }
     }
 
     if (msg.type === 'close') {

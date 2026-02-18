@@ -1,6 +1,6 @@
 # OTV CoverOmatic 2.0 - Guía Rápida
 
-Plugin de Figma para aplicar imágenes y metadatos de películas, series y personas desde TMDB.
+Plugin de Figma para aplicar imágenes y metadatos de películas, series, episodios y personas desde TMDB y el catálogo OrangeTV.
 
 ---
 
@@ -17,73 +17,185 @@ Plugin de Figma para aplicar imágenes y metadatos de películas, series y perso
 
 ## 🏗️ Estructura de Componentes
 
-### Lo básico: el frame `cover`
+### El frame `cover` (obligatorio)
 
-Para que el plugin funcione, tu componente **debe tener** un frame llamado `cover`:
+Todos los componentes **deben tener** un frame llamado `cover` para que el plugin funcione:
 
 ```
 📦 Tu Componente
   └─ 🖼️ cover  ← Aquí se aplica la imagen (OBLIGATORIO)
 ```
 
-### Componente completo con metadatos
+### Componentes con metadatos
 
-Si quieres que el plugin también rellene textos, añade estos elementos:
-
-#### Para Películas y Series:
+#### Para Películas y Series (portrait/landscape):
 
 ```
-📦 Tu Componente
+📦 card_portrait / card_landscape
   ├─ 🖼️ cover         ← Imagen (obligatorio)
   ├─ 📝 title         ← Título
   ├─ ⭐ rating        ← Puntuación (ej: "7.5")
   ├─ 📅 year          ← Año
   ├─ ⏱️  duration     ← Duración o temporadas
-  ├─ 📄 sinopsis      ← Sinopsis del contenido
+  ├─ 📄 sinopsis      ← Sinopsis
   └─ 🎭 ageTag        ← Clasificación por edad (componente con variantes)
+```
+
+#### Para VPS (Video Product Section):
+
+```
+📦 vps
+  ├─ 🖼️ cover              ← Background panorámico
+  ├─ 🖼️ titleTreatment     ← Logo del contenido (opcional)
+  ├─ 📝 title              ← Título
+  ├─ ⭐ rating             ← Puntuación
+  ├─ 📅 year               ← Año
+  ├─ ⏱️  duration          ← Duración o temporadas
+  ├─ 📄 sinopsis           ← Sinopsis
+  └─ 🎭 ageTag             ← Clasificación por edad
+```
+
+#### Para Capítulos de Series (NUEVO):
+
+```
+📦 card_chapters
+  ├─ 🖼️ cover      ← Imagen still del episodio
+  ├─ 📝 title      ← Título del episodio
+  ├─ 📝 chapter    ← Número de episodio (formato: "T01 | E03")
+  ├─ ⏱️  duration  ← Duración del episodio
+  └─ 📄 sinopsis   ← Sinopsis del episodio
 ```
 
 #### Para Personas:
 
 ```
-📦 Tu Componente
-  ├─ 🖼️ cover    ← Foto (obligatorio)
+📦 card_reparto
+  ├─ 🖼️ cover    ← Foto
   ├─ 📝 name     ← Nombre
   └─ 📝 rol      ← Rol/departamento (se oculta automáticamente si es actor)
 ```
 
-### Nombres de capas (case-insensitive)
+### Tabla de nombres de capas
 
-| Nombre | Tipo | Uso | Obligatorio |
-|--------|------|-----|-------------|
-| `cover` | FRAME/RECTANGLE | Contenedor de imagen | ✅ Sí |
-| `title` | TEXT | Título del contenido | ❌ No |
-| `rating` | TEXT | Valoración TMDB | ❌ No |
-| `year` | TEXT | Año de estreno | ❌ No |
-| `duration` | TEXT | Duración o temporadas | ❌ No |
-| `sinopsis` | TEXT | Sinopsis del contenido | ❌ No |
-| `name` | TEXT | Nombre de persona | ❌ No |
-| `rol` | TEXT | Rol de persona | ❌ No |
-| `ageTag` | INSTANCE | Clasificación edad | ❌ No |
+| Nombre | Tipo | Uso | Componente |
+|--------|------|-----|------------|
+| `cover` | FRAME/RECTANGLE | Contenedor de imagen | Todos (obligatorio) |
+| `titleTreatment` | FRAME/RECTANGLE | Logo del contenido | VPS |
+| `title` | TEXT | Título | Todos menos personas |
+| `rating` | TEXT | Valoración TMDB | Películas, series, VPS |
+| `year` | TEXT | Año de estreno | Películas, series, VPS |
+| `duration` | TEXT | Duración o temporadas | Películas, series, capítulos, VPS |
+| `sinopsis` | TEXT | Sinopsis | Todos |
+| `chapter` | TEXT | Número de episodio | Capítulos |
+| `name` | TEXT | Nombre de persona | Personas |
+| `rol` | TEXT | Rol de persona | Personas |
+| `ageTag` | INSTANCE | Clasificación edad | Películas, series, VPS |
 
 **Importante:**
 - Los nombres NO son case-sensitive: `Cover`, `COVER`, `cover` funcionan igual
 - Los elementos pueden estar anidados dentro de otros frames
-- El `ageTag` puede estar oculto, el plugin lo mostrará temporalmente para actualizarlo
-- El `ageTag` debe tener una propiedad `rating` con variantes: `"TP"`, `"7"`, `"12"`, `"16"`, `"18"`
+- El plugin detecta automáticamente el tipo de componente por su nombre
+- Soporta nombres personalizados: si tu componente se llama `card01` pero es una instancia de `card_chapters`, funcionará igual
 
 ---
 
 ## 🎯 Cómo Usar el Plugin
 
-### 1. Aplicar una imagen a un componente
+### 1. Aplicar contenido básico
 
 1. Selecciona tu componente en Figma
-2. En el plugin, elige **Cine**, **Series** o **Personas**
+2. En el plugin, elige la pestaña **Cine** o **Series**
 3. Busca el contenido que quieres
 4. Haz clic en la imagen → Se aplica al frame `cover` y se rellenan los textos
 
-### 2. Buscar contenido
+### 2. Trabajar con series (NUEVO)
+
+Cuando haces hover sobre una **serie** en el catálogo OTV, aparecen dos opciones:
+
+**Botón "Datos":**
+- Aplica los metadatos generales de la serie (título, año, temporadas, sinopsis, etc.)
+- Igual que hacer clic en una película
+
+**Botón "Temporadas"** (solo series):
+- Abre el selector de temporadas y episodios
+- Puedes elegir episodios individuales o aplicar varios a la vez
+
+#### Aplicar capítulos individuales
+
+1. Selecciona **una** card de tipo `card_chapters`
+2. Hover sobre la serie → Click en **"Temporadas"**
+3. Selecciona la temporada
+4. Click en el episodio que quieras → Se aplica a la card
+
+#### Aplicar varios capítulos a la vez
+
+1. Selecciona **varias** cards de tipo `card_chapters` (o un frame que las contenga)
+2. Hover sobre la serie → Click en **"Temporadas"**
+3. Selecciona la temporada
+4. Click en **"Añadir capítulos"** → Se aplican los episodios en orden a todas las cards
+
+### 3. Flujo VPS completo (NUEVO)
+
+Cuando aplicas contenido a una **VPS**, aparece un diálogo con opciones:
+
+#### Para series VPS:
+
+1. **Añadir capítulos**
+   - Abre el selector de temporadas
+   - Puedes añadir episodios de distintas temporadas
+   - Vuelve al diálogo después de cada aplicación
+
+2. **Añadir contenido relacionado**
+   - Filtra el catálogo OTV por los géneros de la serie
+   - Aplica aleatoriamente a las cards portrait/landscape que tengas seleccionadas
+   - Perfecto para rellenar un carrusel con contenido del mismo género
+
+3. **Ver reparto**
+   - Te lleva a la pestaña Personas con el reparto de la serie
+   - Puedes aplicar fotos de actores a tus componentes de reparto
+
+4. **Más tarde**
+   - Cierra el diálogo completamente
+
+#### Para películas VPS:
+
+1. **Añadir contenido relacionado**
+   - Igual que en series, filtra por géneros y aplica aleatoriamente
+
+2. **Ver reparto**
+   - Te lleva a la pestaña Personas con el reparto de la película
+
+3. **Más tarde**
+   - Cierra el diálogo
+
+**El diálogo es persistente:** Después de añadir capítulos o contenido relacionado, el diálogo vuelve a aparecer para que puedas seguir añadiendo más contenido sin perder la referencia de la serie/película.
+
+### 4. Búsqueda de personas
+
+En la pestaña **Personas**, puedes buscar de dos formas:
+
+**Por nombre** (modo por defecto):
+- Busca directamente por nombre de la persona
+- Ejemplo: "Ryan Coogler"
+
+**Por contenido**:
+1. Haz clic en el botón **"Por contenido"**
+2. Escribe el nombre de una película o serie (mín. 3 caracteres)
+3. Aparece un listado desplegable con resultados
+4. Selecciona el contenido → Se muestra el elenco y equipo técnico en orden: directores, guionistas, actores
+5. Haz clic en la foto de la persona que quieras aplicar
+
+### 5. Contenido aleatorio
+
+**Para películas/series:**
+1. Selecciona **2 o más componentes** en Figma (Shift + Click)
+2. Aplica filtros si quieres (género, orientación)
+3. Aparece el botón **"🎲 Contenido Aleatorio"**
+4. Haz clic → Cada componente se rellena con contenido diferente
+
+**Ejemplo:** Selecciona 6 cards vacías → Género: Comedia → Contenido Aleatorio → Las 6 se rellenan con películas de comedia diferentes.
+
+### 6. Filtros y búsqueda
 
 **Búsqueda normal:**
 - Escribe en el campo de búsqueda
@@ -97,43 +209,6 @@ Si quieres que el plugin también rellene textos, añade estos elementos:
 - Icono 📱 = Portrait (poster vertical)
 - Icono 📺 = Landscape (backdrop horizontal)
 
-### 3. Búsqueda de personas por contenido (NUEVO)
-
-En la pestaña **Personas**, ahora puedes buscar de dos formas:
-
-**Por nombre** (modo por defecto):
-- Busca directamente por nombre de la persona
-- Ejemplo: "Ryan Coogler"
-
-**Por contenido**:
-1. Haz clic en el botón **"Por contenido"**
-2. Escribe el nombre de una película o serie (mín. 3 caracteres)
-3. Aparece un listado desplegable con resultados
-4. Selecciona el contenido → Se muestra el elenco y equipo técnico
-5. Haz clic en la foto de la persona que quieras aplicar
-
-**Cambiar de contenido:**
-- Simplemente vuelve a buscar otra película/serie
-- El nuevo elenco sustituirá al anterior
-
-**Volver a personas trending:**
-- Haz clic en la **×** de la barra "Personas de: [título]"
-
-### 4. Rellenar varios componentes a la vez
-
-**Contenido aleatorio:**
-1. Selecciona **2 o más componentes** en Figma (Shift + Click)
-2. Aplica filtros si quieres (género, orientación)
-3. Aparece el botón **"🎲 Contenido Aleatorio"**
-4. Haz clic → Cada componente se rellena con contenido diferente
-
-**Ejemplo:** Selecciona 6 cards vacías → Género: Comedia → Contenido Aleatorio → Las 6 se rellenan con películas de comedia diferentes.
-
-### 5. Cargar más resultados
-
-- Botón **"↻ Más"** en el footer
-- Carga la siguiente página de resultados
-
 ---
 
 ## 🐛 Solución de Problemas
@@ -142,7 +217,7 @@ En la pestaña **Personas**, ahora puedes buscar de dos formas:
 **Solución:** Asegúrate de que tu componente tenga un frame llamado `cover` (puede ser mayúsculas o minúsculas).
 
 ### Los textos no se rellenan
-**Solución:** Verifica que las capas de texto tengan los nombres correctos: `title`, `rating`, `year`, `duration`, `name`, `rol`.
+**Solución:** Verifica que las capas de texto tengan los nombres correctos según la tabla de arriba.
 
 ### El ageTag no cambia
 **Solución:**
@@ -150,16 +225,20 @@ En la pestaña **Personas**, ahora puedes buscar de dos formas:
 - Debe llamarse `ageTag` (o variaciones)
 - Debe tener una propiedad `rating` con variantes: "TP", "7", "12", "16", "18"
 
-### "API Key inválida"
+### No detecta mis cards con nombres personalizados
 **Solución:**
-- Copia de nuevo la API Key desde TMDB
-- Asegúrate de usar la v3 (no v4)
-- Revisa tu conexión a internet
+- Si tus instancias se llaman `card01`, `card02`, etc., asegúrate de que sean instancias de componentes llamados `card_portrait`, `card_landscape`, `card_chapters`, etc.
+- El plugin busca tanto en el nombre de la instancia como en el nombre del componente padre
 
-### El dropdown de búsqueda por contenido no aparece
+### El botón "Temporadas" no aparece
 **Solución:**
-- Asegúrate de haber cambiado a modo "Por contenido"
-- Escribe al menos 3 caracteres en el buscador
+- Solo aparece en **series** del catálogo OTV
+- Haz hover sobre la card de la serie para ver los botones
+
+### El diálogo VPS no aparece
+**Solución:**
+- Solo aparece cuando aplicas contenido a una VPS
+- El contenido debe tener un `tmdbId` válido
 
 ---
 
@@ -226,14 +305,8 @@ EOF
 
 > **Importante:** usar siempre este script Python (no `re.sub`) para el embedding. `re.sub` interpreta `\n` como salto de línea literal, rompiendo la sintaxis JavaScript.
 
-### Notas técnicas
-
-- `extract-catalog-v2.js` busca el patrón `card__name` + `background-image: url(...)` en el HTML. Los títulos se normalizan (minúsculas, sin acentos) como clave del catálogo.
-- El merge **preserva todos los datos TMDB** de entradas existentes y solo añade las nuevas.
-- `clean-catalog.js` testea `COVER_ART` con HEAD request. Si se quieren filtrar también por `VERTICAL` (necesario para componentes portrait), modificar el script para testear ese tipo.
-- El JSON se embebe minificado en una **sola línea** en `ui.html` para evitar errores de sintaxis JS.
-
 ---
 
 **Versión**: 2.0
 **Desarrollado para**: OrangeTV | CitrusDLS
+**Última actualización**: Febrero 2026
