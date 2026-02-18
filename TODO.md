@@ -38,7 +38,20 @@ Implementación: al aplicar contenido, parsear el `id` del entry y mapear al nom
 
 ---
 
-### 3. Retransmisiones deportivas
+### 3. Búsqueda de reparto por ID de TMDB (VPS)
+Al aplicar contenido a una VPS, la búsqueda de actores en la pestaña Personas debe usar el **`person_id` de TMDB** en lugar del nombre.
+
+Motivo: buscar por nombre falla cuando hay caracteres especiales, nombres ambiguos o variaciones de escritura.
+
+Endpoint correcto:
+- `GET /person/{person_id}` → datos del actor
+- `GET /person/{person_id}/images` → fotos del actor
+
+Cambio necesario: el catálogo ya almacena el `tmdbId` del contenido; al cargar el reparto usar los IDs de persona del endpoint `GET /movie/{id}/credits` o `GET /tv/{id}/credits` → campo `cast[].id` en lugar de `cast[].name` para hacer lookups posteriores.
+
+---
+
+### 4. Retransmisiones deportivas
 Empezar a pensar cómo gestionar el flujo para **contenido deportivo en directo**:
 - ¿Qué tipo de card/componente usan?
 - ¿Qué datos necesitan? (equipos, competición, fecha/hora, canal)
