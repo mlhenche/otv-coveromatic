@@ -37,6 +37,14 @@ async function main() {
 
   for (let i = 0; i < entries.length; i++) {
     const [key, entry] = entries[i];
+
+    if (entry.tmdbId !== undefined) {
+      if (entry.mediaType === 'movie') movies++;
+      else if (entry.mediaType === 'tv') tv++;
+      else notFound++;
+      continue;
+    }
+
     const result = await searchTMDB(entry.title);
 
     if (result) {

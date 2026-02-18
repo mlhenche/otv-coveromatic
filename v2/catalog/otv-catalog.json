@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-02-17T14:13:35.288Z",
+  "generatedAt": "2026-02-18T09:05:55.106Z",
   "source": "OrangeCatalog.html (merged with previous)",
-  "totalContents": 282,
+  "totalContents": 321,
   "urlPatterns": {
     "coverArt": "https://pc.orangetv.orange.es/pc/api/rtv/v1/images/vod/COVER_ART/{contentId}_COVER_ART.jpg?width=3840&height=2160",
     "vertical": "https://pc.orangetv.orange.es/pc/api/rtv/v1/images/vod/VERTICAL/{contentId}_VERTICAL.jpg?width=3840&height=2160",
@@ -402,18 +402,6 @@
       "genreIds": [
         18,
         35
-      ]
-    },
-    "sin limites": {
-      "title": "Sin\n                                                                    Límites",
-      "contentId": "PRIME_299356016APVI",
-      "mediaType": "tv",
-      "tmdbId": 231100,
-      "tmdbTitle": "Amar Sin Limites",
-      "genreIds": [
-        18,
-        80,
-        10766
       ]
     },
     "sonic 3 la pelicula": {
@@ -828,7 +816,7 @@
       ]
     },
     "star trek academia de la flota estelar": {
-      "title": "Star Trek:\n                                                                    Academia de la Flota Estelar",
+      "title": "Star Trek: Academia de la Flota Estelar",
       "contentId": "SKYS_299854944",
       "mediaType": "tv",
       "tmdbId": 223530,
@@ -839,7 +827,7 @@
       ]
     },
     "muerte bajo cero": {
-      "title": "Muerte\n                                                                    bajo cero",
+      "title": "Muerte bajo cero",
       "contentId": "MFO_299484941",
       "mediaType": "tv",
       "tmdbId": 153512,
@@ -852,7 +840,7 @@
       ]
     },
     "aci alta capacidad intelectual": {
-      "title": "ACI: Alta\n                                                                    Capacidad Intelectual",
+      "title": "ACI: Alta Capacidad Intelectual",
       "contentId": "MFO_299232049",
       "mediaType": "tv",
       "tmdbId": 112738,
@@ -876,7 +864,7 @@
       ]
     },
     "bright minds": {
-      "title": "Bright\n                                                                    Minds",
+      "title": "Bright Minds",
       "contentId": "MFO_299544189",
       "mediaType": "tv",
       "tmdbId": 88384,
@@ -886,7 +874,7 @@
       ]
     },
     "verdades ocultas": {
-      "title": "Verdades\n                                                                    ocultas",
+      "title": "Verdades ocultas",
       "contentId": "DSN_299798951STAR",
       "mediaType": "tv",
       "tmdbId": 273247,
@@ -897,7 +885,7 @@
       ]
     },
     "la sombra de la tierra": {
-      "title": "La sombra\n                                                                    de la tierra",
+      "title": "La sombra de la tierra",
       "contentId": "APREM_299649615A3PP",
       "mediaType": "tv",
       "tmdbId": 242863,
@@ -918,7 +906,7 @@
       ]
     },
     "como agua para chocolate": {
-      "title": "Como Agua\n                                                                    para Chocolate",
+      "title": "Como Agua para Chocolate",
       "contentId": "MAX_299642011",
       "mediaType": "tv",
       "tmdbId": 235635,
@@ -928,7 +916,7 @@
       ]
     },
     "the hunting party": {
-      "title": "The\n                                                                    Hunting Party",
+      "title": "The Hunting Party",
       "contentId": "MFO_299701152STRN",
       "mediaType": "tv",
       "tmdbId": 247723,
@@ -939,7 +927,7 @@
       ]
     },
     "the artful dodger": {
-      "title": "The\n                                                                    Artful Dodger",
+      "title": "The Artful Dodger",
       "contentId": "DSN_299487048STAR",
       "mediaType": "tv",
       "tmdbId": 202208,
@@ -950,28 +938,8 @@
         10759
       ]
     },
-    "cross": {
-      "title": "Cross",
-      "contentId": "PRIME_299645533APVO",
-      "mediaType": "tv",
-      "tmdbId": 213306,
-      "tmdbTitle": "Cross",
-      "genreIds": [
-        80,
-        18,
-        9648
-      ]
-    },
-    "asesinatos en reikiavik": {
-      "title": "Asesinatos en Reikiavik",
-      "contentId": "U7D_MFO_299853221AMC",
-      "mediaType": null,
-      "tmdbId": null,
-      "tmdbTitle": null,
-      "genreIds": []
-    },
     "the rookie": {
-      "title": "The\n                                                                    Rookie",
+      "title": "The Rookie",
       "contentId": "DSN_298891399STAR",
       "mediaType": "tv",
       "tmdbId": 79744,
@@ -983,7 +951,7 @@
       ]
     },
     "wonder man": {
-      "title": "Wonder\n                                                                    Man",
+      "title": "Wonder Man",
       "contentId": "DSN_299857651MRVL",
       "mediaType": "tv",
       "tmdbId": 198178,
@@ -1037,18 +1005,6 @@
         18
       ]
     },
-    "daldal": {
-      "title": "Daldal",
-      "contentId": "PRIME_299854834APVO",
-      "mediaType": "tv",
-      "tmdbId": 41823,
-      "tmdbTitle": "Daldalita",
-      "genreIds": [
-        18,
-        10765,
-        35
-      ]
-    },
     "dona beja": {
       "title": "Dona Beja",
       "contentId": "MAX_299859740",
@@ -1060,20 +1016,8 @@
         10766
       ]
     },
-    "the lazarus project": {
-      "title": "The\n                                                                    Lazarus Project",
-      "contentId": "U7D_MFO_299383503AMC",
-      "mediaType": "tv",
-      "tmdbId": 194567,
-      "tmdbTitle": "The Lazarus Project",
-      "genreIds": [
-        10765,
-        18,
-        10759
-      ]
-    },
     "las senderistas": {
-      "title": "Las\n                                                                    senderistas",
+      "title": "Las senderistas",
       "contentId": "MFO_299617562AMCN",
       "mediaType": "tv",
       "tmdbId": 209201,
@@ -1084,7 +1028,7 @@
       ]
     },
     "por h o por b": {
-      "title": "Por H o\n                                                                    Por B",
+      "title": "Por H o Por B",
       "contentId": "SKYS_299646887",
       "mediaType": "tv",
       "tmdbId": 105939,
@@ -1125,7 +1069,7 @@
       ]
     },
     "mr throwback": {
-      "title": "Mr.\n                                                                    Throwback",
+      "title": "Mr. Throwback",
       "contentId": "SKYS_299713782",
       "mediaType": "tv",
       "tmdbId": 246410,
@@ -1134,18 +1078,8 @@
         35
       ]
     },
-    "dias mejores": {
-      "title": "Días\n                                                                    mejores",
-      "contentId": "PRIME_299338477APVI",
-      "mediaType": "tv",
-      "tmdbId": 198146,
-      "tmdbTitle": "Días mejores",
-      "genreIds": [
-        18
-      ]
-    },
     "los centinelas": {
-      "title": "Los\n                                                                    Centinelas",
+      "title": "Los Centinelas",
       "contentId": "MFO_299820477STRN",
       "mediaType": "tv",
       "tmdbId": 223876,
@@ -1156,7 +1090,7 @@
       ]
     },
     "el encargado": {
-      "title": "El\n                                                                    encargado",
+      "title": "El encargado",
       "contentId": "DSN_299364569STAR",
       "mediaType": "tv",
       "tmdbId": 128306,
@@ -1187,7 +1121,7 @@
       ]
     },
     "quantum leap": {
-      "title": "Quantum\n                                                                    Leap",
+      "title": "Quantum Leap",
       "contentId": "MFO_299453622",
       "mediaType": "tv",
       "tmdbId": 4018,
@@ -1210,7 +1144,7 @@
       ]
     },
     "la empresa de sillas": {
-      "title": "La\n                                                                    empresa de sillas",
+      "title": "La empresa de sillas",
       "contentId": "MAX_299804222",
       "mediaType": "tv",
       "tmdbId": 271267,
@@ -1243,19 +1177,8 @@
         9648
       ]
     },
-    "enjambre": {
-      "title": "Enjambre",
-      "contentId": "PRIME_299412170APVO",
-      "mediaType": "movie",
-      "tmdbId": 708682,
-      "tmdbTitle": "Enjambre",
-      "genreIds": [
-        99,
-        10402
-      ]
-    },
     "la marquesa de merteuil": {
-      "title": "La\n                                                                    marquesa de Merteuil",
+      "title": "La marquesa de Merteuil",
       "contentId": "MAX_299818262",
       "mediaType": "tv",
       "tmdbId": 255719,
@@ -1276,7 +1199,7 @@
       ]
     },
     "the last of us": {
-      "title": "The Last\n                                                                    of Us",
+      "title": "The Last of Us",
       "contentId": "MAX_299549701",
       "mediaType": "tv",
       "tmdbId": 100088,
@@ -1285,18 +1208,8 @@
         18
       ]
     },
-    "homecoming": {
-      "title": "Homecoming",
-      "contentId": "PRIME_299344479APVO",
-      "mediaType": "tv",
-      "tmdbId": 80335,
-      "tmdbTitle": "Homecoming",
-      "genreIds": [
-        18
-      ]
-    },
     "poker face": {
-      "title": "Poker\n                                                                    Face",
+      "title": "Poker Face",
       "contentId": "SKYS_299646330",
       "mediaType": "movie",
       "tmdbId": 842934,
@@ -1315,7 +1228,7 @@
       "genreIds": []
     },
     "gangs of london": {
-      "title": "Gangs of\n                                                                    London",
+      "title": "Gangs of London",
       "contentId": "SKYS_299137335",
       "mediaType": "tv",
       "tmdbId": 85021,
@@ -1326,18 +1239,8 @@
         80
       ]
     },
-    "dos hombres y medio": {
-      "title": "Dos\n                                                                    hombres y medio",
-      "contentId": "PRIME_299788258APVI",
-      "mediaType": "tv",
-      "tmdbId": 2691,
-      "tmdbTitle": "Dos hombres y medio",
-      "genreIds": [
-        35
-      ]
-    },
     "juego de tronos": {
-      "title": "Juego de\n                                                                    tronos",
+      "title": "Juego de tronos",
       "contentId": "MAX_298249152",
       "mediaType": "tv",
       "tmdbId": 1399,
@@ -1349,7 +1252,7 @@
       ]
     },
     "schitts creek": {
-      "title": "Schitt's\n                                                                    Creek",
+      "title": "Schitt's Creek",
       "contentId": "MAX_298249489",
       "mediaType": "tv",
       "tmdbId": 61662,
@@ -1359,7 +1262,7 @@
       ]
     },
     "la edad dorada": {
-      "title": "La edad\n                                                                    dorada",
+      "title": "La edad dorada",
       "contentId": "MAX_299549952",
       "mediaType": "tv",
       "tmdbId": 81723,
@@ -1369,7 +1272,7 @@
       ]
     },
     "arrested development": {
-      "title": "Arrested\n                                                                    Development",
+      "title": "Arrested Development",
       "contentId": "DSN_299403974STAR",
       "mediaType": "movie",
       "tmdbId": 191024,
@@ -1379,18 +1282,8 @@
         35
       ]
     },
-    "house": {
-      "title": "House",
-      "contentId": "PRIME_298249116APVI",
-      "mediaType": "tv",
-      "tmdbId": 1408,
-      "tmdbTitle": "House",
-      "genreIds": [
-        18
-      ]
-    },
     "ray donovan": {
-      "title": "Ray\n                                                                    Donovan",
+      "title": "Ray Donovan",
       "contentId": "SKYS_298249441",
       "mediaType": "movie",
       "tmdbId": 800425,
@@ -1401,18 +1294,8 @@
         10770
       ]
     },
-    "suits": {
-      "title": "Suits",
-      "contentId": "PRIME_298249544APVI",
-      "mediaType": "movie",
-      "tmdbId": 159734,
-      "tmdbTitle": "Suits",
-      "genreIds": [
-        35
-      ]
-    },
     "twin peaks": {
-      "title": "Twin\n                                                                    Peaks",
+      "title": "Twin Peaks",
       "contentId": "MFO_299708862",
       "mediaType": "tv",
       "tmdbId": 1920,
@@ -1433,18 +1316,6 @@
         35
       ]
     },
-    "el cuento de la criada": {
-      "title": "El cuento\n                                                                    de la criada",
-      "contentId": "PRIME_299549121APVI",
-      "mediaType": "tv",
-      "tmdbId": 69478,
-      "tmdbTitle": "El cuento de la criada",
-      "genreIds": [
-        18,
-        10765,
-        10759
-      ]
-    },
     "frasier": {
       "title": "Frasier",
       "contentId": "SKYS_299654602",
@@ -1457,7 +1328,7 @@
       ]
     },
     "como conoci a vuestra madre": {
-      "title": "Como\n                                                                    conocí a vuestra madre",
+      "title": "Como conocí a vuestra madre",
       "contentId": "DSN_298777885STAR",
       "mediaType": "tv",
       "tmdbId": 1100,
@@ -1467,7 +1338,7 @@
       ]
     },
     "the office": {
-      "title": "The\n                                                                    Office",
+      "title": "The Office",
       "contentId": "SKYS_299339204",
       "mediaType": "tv",
       "tmdbId": 2316,
@@ -1477,7 +1348,7 @@
       ]
     },
     "me llamo earl": {
-      "title": "Me llamo\n                                                                    Earl",
+      "title": "Me llamo Earl",
       "contentId": "DSN_299159413STAR",
       "mediaType": "tv",
       "tmdbId": 2317,
@@ -1487,7 +1358,7 @@
       ]
     },
     "rick y morty": {
-      "title": "Rick y\n                                                                    Morty",
+      "title": "Rick y Morty",
       "contentId": "MAX_298249461",
       "mediaType": "tv",
       "tmdbId": 60625,
@@ -1500,7 +1371,7 @@
       ]
     },
     "csi vegas": {
-      "title": "CSI:\n                                                                    Vegas",
+      "title": "CSI: Vegas",
       "contentId": "MFO_299233319",
       "mediaType": "tv",
       "tmdbId": 1431,
@@ -1509,17 +1380,6 @@
         80,
         18,
         9648
-      ]
-    },
-    "peaky blinders": {
-      "title": "Peaky\n                                                                    Blinders",
-      "contentId": "PRIME_299337988APVI",
-      "mediaType": "tv",
-      "tmdbId": 60574,
-      "tmdbTitle": "Peaky Blinders",
-      "genreIds": [
-        18,
-        80
       ]
     },
     "heroes": {
@@ -1534,7 +1394,7 @@
       ]
     },
     "dexter resurreccion": {
-      "title": "Dexter:\n                                                                    Resurrección",
+      "title": "Dexter: Resurrección",
       "contentId": "SKYS_299792295",
       "mediaType": "tv",
       "tmdbId": 259909,
@@ -1546,7 +1406,7 @@
       ]
     },
     "crimen en el paraiso": {
-      "title": "Crimen en\n                                                                    el paraíso",
+      "title": "Crimen en el paraíso",
       "contentId": "MFO_298248879",
       "mediaType": "tv",
       "tmdbId": 41956,
@@ -1556,16 +1416,6 @@
         80,
         18,
         9648
-      ]
-    },
-    "the incredible journey of mary bryant": {
-      "title": "The\n                                                                    Incredible Journey of Mary Bryant",
-      "contentId": "PRIME_299342200APVI",
-      "mediaType": "tv",
-      "tmdbId": 16491,
-      "tmdbTitle": "El Increíble Viaje de Mary Bryant",
-      "genreIds": [
-        18
       ]
     },
     "perdidos": {
@@ -1581,7 +1431,7 @@
       ]
     },
     "where the sun always shines": {
-      "title": "Where the\n                                                                    Sun Always Shines",
+      "title": "Where the Sun Always Shines",
       "contentId": "SKYS_299813097",
       "mediaType": "tv",
       "tmdbId": 294405,
@@ -1592,7 +1442,7 @@
       ]
     },
     "la leyenda de terramar": {
-      "title": "La\n                                                                    leyenda de Terramar",
+      "title": "La leyenda de Terramar",
       "contentId": "MFO_299517927",
       "mediaType": "tv",
       "tmdbId": 13278,
@@ -1601,20 +1451,8 @@
         10765
       ]
     },
-    "broadchurch": {
-      "title": "Broadchurch",
-      "contentId": "PRIME_299241541APVI",
-      "mediaType": "tv",
-      "tmdbId": 1427,
-      "tmdbTitle": "Broadchurch",
-      "genreIds": [
-        80,
-        18,
-        9648
-      ]
-    },
     "the affair": {
-      "title": "The\n                                                                    Affair",
+      "title": "The Affair",
       "contentId": "SKYS_298249578SKST",
       "mediaType": "movie",
       "tmdbId": 78286,
@@ -1625,7 +1463,7 @@
       ]
     },
     "nuestra bandera significa muerte": {
-      "title": "Nuestra\n                                                                    bandera significa muerte",
+      "title": "Nuestra bandera significa muerte",
       "contentId": "MAX_299549261",
       "mediaType": "tv",
       "tmdbId": 109939,
@@ -1649,7 +1487,7 @@
       ]
     },
     "la sangre helada": {
-      "title": "La sangre\n                                                                    helada",
+      "title": "La sangre helada",
       "contentId": "FLMN299815051",
       "mediaType": "tv",
       "tmdbId": 86941,
@@ -1660,7 +1498,7 @@
       ]
     },
     "mar afuera": {
-      "title": "Mar\n                                                                    afuera",
+      "title": "Mar afuera",
       "contentId": "DSN_299794054STAR",
       "mediaType": "tv",
       "tmdbId": 256150,
@@ -1670,7 +1508,7 @@
       ]
     },
     "black sails": {
-      "title": "Black\n                                                                    Sails",
+      "title": "Black Sails",
       "contentId": "MFO_299160867AMCN",
       "mediaType": "tv",
       "tmdbId": 47665,
@@ -1680,20 +1518,8 @@
         10759
       ]
     },
-    "punto nemo": {
-      "title": "Punto\n                                                                    Nemo",
-      "contentId": "PRIME_299710410APVI",
-      "mediaType": "tv",
-      "tmdbId": 280893,
-      "tmdbTitle": "Punto Nemo",
-      "genreIds": [
-        10765,
-        10759,
-        18
-      ]
-    },
     "el corazon del oceano": {
-      "title": "El\n                                                                    corazón del océano",
+      "title": "El corazón del océano",
       "contentId": "FLX_D1648",
       "mediaType": "tv",
       "tmdbId": 62975,
@@ -1737,29 +1563,8 @@
         10759
       ]
     },
-    "operacion marea negra": {
-      "title": "Operación\n                                                                    Marea Negra",
-      "contentId": "PRIME_299299510APVI",
-      "mediaType": "tv",
-      "tmdbId": 128676,
-      "tmdbTitle": "Operación Marea Negra",
-      "genreIds": [
-        80,
-        18
-      ]
-    },
-    "the silent service": {
-      "title": "The\n                                                                    Silent Service",
-      "contentId": "PRIME_299506506APVO",
-      "mediaType": "tv",
-      "tmdbId": 18127,
-      "tmdbTitle": "The Silent Service",
-      "genreIds": [
-        18
-      ]
-    },
     "verano azul": {
-      "title": "Verano\n                                                                    Azul",
+      "title": "Verano Azul",
       "contentId": "MFO_299012865VITV",
       "mediaType": "tv",
       "tmdbId": 6066,
@@ -1771,7 +1576,7 @@
       ]
     },
     "das boot el submarino": {
-      "title": "Das Boot\n                                                                    (El submarino)",
+      "title": "Das Boot (El submarino)",
       "contentId": "SKYS_298942963",
       "mediaType": "tv",
       "tmdbId": 83936,
@@ -1782,7 +1587,7 @@
       ]
     },
     "lobo de mar": {
-      "title": "Lobo de\n                                                                    mar",
+      "title": "Lobo de mar",
       "contentId": "MFO_299524387AMCN",
       "mediaType": "movie",
       "tmdbId": 267314,
@@ -1803,7 +1608,7 @@
       ]
     },
     "teresa de jesus": {
-      "title": "Teresa de\n                                                                    Jesús",
+      "title": "Teresa de Jesús",
       "contentId": "FLX_D1295",
       "mediaType": "movie",
       "tmdbId": 67469,
@@ -1813,7 +1618,7 @@
       ]
     },
     "el quijote de miguel de cervantes": {
-      "title": "El\n                                                                    Quijote de Miguel de Cervantes",
+      "title": "El Quijote de Miguel de Cervantes",
       "contentId": "FLX_D2094",
       "mediaType": "tv",
       "tmdbId": 78522,
@@ -1824,7 +1629,7 @@
       ]
     },
     "la forja de un rebelde": {
-      "title": "La forja\n                                                                    de un rebelde",
+      "title": "La forja de un rebelde",
       "contentId": "FLX_D1521",
       "mediaType": "tv",
       "tmdbId": 42831,
@@ -1835,7 +1640,7 @@
       ]
     },
     "olmos y robles": {
-      "title": "Olmos y\n                                                                    Robles",
+      "title": "Olmos y Robles",
       "contentId": "FLX_D2031",
       "mediaType": "tv",
       "tmdbId": 63842,
@@ -1845,7 +1650,7 @@
       ]
     },
     "una bala para el rey": {
-      "title": "Una bala\n                                                                    para el Rey",
+      "title": "Una bala para el Rey",
       "contentId": "FLX_D1811",
       "mediaType": "tv",
       "tmdbId": 75843,
@@ -1855,7 +1660,7 @@
       ]
     },
     "uco unidad central operativa": {
-      "title": "U.c.o.\n                                                                    (Unidad Central Operativa)",
+      "title": "U.c.o. (Unidad Central Operativa)",
       "contentId": "FLX_D2052",
       "mediaType": "tv",
       "tmdbId": 72567,
@@ -1865,7 +1670,7 @@
       ]
     },
     "patricia marcos desaparecida": {
-      "title": "Patricia\n                                                                    Marcos: Desaparecida",
+      "title": "Patricia Marcos: Desaparecida",
       "contentId": "FLX_D1429",
       "mediaType": "tv",
       "tmdbId": 63758,
@@ -1876,7 +1681,7 @@
       ]
     },
     "las chicas de oro": {
-      "title": "Las\n                                                                    chicas de oro",
+      "title": "Las chicas de oro",
       "contentId": "FLX_D1318",
       "mediaType": "tv",
       "tmdbId": 1678,
@@ -1896,7 +1701,7 @@
       ]
     },
     "los jinetes del alba": {
-      "title": "Los\n                                                                    jinetes del alba",
+      "title": "Los jinetes del alba",
       "contentId": "FLX_D1456",
       "mediaType": "tv",
       "tmdbId": 59156,
@@ -1907,7 +1712,7 @@
       ]
     },
     "fortunata y jacinta": {
-      "title": "Fortunata\n                                                                    y Jacinta",
+      "title": "Fortunata y Jacinta",
       "contentId": "FLX_D1820",
       "mediaType": "tv",
       "tmdbId": 74416,
@@ -1917,7 +1722,7 @@
       ]
     },
     "los pazos de ulloa": {
-      "title": "Los pazos\n                                                                    de Ulloa",
+      "title": "Los pazos de Ulloa",
       "contentId": "FLX_D1333",
       "mediaType": "tv",
       "tmdbId": 116092,
@@ -1937,7 +1742,7 @@
       ]
     },
     "proceso a mariana pineda": {
-      "title": "Proceso a\n                                                                    Mariana Pineda",
+      "title": "Proceso a Mariana Pineda",
       "contentId": "FLX_D1259",
       "mediaType": "tv",
       "tmdbId": 77111,
@@ -1957,7 +1762,7 @@
       ]
     },
     "la barraca": {
-      "title": "La\n                                                                    barraca",
+      "title": "La barraca",
       "contentId": "FLX_D1537",
       "mediaType": "movie",
       "tmdbId": 194154,
@@ -1967,7 +1772,7 @@
       ]
     },
     "lorca muerte de un poeta": {
-      "title": "Lorca,\n                                                                    muerte de un poeta",
+      "title": "Lorca, muerte de un poeta",
       "contentId": "FLX_D1444",
       "mediaType": "tv",
       "tmdbId": 75644,
@@ -1977,7 +1782,7 @@
       ]
     },
     "canas y barro": {
-      "title": "Cañas y\n                                                                    barro",
+      "title": "Cañas y barro",
       "contentId": "FLX_D1529",
       "mediaType": "movie",
       "tmdbId": 472807,
@@ -1987,7 +1792,7 @@
       ]
     },
     "los gozos y las sombras": {
-      "title": "Los gozos\n                                                                    y las sombras",
+      "title": "Los gozos y las sombras",
       "contentId": "FLX_D1463",
       "mediaType": "tv",
       "tmdbId": 77617,
@@ -1997,7 +1802,7 @@
       ]
     },
     "sin cita previa": {
-      "title": "Sin cita\n                                                                    previa",
+      "title": "Sin cita previa",
       "contentId": "DSN_298249516STAR",
       "mediaType": "tv",
       "tmdbId": 3172,
@@ -2006,18 +1811,8 @@
         18
       ]
     },
-    "hospital central": {
-      "title": "Hospital\n                                                                    Central",
-      "contentId": "PRIME_298871201APVI",
-      "mediaType": "tv",
-      "tmdbId": 12288,
-      "tmdbTitle": "Hospital Central",
-      "genreIds": [
-        18
-      ]
-    },
     "codigo negro": {
-      "title": "Código\n                                                                    negro",
+      "title": "Código negro",
       "contentId": "DSN_298248860STAR",
       "mediaType": "tv",
       "tmdbId": 63418,
@@ -2027,7 +1822,7 @@
       ]
     },
     "the new nurses": {
-      "title": "The New\n                                                                    Nurses",
+      "title": "The New Nurses",
       "contentId": "MFO_299108232AMCN",
       "mediaType": "tv",
       "tmdbId": 83524,
@@ -2078,7 +1873,7 @@
       ]
     },
     "anatomia de grey": {
-      "title": "Anatomía\n                                                                    de Grey",
+      "title": "Anatomía de Grey",
       "contentId": "DSN_298248722STAR",
       "mediaType": "tv",
       "tmdbId": 1416,
@@ -2098,7 +1893,7 @@
       ]
     },
     "the resident": {
-      "title": "The\n                                                                    Resident",
+      "title": "The Resident",
       "contentId": "DSN_298249614STAR",
       "mediaType": "tv",
       "tmdbId": 74016,
@@ -2107,28 +1902,8 @@
         18
       ]
     },
-    "chicago med": {
-      "title": "Chicago\n                                                                    Med",
-      "contentId": "PRIME_298248548APVI",
-      "mediaType": "tv",
-      "tmdbId": 62650,
-      "tmdbTitle": "Chicago Med",
-      "genreIds": [
-        18
-      ]
-    },
-    "madres amor y vida": {
-      "title": "Madres,\n                                                                    Amor y Vida",
-      "contentId": "PRIME_299123642APVI",
-      "mediaType": "tv",
-      "tmdbId": 103156,
-      "tmdbTitle": "Madres: amor y vida",
-      "genreIds": [
-        18
-      ]
-    },
     "saving hope": {
-      "title": "Saving\n                                                                    Hope",
+      "title": "Saving Hope",
       "contentId": "MFO_299478430",
       "mediaType": "tv",
       "tmdbId": 43097,
@@ -2160,7 +1935,7 @@
       ]
     },
     "padre de familia": {
-      "title": "Padre de\n                                                                    Familia",
+      "title": "Padre de Familia",
       "contentId": "DSN_298249380STAR",
       "mediaType": "tv",
       "tmdbId": 1434,
@@ -2170,19 +1945,8 @@
         35
       ]
     },
-    "shameless": {
-      "title": "Shameless",
-      "contentId": "PRIME_298782306APVI",
-      "mediaType": "tv",
-      "tmdbId": 34307,
-      "tmdbTitle": "Shameless",
-      "genreIds": [
-        18,
-        35
-      ]
-    },
     "bates motel": {
-      "title": "Bates\n                                                                    Motel",
+      "title": "Bates Motel",
       "contentId": "SKYS_298248762",
       "mediaType": "tv",
       "tmdbId": 46786,
@@ -2194,7 +1958,7 @@
       ]
     },
     "bendita paciencia breeders": {
-      "title": "Bendita\n                                                                    paciencia (Breeders)",
+      "title": "Bendita paciencia (Breeders)",
       "contentId": "MAX_299306227",
       "mediaType": "tv",
       "tmdbId": 93290,
@@ -2204,43 +1968,8 @@
         10751
       ]
     },
-    "betty la fea la historia continua": {
-      "title": "Betty La\n                                                                    Fea, La Historia Continúa",
-      "contentId": "PRIME_299582162APVO",
-      "mediaType": "tv",
-      "tmdbId": 230424,
-      "tmdbTitle": "Betty la fea, la historia continúa",
-      "genreIds": [
-        10766,
-        35,
-        18
-      ]
-    },
-    "gran reserva": {
-      "title": "Gran\n                                                                    Reserva",
-      "contentId": "PRIME_299186114APVI",
-      "mediaType": "tv",
-      "tmdbId": 59164,
-      "tmdbTitle": "Gran reserva",
-      "genreIds": [
-        18,
-        10751
-      ]
-    },
-    "la mejor hermana": {
-      "title": "La mejor\n                                                                    hermana",
-      "contentId": "PRIME_299743354APVI",
-      "mediaType": "tv",
-      "tmdbId": 253321,
-      "tmdbTitle": "La mejor hermana",
-      "genreIds": [
-        18,
-        80,
-        9648
-      ]
-    },
     "chino americano la serie": {
-      "title": "Chino\n                                                                    americano, la serie",
+      "title": "Chino americano, la serie",
       "contentId": "DSN_299432160DPLS",
       "mediaType": "tv",
       "tmdbId": 135615,
@@ -2252,7 +1981,7 @@
       ]
     },
     "mamen mayo": {
-      "title": "Mamen\n                                                                    Mayo",
+      "title": "Mamen Mayo",
       "contentId": "SKYS_299650143",
       "mediaType": "tv",
       "tmdbId": 264288,
@@ -2273,7 +2002,7 @@
       ]
     },
     "esto no es suecia": {
-      "title": "Esto no\n                                                                    es Suecia",
+      "title": "Esto no es Suecia",
       "contentId": "SKYS_299482823",
       "mediaType": "tv",
       "tmdbId": 224795,
@@ -2284,7 +2013,7 @@
       ]
     },
     "los soprano": {
-      "title": "Los\n                                                                    Soprano",
+      "title": "Los Soprano",
       "contentId": "MAX_299549249",
       "mediaType": "tv",
       "tmdbId": 1398,
@@ -2295,7 +2024,7 @@
       ]
     },
     "a dos metros bajo tierra": {
-      "title": "A dos\n                                                                    metros bajo tierra",
+      "title": "A dos metros bajo tierra",
       "contentId": "MAX_299549338",
       "mediaType": "tv",
       "tmdbId": 1274,
@@ -2305,7 +2034,7 @@
       ]
     },
     "los borgia": {
-      "title": "Los\n                                                                    Borgia",
+      "title": "Los Borgia",
       "contentId": "SKYS_299654657",
       "mediaType": "tv",
       "tmdbId": 33025,
@@ -2316,7 +2045,7 @@
       ]
     },
     "un reves inesperado": {
-      "title": "Un revés\n                                                                    inesperado",
+      "title": "Un revés inesperado",
       "contentId": "SKYS_299649427",
       "mediaType": "tv",
       "tmdbId": 222031,
@@ -2336,17 +2065,6 @@
         35
       ]
     },
-    "los farad": {
-      "title": "Los Farad",
-      "contentId": "PRIME_299489730APVO",
-      "mediaType": "tv",
-      "tmdbId": 225283,
-      "tmdbTitle": "Los Farad",
-      "genreIds": [
-        18,
-        80
-      ]
-    },
     "empire": {
       "title": "Empire",
       "contentId": "DSN_299304002STAR",
@@ -2359,7 +2077,7 @@
       ]
     },
     "better things": {
-      "title": "Better\n                                                                    Things",
+      "title": "Better Things",
       "contentId": "DSN_299303081STAR",
       "mediaType": "tv",
       "tmdbId": 66859,
@@ -2370,7 +2088,7 @@
       ]
     },
     "el caso cenicienta": {
-      "title": "El caso\n                                                                    Cenicienta",
+      "title": "El caso Cenicienta",
       "contentId": "MFO_299571719AMCN",
       "mediaType": "tv",
       "tmdbId": 259030,
@@ -2379,21 +2097,8 @@
         80
       ]
     },
-    "forever": {
-      "title": "Forever",
-      "contentId": "PRIME_299355771APVO",
-      "mediaType": "tv",
-      "tmdbId": 60726,
-      "tmdbTitle": "Forever",
-      "genreIds": [
-        18,
-        80,
-        9648,
-        10765
-      ]
-    },
     "m el hijo del siglo": {
-      "title": "M - El\n                                                                    Hijo del Siglo",
+      "title": "M - El Hijo del Siglo",
       "contentId": "SKYS_299693455",
       "mediaType": "tv",
       "tmdbId": 212333,
@@ -2404,7 +2109,7 @@
       ]
     },
     "la noche mas larga": {
-      "title": "La noche\n                                                                    más larga",
+      "title": "La noche más larga",
       "contentId": "MFO_299383376",
       "mediaType": "movie",
       "tmdbId": 102685,
@@ -2413,19 +2118,8 @@
         18
       ]
     },
-    "nine perfect strangers": {
-      "title": "Nine\n                                                                    Perfect Strangers",
-      "contentId": "PRIME_299338642APVI",
-      "mediaType": "tv",
-      "tmdbId": 88989,
-      "tmdbTitle": "Nine Perfect Strangers",
-      "genreIds": [
-        18,
-        9648
-      ]
-    },
     "funny woman": {
-      "title": "Funny\n                                                                    Woman",
+      "title": "Funny Woman",
       "contentId": "SKYS_299647753",
       "mediaType": "tv",
       "tmdbId": 156644,
@@ -2435,7 +2129,7 @@
       ]
     },
     "por que matan las mujeres": {
-      "title": "Por qué\n                                                                    matan las mujeres",
+      "title": "Por qué matan las mujeres",
       "contentId": "SKYS_299663888",
       "mediaType": "tv",
       "tmdbId": 87428,
@@ -2446,20 +2140,8 @@
         18
       ]
     },
-    "good omens": {
-      "title": "Good\n                                                                    Omens",
-      "contentId": "PRIME_299348961APVO",
-      "mediaType": "tv",
-      "tmdbId": 71915,
-      "tmdbTitle": "Good Omens",
-      "genreIds": [
-        10765,
-        35,
-        18
-      ]
-    },
     "dopesick historia de una adiccion": {
-      "title": "Dopesick:\n                                                                    Historia de una adicción",
+      "title": "Dopesick: Historia de una adicción",
       "contentId": "DSN_299304739STAR",
       "mediaType": "tv",
       "tmdbId": 110695,
@@ -2470,23 +2152,13 @@
       ]
     },
     "secretos de un matrimonio": {
-      "title": "Secretos\n                                                                    de un matrimonio",
+      "title": "Secretos de un matrimonio",
       "contentId": "MAX_299553103",
       "mediaType": "tv",
       "tmdbId": 112077,
       "tmdbTitle": "Secretos de un matrimonio",
       "genreIds": [
         18
-      ]
-    },
-    "miss sophie lo mismo que todos los anos": {
-      "title": "Miss\n                                                                    Sophie: Lo mismo que todos los años",
-      "contentId": "PRIME_299834306APVO",
-      "mediaType": "tv",
-      "tmdbId": 304949,
-      "tmdbTitle": "Miss Sophie - Same Procedure as Every Year",
-      "genreIds": [
-        35
       ]
     },
     "lockerbie en busqueda de la verdad": {
@@ -2521,7 +2193,7 @@
       ]
     },
     "el colapso": {
-      "title": "El\n                                                                    colapso",
+      "title": "El colapso",
       "contentId": "FLMN299146559",
       "mediaType": "tv",
       "tmdbId": 220878,
@@ -2529,14 +2201,6 @@
       "genreIds": [
         18
       ]
-    },
-    "clarity": {
-      "title": "Clar.ity",
-      "contentId": "PRIME_299724537APVI",
-      "mediaType": null,
-      "tmdbId": null,
-      "tmdbTitle": null,
-      "genreIds": []
     },
     "matices": {
       "title": "Matices",
@@ -2550,7 +2214,7 @@
       ]
     },
     "the undoing": {
-      "title": "The\n                                                                    Undoing",
+      "title": "The Undoing",
       "contentId": "MAX_299549585",
       "mediaType": "tv",
       "tmdbId": 83851,
@@ -2562,7 +2226,7 @@
       ]
     },
     "devil in disguise john wayne gacy": {
-      "title": "Devil in\n                                                                    Disguise: John Wayne Gacy",
+      "title": "Devil in Disguise: John Wayne Gacy",
       "contentId": "SKYS_299804747",
       "mediaType": "tv",
       "tmdbId": 257534,
@@ -2573,7 +2237,7 @@
       ]
     },
     "the pacific": {
-      "title": "The\n                                                                    Pacific",
+      "title": "The Pacific",
       "contentId": "MAX_299493685",
       "mediaType": "tv",
       "tmdbId": 16997,
@@ -2585,7 +2249,7 @@
       ]
     },
     "douglas is cancelled": {
-      "title": "Douglas\n                                                                    Is Cancelled",
+      "title": "Douglas Is Cancelled",
       "contentId": "SKYS_299645199",
       "mediaType": "tv",
       "tmdbId": 240457,
@@ -2596,7 +2260,7 @@
       ]
     },
     "el mejor de los nuestros": {
-      "title": "El mejor\n                                                                    de los nuestros",
+      "title": "El mejor de los nuestros",
       "contentId": "MFO_299452350AMCN",
       "mediaType": "tv",
       "tmdbId": 214124,
@@ -2628,7 +2292,7 @@
       ]
     },
     "no apagues la luz": {
-      "title": "No\n                                                                    apagues la luz",
+      "title": "No apagues la luz",
       "contentId": "MFO_299429637AMCN",
       "mediaType": "tv",
       "tmdbId": 202140,
@@ -2638,7 +2302,7 @@
       ]
     },
     "follow au plus pres du tueur": {
-      "title": "Follow -\n                                                                    au plus pres du Tueur",
+      "title": "Follow - au plus pres du Tueur",
       "contentId": "MFO_299510192NBCU",
       "mediaType": null,
       "tmdbId": null,
@@ -2657,20 +2321,8 @@
         878
       ]
     },
-    "hanna": {
-      "title": "Hanna",
-      "contentId": "PRIME_299341335APVO",
-      "mediaType": "movie",
-      "tmdbId": 50456,
-      "tmdbTitle": "Hanna",
-      "genreIds": [
-        28,
-        53,
-        12
-      ]
-    },
     "high fidelity": {
-      "title": "High\n                                                                    Fidelity",
+      "title": "High Fidelity",
       "contentId": "DSN_299123903STAR",
       "mediaType": "tv",
       "tmdbId": 96734,
@@ -2681,7 +2333,7 @@
       ]
     },
     "the night of": {
-      "title": "The Night\n                                                                    of",
+      "title": "The Night of",
       "contentId": "MAX_299482179",
       "mediaType": "tv",
       "tmdbId": 138357,
@@ -2705,7 +2357,7 @@
       ]
     },
     "my life is murder": {
-      "title": "My Life\n                                                                    Is Murder",
+      "title": "My Life Is Murder",
       "contentId": "MFO_299286345",
       "mediaType": "tv",
       "tmdbId": 91267,
@@ -2718,7 +2370,7 @@
       ]
     },
     "el tercer dia": {
-      "title": "El tercer\n                                                                    día",
+      "title": "El tercer día",
       "contentId": "MAX_299550940",
       "mediaType": "tv",
       "tmdbId": 90259,
@@ -2742,7 +2394,7 @@
       ]
     },
     "el visitante the outsider": {
-      "title": "El\n                                                                    visitante (The Outsider)",
+      "title": "El visitante (The Outsider)",
       "contentId": "MAX_299550060",
       "mediaType": "tv",
       "tmdbId": 84661,
@@ -2754,7 +2406,7 @@
       ]
     },
     "solo asesinatos en el edificio": {
-      "title": "Solo\n                                                                    asesinatos en el edificio",
+      "title": "Solo asesinatos en el edificio",
       "contentId": "DSN_299303305STAR",
       "mediaType": "tv",
       "tmdbId": 107113,
@@ -2778,7 +2430,7 @@
       ]
     },
     "the killing": {
-      "title": "The\n                                                                    Killing",
+      "title": "The Killing",
       "contentId": "DSN_298931398STAR",
       "mediaType": "tv",
       "tmdbId": 32368,
@@ -2802,7 +2454,7 @@
       ]
     },
     "true detective": {
-      "title": "True\n                                                                    Detective",
+      "title": "True Detective",
       "contentId": "MAX_298249642",
       "mediaType": "tv",
       "tmdbId": 46648,
@@ -2813,7 +2465,7 @@
       ]
     },
     "cegado por la luz": {
-      "title": "Cegado\n                                                                    por la luz",
+      "title": "Cegado por la luz",
       "contentId": "MAX_299550633",
       "mediaType": "movie",
       "tmdbId": 534259,
@@ -2821,17 +2473,6 @@
       "genreIds": [
         18,
         35
-      ]
-    },
-    "los crimenes de fjallbacka": {
-      "title": "Los\n                                                                    crímenes de Fjällbacka",
-      "contentId": "PRIME_299338509APVI",
-      "mediaType": "tv",
-      "tmdbId": 67028,
-      "tmdbTitle": "Los crímenes de Fjällbacka",
-      "genreIds": [
-        18,
-        80
       ]
     },
     "limbo": {
@@ -2845,7 +2486,7 @@
       ]
     },
     "end of summer": {
-      "title": "End of\n                                                                    Summer",
+      "title": "End of Summer",
       "contentId": "SKYS_299663430",
       "mediaType": "tv",
       "tmdbId": 237347,
@@ -2856,7 +2497,7 @@
       ]
     },
     "made in oslo": {
-      "title": "Made In\n                                                                    Oslo",
+      "title": "Made In Oslo",
       "contentId": "MFO_299392369",
       "mediaType": "tv",
       "tmdbId": 196822,
@@ -2876,7 +2517,7 @@
       ]
     },
     "max anger espia": {
-      "title": "Max\n                                                                    Anger: Espía",
+      "title": "Max Anger: Espía",
       "contentId": "MFO_299451822",
       "mediaType": null,
       "tmdbId": null,
@@ -2904,7 +2545,7 @@
       ]
     },
     "salto a la gloria": {
-      "title": "Salto a\n                                                                    la gloria",
+      "title": "Salto a la gloria",
       "contentId": "MFO_299647344",
       "mediaType": "tv",
       "tmdbId": 246865,
@@ -2915,7 +2556,7 @@
       ]
     },
     "la puta ama": {
-      "title": "La puta\n                                                                    ama",
+      "title": "La puta ama",
       "contentId": "MFO_299785510AMCN",
       "mediaType": "tv",
       "tmdbId": 280860,
@@ -2937,7 +2578,7 @@
       ]
     },
     "requiem for selina": {
-      "title": "Requiem\n                                                                    for Selina",
+      "title": "Requiem for Selina",
       "contentId": "MFO_299772669AMCN",
       "mediaType": "tv",
       "tmdbId": 283983,
@@ -2947,7 +2588,7 @@
       ]
     },
     "the darkness": {
-      "title": "The\n                                                                    Darkness",
+      "title": "The Darkness",
       "contentId": "SKYS_299648175",
       "mediaType": "tv",
       "tmdbId": 275694,
@@ -2955,17 +2596,6 @@
       "genreIds": [
         80,
         9648
-      ]
-    },
-    "corazon oscuro": {
-      "title": "Corazón\n                                                                    oscuro",
-      "contentId": "PRIME_299669216APVI",
-      "mediaType": "movie",
-      "tmdbId": 240133,
-      "tmdbTitle": "El lado oscuro del corazón 2",
-      "genreIds": [
-        18,
-        10749
       ]
     },
     "veronika": {
@@ -2979,7 +2609,7 @@
       ]
     },
     "codename annika": {
-      "title": "Codename:\n                                                                    Annika",
+      "title": "Codename: Annika",
       "contentId": "SKYS_299651537",
       "mediaType": "tv",
       "tmdbId": 218030,
@@ -3001,19 +2631,6 @@
         9648
       ]
     },
-    "parot": {
-      "title": "Parot",
-      "contentId": "PRIME_299296470APVI",
-      "mediaType": "tv",
-      "tmdbId": 121898,
-      "tmdbTitle": "Parot",
-      "genreIds": [
-        9648,
-        80,
-        10768,
-        18
-      ]
-    },
     "luther": {
       "title": "Luther",
       "contentId": "MFO_299332012AMCN",
@@ -3027,7 +2644,7 @@
       ]
     },
     "los rios color purpura": {
-      "title": "Los ríos\n                                                                    color púrpura",
+      "title": "Los ríos color púrpura",
       "contentId": "MFO_299020016NBCU",
       "mediaType": "tv",
       "tmdbId": 82149,
@@ -3038,7 +2655,7 @@
       ]
     },
     "los casos de pearl nolan": {
-      "title": "Los casos\n                                                                    de Pearl Nolan",
+      "title": "Los casos de Pearl Nolan",
       "contentId": "MFO_299408019",
       "mediaType": "tv",
       "tmdbId": 113966,
@@ -3049,7 +2666,7 @@
       ]
     },
     "mare of easttown": {
-      "title": "Mare of\n                                                                    Easttown",
+      "title": "Mare of Easttown",
       "contentId": "MAX_299509803",
       "mediaType": "tv",
       "tmdbId": 115004,
@@ -3058,18 +2675,6 @@
         18,
         80,
         9648
-      ]
-    },
-    "reacher": {
-      "title": "Reacher",
-      "contentId": "PRIME_299354270APVO",
-      "mediaType": "tv",
-      "tmdbId": 108978,
-      "tmdbTitle": "Reacher",
-      "genreIds": [
-        10759,
-        18,
-        80
       ]
     },
     "allegiance 2024": {
@@ -3081,7 +2686,7 @@
       "genreIds": []
     },
     "por mandato del cielo": {
-      "title": "Por\n                                                                    mandato del cielo",
+      "title": "Por mandato del cielo",
       "contentId": "DSN_299303181STAR",
       "mediaType": "tv",
       "tmdbId": 128095,
@@ -3092,19 +2697,921 @@
         9648
       ]
     },
-    "jack ryan de tom clancy": {
-      "title": "Jack\n                                                                    Ryan, de Tom Clancy",
-      "contentId": "PRIME_299339897APVO",
+    "cachorros a la obra": {
+      "title": "¡Cachorros a la obra!",
+      "contentId": "MFO_299492886",
       "mediaType": "tv",
-      "tmdbId": 73375,
-      "tmdbTitle": "Jack Ryan de Tom Clancy",
+      "tmdbId": 156616,
+      "tmdbTitle": "Cachorros a la Obra",
       "genreIds": [
+        16,
+        10762,
+        35
+      ]
+    },
+    "star wars las aventuras de los jovenes jedi": {
+      "title": "Star Wars: Las aventuras de los jóvenes Jedi",
+      "contentId": "DSN_299426704SWAR",
+      "mediaType": "tv",
+      "tmdbId": 202998,
+      "tmdbTitle": "Star Wars: Las aventuras de los jóvenes Jedi",
+      "genreIds": [
+        16,
+        10762,
         10759,
+        35
+      ]
+    },
+    "wicked": {
+      "title": "Wicked",
+      "contentId": "SKYS_0002386048",
+      "mediaType": "movie",
+      "tmdbId": 402431,
+      "tmdbTitle": "Wicked",
+      "genreIds": [
+        18,
+        10749,
+        14
+      ]
+    },
+    "rugrats aventuras en panales": {
+      "title": "Rugrats, aventuras en pañales",
+      "contentId": "SKYS_299233480",
+      "mediaType": "tv",
+      "tmdbId": 3022,
+      "tmdbTitle": "Rugrats: Aventuras en pañales",
+      "genreIds": [
+        10751,
+        16,
+        10762,
+        35
+      ]
+    },
+    "como entrenar a tu dragon 2025": {
+      "title": "Cómo entrenar a tu dragón (2025)",
+      "contentId": "SKYS_0002635883",
+      "mediaType": null,
+      "tmdbId": null,
+      "tmdbTitle": null,
+      "genreIds": []
+    },
+    "el gato con botas el ultimo deseo": {
+      "title": "El Gato Con Botas: El Último Deseo",
+      "contentId": "el-gato-con-botas-el-ultimo-deseo",
+      "mediaType": "movie",
+      "tmdbId": 315162,
+      "tmdbTitle": "El Gato con Botas: El último deseo",
+      "genreIds": [
+        16,
+        12,
+        14,
+        35,
+        10751
+      ]
+    },
+    "minions el origen de gru": {
+      "title": "Minions: El origen de Gru",
+      "contentId": "minions-el-origen-de-gru",
+      "mediaType": "movie",
+      "tmdbId": 438148,
+      "tmdbTitle": "Minions: El origen de Gru",
+      "genreIds": [
+        10751,
+        35,
+        12,
+        16,
+        878,
+        14
+      ]
+    },
+    "madagascar 3 de marcha por europa": {
+      "title": "Madagascar 3: De marcha por Europa",
+      "contentId": "madagascar-3-de-marcha-por-europa",
+      "mediaType": "movie",
+      "tmdbId": 80321,
+      "tmdbTitle": "Madagascar 3: De marcha por Europa",
+      "genreIds": [
+        16,
+        10751,
+        35,
+        12
+      ]
+    },
+    "star wars el retorno del jedi episodio vi": {
+      "title": "Star Wars: El Retorno del Jedi (Episodio VI)",
+      "contentId": "star-wars-episodio-vi-el-retorno-del-jedi",
+      "mediaType": "movie",
+      "tmdbId": 1892,
+      "tmdbTitle": "El retorno del Jedi",
+      "genreIds": [
+        12,
+        28,
+        878
+      ]
+    },
+    "enredados": {
+      "title": "Enredados",
+      "contentId": "enredados",
+      "mediaType": "movie",
+      "tmdbId": 38757,
+      "tmdbTitle": "Enredados",
+      "genreIds": [
+        16,
+        10751,
+        12
+      ]
+    },
+    "e t el extraterrestre": {
+      "title": "E. T. - El Extraterrestre",
+      "contentId": "e-t-el-extraterrestre",
+      "mediaType": "movie",
+      "tmdbId": 601,
+      "tmdbTitle": "E.T. el extraterrestre",
+      "genreIds": [
+        878,
+        12,
+        10751,
+        14
+      ]
+    },
+    "acero puro": {
+      "title": "Acero puro",
+      "contentId": "acero-puro",
+      "mediaType": "movie",
+      "tmdbId": 39254,
+      "tmdbTitle": "Acero Puro",
+      "genreIds": [
+        28,
+        878,
         18
       ]
+    },
+    "hotel transylvania transformania": {
+      "title": "Hotel Transylvania: Transformanía",
+      "contentId": "hotel-transilvania-transformania",
+      "mediaType": "movie",
+      "tmdbId": 585083,
+      "tmdbTitle": "Hotel Transilvania: Transformanía",
+      "genreIds": [
+        16,
+        35,
+        10751,
+        12,
+        14
+      ]
+    },
+    "el gato con botas": {
+      "title": "El gato con botas",
+      "contentId": "el-gato-con-botas--2",
+      "mediaType": "movie",
+      "tmdbId": 417859,
+      "tmdbTitle": "El gato con botas",
+      "genreIds": [
+        16,
+        10751,
+        14,
+        12,
+        35,
+        28,
+        37
+      ]
+    },
+    "shrek 3": {
+      "title": "Shrek 3",
+      "contentId": "shrek-tercero",
+      "mediaType": "movie",
+      "tmdbId": 1631442,
+      "tmdbTitle": "Shrek 3-D",
+      "genreIds": [
+        35,
+        12,
+        10751
+      ]
+    },
+    "madagascar": {
+      "title": "Madagascar",
+      "contentId": "madagascar",
+      "mediaType": "movie",
+      "tmdbId": 953,
+      "tmdbTitle": "Madagascar",
+      "genreIds": [
+        10751,
+        16,
+        12,
+        35
+      ]
+    },
+    "voluntad de hierro": {
+      "title": "Voluntad de hierro",
+      "contentId": "voluntad-de-hierro",
+      "mediaType": "movie",
+      "tmdbId": 24767,
+      "tmdbTitle": "Voluntad de hierro",
+      "genreIds": [
+        12,
+        10751,
+        28
+      ]
+    },
+    "speed racer": {
+      "title": "Speed Racer",
+      "contentId": "speed-racer-2008",
+      "mediaType": "movie",
+      "tmdbId": 7459,
+      "tmdbTitle": "Speed Racer",
+      "genreIds": [
+        10751,
+        28,
+        12,
+        35
+      ]
+    },
+    "ciguenas": {
+      "title": "Cigüeñas",
+      "contentId": "ciguenas",
+      "mediaType": "movie",
+      "tmdbId": 332210,
+      "tmdbTitle": "Cigüeñas",
+      "genreIds": [
+        12,
+        16,
+        35,
+        10751
+      ]
+    },
+    "my little pony la pelicula": {
+      "title": "My Little Pony: La Película",
+      "contentId": "my-little-pony-la-pelicula",
+      "mediaType": "movie",
+      "tmdbId": 335360,
+      "tmdbTitle": "My Little Pony: La película",
+      "genreIds": [
+        10751,
+        16,
+        12,
+        14
+      ]
+    },
+    "el rey leon": {
+      "title": "El Rey León",
+      "contentId": "el-rey-leon-2019",
+      "mediaType": "movie",
+      "tmdbId": 8587,
+      "tmdbTitle": "El rey león",
+      "genreIds": [
+        10751,
+        16,
+        18,
+        12
+      ]
+    },
+    "happy feet rompiendo el hielo": {
+      "title": "Happy Feet: rompiendo el hielo",
+      "contentId": "happy-feet-rompiendo-el-hielo",
+      "mediaType": "movie",
+      "tmdbId": 9836,
+      "tmdbTitle": "Happy Feet: Rompiendo el hielo",
+      "genreIds": [
+        16,
+        35,
+        10751
+      ]
+    },
+    "scoobydoo 2 desatado": {
+      "title": "Scooby-Doo 2: Desatado",
+      "contentId": "scooby-doo-2-desatado",
+      "mediaType": "movie",
+      "tmdbId": 11024,
+      "tmdbTitle": "Scooby-Doo 2: Desatado",
+      "genreIds": [
+        9648,
+        12,
+        35
+      ]
+    },
+    "guardianes en la opera": {
+      "title": "Guardianes en la Ópera",
+      "contentId": "guardianes-en-la-opera",
+      "mediaType": "movie",
+      "tmdbId": 1112357,
+      "tmdbTitle": "Guardianes en la opera",
+      "genreIds": [
+        16,
+        12,
+        10751
+      ]
+    },
+    "doctora juguetesnbsp": {
+      "title": "Doctora Juguetes&nbsp;",
+      "contentId": "DSN_299203582DPLS",
+      "mediaType": null,
+      "tmdbId": null,
+      "tmdbTitle": null,
+      "genreIds": []
+    },
+    "la guardia del leon": {
+      "title": "La Guardia del León",
+      "contentId": "DSN_299304343DPLS",
+      "mediaType": "tv",
+      "tmdbId": 64752,
+      "tmdbTitle": "La guardia del león",
+      "genreIds": [
+        10762,
+        16
+      ]
+    },
+    "lana barbalarga": {
+      "title": "Lana Barbalarga",
+      "contentId": "MAX_299816223",
+      "mediaType": null,
+      "tmdbId": null,
+      "tmdbTitle": null,
+      "genreIds": []
+    },
+    "dragones al rescate los heroes del cielo": {
+      "title": "Dragones al rescate: los héroes del cielo",
+      "contentId": "SKYS_299807479",
+      "mediaType": null,
+      "tmdbId": null,
+      "tmdbTitle": null,
+      "genreIds": []
+    },
+    "superliga bunny": {
+      "title": "Superliga Bunny",
+      "contentId": "SKYS_299815442",
+      "mediaType": null,
+      "tmdbId": null,
+      "tmdbTitle": null,
+      "genreIds": []
+    },
+    "marvel iron man y su superequipo": {
+      "title": "Marvel Iron Man y su superequipo",
+      "contentId": "MFO_299775881",
+      "mediaType": "tv",
+      "tmdbId": 274388,
+      "tmdbTitle": "Iron Man y su superequipo",
+      "genreIds": [
+        16,
+        10762,
+        10765
+      ]
+    },
+    "totally spies": {
+      "title": "Totally Spies",
+      "contentId": "MAX_299338172",
+      "mediaType": "tv",
+      "tmdbId": 2808,
+      "tmdbTitle": "Totally Spies !",
+      "genreIds": [
+        16,
+        10762,
+        35,
+        10759
+      ]
+    },
+    "las supernenas": {
+      "title": "Las Supernenas",
+      "contentId": "MAX_299776325",
+      "mediaType": "tv",
+      "tmdbId": 607,
+      "tmdbTitle": "Las Supernenas",
+      "genreIds": [
+        10759,
+        16,
+        35,
+        10762,
+        10751
+      ]
+    },
+    "robogobo": {
+      "title": "Robogobo",
+      "contentId": "MFO_299708249",
+      "mediaType": "tv",
+      "tmdbId": 228721,
+      "tmdbTitle": "RoboGobo",
+      "genreIds": [
+        16,
+        10759,
+        35,
+        10751,
+        10765
+      ]
+    },
+    "luca": {
+      "title": "Luca",
+      "contentId": "DSN_3c780bdc-6ec6-4add-ac82-bbdacd0a7902",
+      "mediaType": "movie",
+      "tmdbId": 508943,
+      "tmdbTitle": "Luca",
+      "genreIds": [
+        16,
+        35,
+        14,
+        12,
+        10751
+      ]
+    },
+    "cars": {
+      "title": "Cars",
+      "contentId": "DSN_23b709dd-e05a-40af-9410-853e99029b76",
+      "mediaType": "movie",
+      "tmdbId": 920,
+      "tmdbTitle": "Cars",
+      "genreIds": [
+        16,
+        12,
+        35,
+        10751
+      ]
+    },
+    "buscando a nemo": {
+      "title": "Buscando a Nemo",
+      "contentId": "DSN_ac1145e1-de69-460b-921d-77b94b23af65",
+      "mediaType": "movie",
+      "tmdbId": 12,
+      "tmdbTitle": "Buscando a Nemo",
+      "genreIds": [
+        16,
+        10751
+      ]
+    },
+    "monstruos sa": {
+      "title": "Monstruos, S.A.",
+      "contentId": "DSN_91f86d49-c2b9-456b-90f2-156fe8d4c87a",
+      "mediaType": "movie",
+      "tmdbId": 585,
+      "tmdbTitle": "Monstruos, S.A.",
+      "genreIds": [
+        16,
+        35,
+        10751
+      ]
+    },
+    "onward": {
+      "title": "Onward",
+      "contentId": "DSN_3a0b0d65-fba2-4f42-8b87-c07fe471e455",
+      "mediaType": "movie",
+      "tmdbId": 508439,
+      "tmdbTitle": "Onward",
+      "genreIds": [
+        10751,
+        35,
+        12,
+        16,
+        14
+      ]
+    },
+    "soul": {
+      "title": "Soul",
+      "contentId": "DSN_a4b62681-6cff-4da7-99d7-84643139ec66",
+      "mediaType": "movie",
+      "tmdbId": 508442,
+      "tmdbTitle": "Soul",
+      "genreIds": [
+        16,
+        10751,
+        35,
+        14,
+        18,
+        10402
+      ]
+    },
+    "los increibles": {
+      "title": "Los Increíbles",
+      "contentId": "DSN_a24c1323-06ab-401a-8666-15c0b3874f45",
+      "mediaType": "movie",
+      "tmdbId": 9806,
+      "tmdbTitle": "Los Increíbles",
+      "genreIds": [
+        28,
+        12,
+        16,
+        10751
+      ]
+    },
+    "del reves": {
+      "title": "Del Revés",
+      "contentId": "DSN_3984c1dc-c8a6-4933-8b9a-0352ccdcc713",
+      "mediaType": "movie",
+      "tmdbId": 1022789,
+      "tmdbTitle": "Del revés 2 (Inside Out 2)",
+      "genreIds": [
+        16,
+        12,
+        35,
+        10751
+      ]
+    },
+    "lightyear": {
+      "title": "Lightyear",
+      "contentId": "DSN_af4de78e-05a9-4e98-bb92-86d9f2a2ebd5",
+      "mediaType": "movie",
+      "tmdbId": 718789,
+      "tmdbTitle": "Lightyear",
+      "genreIds": [
+        16,
+        878,
+        10751,
+        12
+      ]
+    },
+    "toy story": {
+      "title": "Toy Story",
+      "contentId": "DSN_c9efe5b1-470e-4907-a8b6-12655927c958",
+      "mediaType": "movie",
+      "tmdbId": 862,
+      "tmdbTitle": "Toy Story",
+      "genreIds": [
+        10751,
+        35,
+        16,
+        12
+      ]
+    },
+    "superkitties": {
+      "title": "SuperKitties",
+      "contentId": "MFO_299482791",
+      "mediaType": "tv",
+      "tmdbId": 201478,
+      "tmdbTitle": "SuperKitties",
+      "genreIds": [
+        16,
+        10762
+      ]
+    },
+    "spirit cabalgando en libertad": {
+      "title": "Spirit: Cabalgando en libertad",
+      "contentId": "MFO_299203224",
+      "mediaType": "tv",
+      "tmdbId": 101400,
+      "tmdbTitle": "Spirit: Cabalgando en libertad:Escuela de equitación",
+      "genreIds": [
+        10762,
+        16,
+        10751,
+        10759
+      ]
+    },
+    "las aventuras del gato con botas": {
+      "title": "Las aventuras del Gato con Botas",
+      "contentId": "MFO_298908144",
+      "mediaType": "tv",
+      "tmdbId": 61886,
+      "tmdbTitle": "Las Aventuras del Gato con Botas",
+      "genreIds": [
+        16,
+        35,
+        10751,
+        10762
+      ]
+    },
+    "el show del sr peabody y sherman": {
+      "title": "El show del Sr. Peabody y Sherman",
+      "contentId": "MFO_298921378",
+      "mediaType": "tv",
+      "tmdbId": 71377,
+      "tmdbTitle": "El Show de Mr. Peabody & Sherman",
+      "genreIds": [
+        16,
+        10751,
+        35
+      ]
+    },
+    "cartero paco": {
+      "title": "Cartero Paco",
+      "contentId": "MFO_299163975DWOR",
+      "mediaType": null,
+      "tmdbId": null,
+      "tmdbTitle": null,
+      "genreIds": []
+    },
+    "turbo fast": {
+      "title": "Turbo F.A.S.T.",
+      "contentId": "MFO_298947720",
+      "mediaType": "tv",
+      "tmdbId": 63157,
+      "tmdbTitle": "Turbo FAST",
+      "genreIds": [
+        16,
+        10751,
+        10762,
+        35
+      ]
+    },
+    "viva el rey julien": {
+      "title": "Viva el Rey Julien",
+      "contentId": "MFO_298968132",
+      "mediaType": "tv",
+      "tmdbId": 71867,
+      "tmdbTitle": "Viva el rey Julien",
+      "genreIds": [
+        16,
+        35
+      ]
+    },
+    "cuentos de tinga tinga": {
+      "title": "Cuentos de Tinga Tinga",
+      "contentId": "MFO_299171183",
+      "mediaType": "tv",
+      "tmdbId": 19739,
+      "tmdbTitle": "Los cuentos de Tinga Tinga",
+      "genreIds": [
+        16,
+        10762
+      ]
+    },
+    "cleopatra en el espacio": {
+      "title": "Cleopatra en el espacio",
+      "contentId": "MFO_299163878DWOR",
+      "mediaType": "tv",
+      "tmdbId": 105349,
+      "tmdbTitle": "Cleopatra en el Espacio",
+      "genreIds": [
+        10759,
+        16,
+        35,
+        10762
+      ]
+    },
+    "la escuela de miedos de casper": {
+      "title": "La escuela de miedos de Casper",
+      "contentId": "MFO_299163605",
+      "mediaType": null,
+      "tmdbId": null,
+      "tmdbTitle": null,
+      "genreIds": []
+    },
+    "dragones hacia nuevos confines": {
+      "title": "Dragones: Hacia nuevos confines",
+      "contentId": "MFO_298871165",
+      "mediaType": "tv",
+      "tmdbId": 78173,
+      "tmdbTitle": "Dragones: Hacia nuevos confines",
+      "genreIds": [
+        10751,
+        16,
+        10759,
+        10765
+      ]
+    },
+    "el principe de egipto": {
+      "title": "El príncipe de Egipto",
+      "contentId": "SKYS_0002638636",
+      "mediaType": "movie",
+      "tmdbId": 9837,
+      "tmdbTitle": "El príncipe de Egipto",
+      "genreIds": [
+        12,
+        16,
+        18,
+        10751
+      ]
+    },
+    "hechizados": {
+      "title": "Hechizados",
+      "contentId": "FLMN10000000026149",
+      "mediaType": "movie",
+      "tmdbId": 592983,
+      "tmdbTitle": "Hechizados",
+      "genreIds": [
+        16,
+        14,
+        10751,
+        12,
+        35
+      ]
+    },
+    "santa claus conquista a los marcianos": {
+      "title": "Santa Claus conquista a los marcianos",
+      "contentId": "FLMN10000000024253",
+      "mediaType": "movie",
+      "tmdbId": 32307,
+      "tmdbTitle": "Santa Claus conquista a los marcianos",
+      "genreIds": [
+        35,
+        14,
+        878
+      ]
+    },
+    "un monstruo en paris": {
+      "title": "Un monstruo en París",
+      "contentId": "FLMN10000000010021",
+      "mediaType": "movie",
+      "tmdbId": 77459,
+      "tmdbTitle": "Un monstruo en París",
+      "genreIds": [
+        12,
+        16,
+        35,
+        10751,
+        14
+      ]
+    },
+    "la patrulla canina la superpelicula": {
+      "title": "La Patrulla Canina: La Superpelícula",
+      "contentId": "PRIME_amzn1.dv.gti.9bb322d4-32eb-4947-b6b0-9f4c4fea9e46:ES",
+      "mediaType": "movie",
+      "tmdbId": 893723,
+      "tmdbTitle": "La Patrulla Canina: La superpelícula",
+      "genreIds": [
+        10751,
+        35,
+        12,
+        16
+      ]
+    },
+    "aliens in the attic": {
+      "title": "Aliens in the Attic",
+      "contentId": "PRIME_amzn1.dv.gti.4ea9f723-701a-d0ef-1b43-edc2cf1c4b3e:ES",
+      "mediaType": "movie",
+      "tmdbId": 20856,
+      "tmdbTitle": "Pequeños invasores",
+      "genreIds": [
+        12,
+        35,
+        10751,
+        14,
+        878
+      ]
+    },
+    "mi mundial": {
+      "title": "Mi Mundial",
+      "contentId": "PRIME_amzn1.dv.gti.9f768098-50a2-4340-84a6-5e6e3a058d5c:ES",
+      "mediaType": "movie",
+      "tmdbId": 475380,
+      "tmdbTitle": "Mi mundial",
+      "genreIds": [
+        18,
+        10751
+      ]
+    },
+    "mi amigo el gigante": {
+      "title": "Mi amigo el gigante",
+      "contentId": "MFO_0002466379",
+      "mediaType": "movie",
+      "tmdbId": 267935,
+      "tmdbTitle": "Mi amigo el gigante",
+      "genreIds": [
+        12,
+        10751,
+        14
+      ]
+    },
+    "trolls 2 gira mundial": {
+      "title": "Trolls 2 - Gira Mundial",
+      "contentId": "PRIME_amzn1.dv.gti.9eb89aa9-d291-737f-7ed4-5ad4d4077c33:ES",
+      "mediaType": "movie",
+      "tmdbId": 446893,
+      "tmdbTitle": "Trolls 2: Gira mundial",
+      "genreIds": [
+        10751,
+        16,
+        35,
+        14,
+        12,
+        10402
+      ]
+    },
+    "los misteriosos cuentos del manzano": {
+      "title": "Los misteriosos cuentos del manzano",
+      "contentId": "FLMN10000000057866",
+      "mediaType": "movie",
+      "tmdbId": 587370,
+      "tmdbTitle": "Los misteriosos cuentos del manzano",
+      "genreIds": [
+        16,
+        18,
+        10751,
+        14
+      ]
+    },
+    "tyler perrys young dylan": {
+      "title": "Tyler Perry's Young Dylan",
+      "contentId": "MFO_299143243NICK",
+      "mediaType": "tv",
+      "tmdbId": 99486,
+      "tmdbTitle": "Tyler Perry's Young Dylan",
+      "genreIds": [
+        35,
+        10751,
+        10762
+      ]
+    },
+    "wylde pak": {
+      "title": "Wylde Pak",
+      "contentId": "MFO_299789947",
+      "mediaType": "tv",
+      "tmdbId": 286170,
+      "tmdbTitle": "Wylde Pak",
+      "genreIds": [
+        16,
+        35,
+        10751
+      ]
+    },
+    "los wylde pak": {
+      "title": "Los Wylde Pak",
+      "contentId": "SKYS_299848721",
+      "mediaType": null,
+      "tmdbId": null,
+      "tmdbTitle": null,
+      "genreIds": []
+    },
+    "looney tunes presenta explicando los deportes con bugs bunny": {
+      "title": "Looney Tunes Presenta: Explicando los deportes con Bugs Bunny",
+      "contentId": "MAX_299858657",
+      "mediaType": null,
+      "tmdbId": null,
+      "tmdbTitle": null,
+      "genreIds": []
+    },
+    "peppa pig": {
+      "title": "Peppa Pig",
+      "contentId": "MFO_299411626",
+      "mediaType": "tv",
+      "tmdbId": 12225,
+      "tmdbTitle": "Peppa Pig",
+      "genreIds": [
+        16,
+        10762
+      ]
+    },
+    "bob esponja doble episodio": {
+      "title": "Bob Esponja (Doble Episodio)",
+      "contentId": "MFO_299587586",
+      "mediaType": null,
+      "tmdbId": null,
+      "tmdbTitle": null,
+      "genreIds": []
+    },
+    "la patrulla canina": {
+      "title": "La patrulla canina",
+      "contentId": "MFO_298778311",
+      "mediaType": "tv",
+      "tmdbId": 57532,
+      "tmdbTitle": "La Patrulla Canina",
+      "genreIds": [
+        16,
+        10762
+      ]
+    },
+    "tim rex en el espacio": {
+      "title": "Tim Rex en el espacio",
+      "contentId": "SKYS_299845420",
+      "mediaType": "tv",
+      "tmdbId": 258926,
+      "tmdbTitle": "Tim Rex en el espacio",
+      "genreIds": [
+        10762,
+        16
+      ]
+    },
+    "la corona magica": {
+      "title": "La corona mágica",
+      "contentId": "RTVE_299591680",
+      "mediaType": "tv",
+      "tmdbId": 67720,
+      "tmdbTitle": "La corona magica",
+      "genreIds": [
+        16
+      ]
+    },
+    "lego star wars allstars": {
+      "title": "Lego Star Wars: All-Stars",
+      "contentId": "DSN_299303179SWAR",
+      "mediaType": "tv",
+      "tmdbId": 83558,
+      "tmdbTitle": "LEGO Star Wars: All-Stars",
+      "genreIds": [
+        16,
+        10751,
+        35,
+        10765
+      ]
+    },
+    "blaze y los monster machines": {
+      "title": "Blaze y los Monster Machines",
+      "contentId": "MFO_298248773",
+      "mediaType": "tv",
+      "tmdbId": 64198,
+      "tmdbTitle": "Blaze y los Monster Machines",
+      "genreIds": [
+        10762,
+        16,
+        10751,
+        35
+      ]
+    },
+    "equipo rubble doble episodio": {
+      "title": "Equipo Rubble (Doble Episodio)",
+      "contentId": "MFO_299598875",
+      "mediaType": null,
+      "tmdbId": null,
+      "tmdbTitle": null,
+      "genreIds": []
     }
   },
-  "enrichedAt": "2026-02-17T14:17:11.497Z",
+  "enrichedAt": "2026-02-18T09:06:33.635Z",
   "genreNames": {
     "12": "Aventura",
     "14": "Fantasía",
@@ -3134,5 +3641,6 @@
     "10768": "War & Politics",
     "10770": "Película de TV"
   },
-  "genreEnrichedAt": "2026-02-17T14:18:47.742Z"
+  "genreEnrichedAt": "2026-02-18T09:07:03.155Z",
+  "cleanedAt": "2026-02-18T09:23:07.685Z"
 }

@@ -35,7 +35,7 @@ const titles = [];
 while ((match = cardNamePattern.exec(html)) !== null) {
   const title = match[1].trim();
   if (title && title.length > 0) {
-    titles.push({ title, index: match.index });
+    titles.push({ title: title.replace(/\s+/g, ' '), index: match.index });
   }
 }
 
@@ -69,21 +69,48 @@ for (const entry of titles) {
   }
 }
 
+// Merge: preserve existing catalog and add new entries on top
+const existingPath = path.join(__dirname, 'otv-catalog.json');
+let mergedCatalog = {};
+if (fs.existsSync(existingPath)) {
+  const existing = JSON.parse(fs.readFileSync(existingPath, 'utf-8'));
+  // Start with existing catalog as base (preserves all TMDB data)
+  mergedCatalog = { ...existing.catalog };
+  let newEntries = 0, updatedEntries = 0;
+  for (const [key, entry] of Object.entries(catalog)) {
+    if (mergedCatalog[key]) {
+      // Update contentId if it changed, keep TMDB data
+      mergedCatalog[key].contentId = entry.contentId;
+      mergedCatalog[key].title = entry.title;
+      updatedEntries++;
+    } else {
+      // Genuinely new entry
+      mergedCatalog[key] = entry;
+      newEntries++;
+    }
+  }
+  console.log(`Entradas existentes preservadas: ${Object.keys(existing.catalog).length}`);
+  console.log(`Entradas nuevas añadidas: ${newEntries}`);
+  console.log(`Entradas actualizadas: ${updatedEntries}`);
+} else {
+  mergedCatalog = catalog;
+}
+
 const result = {
   generatedAt: new Date().toISOString(),
-  source: "OrangeCatalog.html",
-  totalContents: Object.keys(catalog).length,
+  source: "OrangeCatalog.html (merged with previous)",
+  totalContents: Object.keys(mergedCatalog).length,
   urlPatterns: {
     coverArt: "https://pc.orangetv.orange.es/pc/api/rtv/v1/images/vod/COVER_ART/{contentId}_COVER_ART.jpg?width=3840&height=2160",
     vertical: "https://pc.orangetv.orange.es/pc/api/rtv/v1/images/vod/VERTICAL/{contentId}_VERTICAL.jpg?width=3840&height=2160",
     background: "https://pc.orangetv.orange.es/pc/api/rtv/v1/images/vod/BACKGROUND/{contentId}_BACKGROUND.jpg?width=3840&height=2160",
     titleTreatment: "https://pc.orangetv.orange.es/pc/api/rtv/v1/images/vod/TITLE_TREATMENT/{contentId}_title_treatment.png?width=1280&height=720",
   },
-  catalog: catalog
+  catalog: mergedCatalog
 };
 
 fs.writeFileSync(outputPath, JSON.stringify(result, null, 2));
 
 console.log(`\n=== Catálogo generado ===`);
-console.log(`Total contenidos: ${Object.keys(catalog).length}`);
+console.log(`Total contenidos: ${Object.keys(mergedCatalog).length}`);
 console.log(`Archivo: ${outputPath} (${(fs.statSync(outputPath).size / 1024).toFixed(1)} KB)`);

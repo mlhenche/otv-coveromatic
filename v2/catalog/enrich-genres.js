@@ -27,6 +27,12 @@ async function main() {
       continue;
     }
 
+    if (entry.genreIds && entry.genreIds.length > 0) {
+      enriched++;
+      entry.genreIds.forEach(id => allGenreIds.add(id));
+      continue;
+    }
+
     const type = entry.mediaType; // "movie" or "tv"
     const url = `${TMDB_BASE}/${type}/${entry.tmdbId}?api_key=${API_KEY}&language=es-ES`;
 

@@ -3,29 +3,10 @@
 
 figma.showUI(__html__, { width: 380, height: 580, themeColors: true });
 
-// -- Send current selection info to UI --
-function sendSelection() {
-    const selection = figma.currentPage.selection;
-    const coverCount = findCoverNodes(selection).length;
-    const titleTreatmentCount = findTitleTreatmentNodes(selection).length;
-
-    // Detect component type from names
-    const names = selection.map(n => n.name.toLowerCase());
-    let componentType = 'unknown';
-    for (const name of names) {
-        if (name.includes('card') && name.includes('portrait')) { componentType = 'card-portrait'; break; }
-        if (name.includes('card') && name.includes('landscape')) { componentType = 'card-landscape'; break; }
-        if (name.includes('slideshow') || name.includes('vps')) { componentType = 'vps'; break; }
-    }
-
-    figma.ui.postMessage({
-        type: 'selection-info',
-        count: selection.length,
-        coverCount: coverCount,
-        titleTreatmentCount: titleTreatmentCount,
-        componentType: componentType
-    });
-}
+// -- Module-level cache: IDs of card instances inside VPS (to exclude from cover search) --
+let cachedAllCardIds = new Set<string>();
+// -- Version counter: cancels stale async sendSelection calls --
+let selectionVersion = 0;
 
 // -- Recursive traversal that includes hidden nodes --
 function walkTree(node: SceneNode, callback: (n: SceneNode) => void) {
@@ -33,6 +14,17 @@ function walkTree(node: SceneNode, callback: (n: SceneNode) => void) {
     if ('children' in node) {
         for (const child of (node as ChildrenMixin & SceneNode).children) {
             walkTree(child, callback);
+        }
+    }
+}
+
+// -- Like walkTree but skips nodes whose IDs are in the exclude set --
+function walkTreeExcludingIds(node: SceneNode, excludeIds: Set<string>, callback: (n: SceneNode) => void) {
+    callback(node);
+    if ('children' in node) {
+        for (const child of (node as ChildrenMixin & SceneNode).children) {
+            if (excludeIds.has(child.id)) continue;
+            walkTreeExcludingIds(child, excludeIds, callback);
         }
     }
 }
@@ -80,6 +72,75 @@ function findInstanceNode(parent: SceneNode, name: string): InstanceNode | null 
     return result;
 }
 
+// -- Async: resolve component name for an instance (works for remote library components) --
+async function getComponentNameAsync(inst: InstanceNode): Promise<string> {
+    if (inst.mainComponent?.name) return inst.mainComponent.name.toLowerCase();
+    try {
+        const main = await inst.getMainComponentAsync();
+        if (main?.name) return main.name.toLowerCase();
+    } catch (_) {}
+    return '';
+}
+
+// -- Returns true if a component name matches a card type (portrait, landscape or reparto) --
+function isCardComponentName(name: string): boolean {
+    const n = name.toLowerCase();
+    return n.includes('card') && (n.includes('portrait') || n.includes('landscape') || n.includes('reparto'));
+}
+
+// -- Sync: build card cache from nodes using only mainComponent.name (no await).
+// Fast — catches all locally accessible components immediately. --
+function refreshCardCacheSync(nodes: readonly SceneNode[]) {
+    for (const node of nodes) {
+        walkTree(node, (child) => {
+            if (child.type !== 'INSTANCE') return;
+            const compName = ((child as InstanceNode).mainComponent?.name || '').toLowerCase();
+            if (isCardComponentName(compName)) cachedAllCardIds.add(child.id);
+        });
+    }
+}
+
+// -- Async: extend card cache with remote/library components (getMainComponentAsync).
+// Called at selection time; sync pre-pass already handled by refreshCardCacheSync. --
+async function refreshCardCache(nodes: readonly SceneNode[]) {
+    cachedAllCardIds = new Set<string>();
+    refreshCardCacheSync(nodes); // immediate sync pass first
+    const instances: InstanceNode[] = [];
+    for (const node of nodes) {
+        walkTree(node, (child) => {
+            if (child.type === 'INSTANCE' && !cachedAllCardIds.has(child.id)) {
+                instances.push(child as InstanceNode); // only unresolved instances
+            }
+        });
+    }
+    for (const inst of instances) {
+        const name = await getComponentNameAsync(inst);
+        if (isCardComponentName(name)) cachedAllCardIds.add(inst.id);
+    }
+}
+
+// -- Find cover nodes, skipping subtrees rooted at excluded IDs --
+function findCoverNodes(nodes: readonly SceneNode[], excludeIds: Set<string> = new Set()): SceneNode[] {
+    const covers: SceneNode[] = [];
+    for (const node of nodes) {
+        walkTreeExcludingIds(node, excludeIds, (child) => {
+            if (isCoverNode(child)) covers.push(child);
+        });
+    }
+    return covers;
+}
+
+// -- Find titleTreatment nodes, skipping subtrees rooted at excluded IDs --
+function findTitleTreatmentNodes(nodes: readonly SceneNode[], excludeIds: Set<string> = new Set()): SceneNode[] {
+    const titleTreatments: SceneNode[] = [];
+    for (const node of nodes) {
+        walkTreeExcludingIds(node, excludeIds, (child) => {
+            if (isTitleTreatmentNode(child)) titleTreatments.push(child);
+        });
+    }
+    return titleTreatments;
+}
+
 // -- Helper: set text content on a named text node --
 async function setTextContent(parent: SceneNode, name: string, value: string) {
     const textNode = findTextNode(parent, name);
@@ -100,12 +161,8 @@ function isPersonMetadata(m: Metadata): m is PersonMetadata {
 async function fillMetadata(nodes: readonly SceneNode[], metadata: Metadata) {
     for (const node of nodes) {
         if (isPersonMetadata(metadata)) {
-            // Person: fill "name" text
-            if (metadata.personName) {
-                await setTextContent(node, 'name', metadata.personName);
-            }
+            if (metadata.personName) await setTextContent(node, 'name', metadata.personName);
 
-            // Person: fill or hide "rol" text
             const rolNode = findTextNode(node, 'rol');
             if (rolNode) {
                 if (metadata.isActor) {
@@ -121,113 +178,63 @@ async function fillMetadata(nodes: readonly SceneNode[], metadata: Metadata) {
                 }
             }
         } else {
-            // Movie/TV: fill text fields
-            const fields: { name: string; value: string }[] = [
+            const fields = [
                 { name: 'title', value: metadata.title },
                 { name: 'rating', value: metadata.rating },
                 { name: 'year', value: metadata.year },
                 { name: 'duration', value: metadata.duration },
                 { name: 'sinopsis', value: metadata.sinopsis },
             ];
-
             for (const field of fields) {
-                if (!field.value) continue;
-                await setTextContent(node, field.name, field.value);
+                if (field.value) await setTextContent(node, field.name, field.value);
             }
 
-            // Fill genres (VPS only: genre, genre2, genre3)
             if (metadata.genres && metadata.genres.length > 0) {
                 const genreNames = ['genre', 'genre2', 'genre3'];
-
-                // Fill each genre slot
                 for (let i = 0; i < genreNames.length; i++) {
                     const genreNode = findTextNode(node, genreNames[i]);
-
                     if (i < metadata.genres.length) {
-                        // Fill and show genre
-                        if (genreNode) {
-                            await setTextContent(node, genreNames[i], metadata.genres[i]);
-                            genreNode.visible = true;
-                        }
+                        if (genreNode) { await setTextContent(node, genreNames[i], metadata.genres[i]); genreNode.visible = true; }
                     } else {
-                        // Hide unused genre slots
                         if (genreNode) genreNode.visible = false;
                     }
                 }
-
-                // Handle all separators (they all have the same name "separator")
                 const allSeparators = findAllTextNodes(node, 'separator');
                 const numGenres = metadata.genres.length;
-
-                // Show separators between genres, hide the rest
-                // Example: 2 genres = show 1 separator (between genre1 and genre2)
-                // Example: 1 genre = hide all separators
                 for (let i = 0; i < allSeparators.length; i++) {
-                    if (i < numGenres - 1) {
-                        allSeparators[i].visible = true;
-                    } else {
-                        allSeparators[i].visible = false;
-                    }
+                    allSeparators[i].visible = i < numGenres - 1;
                 }
             }
 
-            // Set ageTag variant "rating" property
             if (metadata.ageRating) {
                 const ageTag = findInstanceNode(node, 'agetag');
                 if (ageTag) {
-                    // Store original visibility state of ageTag and all its parents
                     const visibilityStates: Array<{ node: SceneNode; wasVisible: boolean }> = [];
-
-                    // Walk up the tree and make all parents visible
                     let currentNode: BaseNode | null = ageTag;
                     while (currentNode && 'visible' in currentNode) {
                         const sceneNode = currentNode as SceneNode;
                         visibilityStates.push({ node: sceneNode, wasVisible: sceneNode.visible });
-                        if (!sceneNode.visible) {
-                            sceneNode.visible = true;
-                        }
+                        if (!sceneNode.visible) sceneNode.visible = true;
                         currentNode = sceneNode.parent;
-                        // Stop at the selection root
                         if (currentNode === node) break;
                     }
-
-                    // Find and set the rating property
                     const props = ageTag.componentProperties;
                     let ratingKey: string | null = null;
-
                     for (const key of Object.keys(props)) {
-                        if (key === 'rating' || key.startsWith('rating#')) {
-                            ratingKey = key;
-                            break;
-                        }
+                        if (key === 'rating' || key.startsWith('rating#')) { ratingKey = key; break; }
                     }
-
                     if (ratingKey) {
                         try {
-                            // Force the property change by swapping to main component first
                             const mainComponent = ageTag.mainComponent;
-                            if (mainComponent) {
-                                // Swap to main component to reset overrides
-                                ageTag.swapComponent(mainComponent);
-                            }
-                            // Now set the new property value
+                            if (mainComponent) ageTag.swapComponent(mainComponent);
                             ageTag.setProperties({ [ratingKey]: metadata.ageRating });
                         } catch (e) {
-                            // Fallback: try direct set
-                            try {
-                                ageTag.setProperties({ [ratingKey]: metadata.ageRating });
-                            } catch (_) {
-                                // Property change failed
-                            }
+                            try { ageTag.setProperties({ [ratingKey]: metadata.ageRating }); } catch (_) {}
                         }
                     }
-
-                    // Restore original visibility states (in reverse order)
                     for (let i = visibilityStates.length - 1; i >= 0; i--) {
                         const { node: stateNode, wasVisible } = visibilityStates[i];
-                        if (!wasVisible) {
-                            stateNode.visible = false;
-                        }
+                        if (!wasVisible) stateNode.visible = false;
                     }
                 }
             }
@@ -236,50 +243,111 @@ async function fillMetadata(nodes: readonly SceneNode[], metadata: Metadata) {
 }
 
 // -- Find the metadata scope for a cover node --
-// Walks up from the cover to find the nearest ancestor that contains text nodes.
-// This ensures each cover's metadata is applied to its own component, not just the first.
 function findMetadataScope(coverNode: SceneNode): SceneNode {
     let current: BaseNode | null = coverNode.parent;
     while (current && current.type !== 'PAGE' && current.type !== 'DOCUMENT') {
         const sceneNode = current as SceneNode;
         let hasText = false;
-        walkTree(sceneNode, (n) => {
-            if (!hasText && n.type === 'TEXT') hasText = true;
-        });
+        walkTree(sceneNode, (n) => { if (!hasText && n.type === 'TEXT') hasText = true; });
         if (hasText) return sceneNode;
         current = sceneNode.parent;
     }
     return (coverNode.parent as SceneNode) || coverNode;
 }
 
-// -- Find all "cover" nodes in the selection (including hidden) --
-function findCoverNodes(nodes: readonly SceneNode[]): SceneNode[] {
-    const covers: SceneNode[] = [];
-    for (const node of nodes) {
-        walkTree(node, (child) => {
-            if (isCoverNode(child)) {
-                covers.push(child);
-            }
-        });
-    }
-    return covers;
+// -- Detect component type from a node name --
+function typeFromName(name: string): string {
+    const n = name.toLowerCase();
+    if (n.includes('card') && n.includes('portrait')) return 'card-portrait';
+    if (n.includes('card') && n.includes('landscape')) return 'card-landscape';
+    if (n.includes('slideshow') || n.includes('vps')) return 'vps';
+    return 'unknown';
 }
 
-// -- Find all "titleTreatment" nodes in the selection (including hidden) --
-function findTitleTreatmentNodes(nodes: readonly SceneNode[]): SceneNode[] {
-    const titleTreatments: SceneNode[] = [];
+// -- Synchronous type detection from selection: walks entire tree, checks node names
+// and mainComponent.name (sync). Called at apply time to avoid race conditions. --
+function detectTypeSync(nodes: readonly SceneNode[]): string {
+    let componentType = 'unknown';
+    let found = false;
     for (const node of nodes) {
         walkTree(node, (child) => {
-            if (isTitleTreatmentNode(child)) {
-                titleTreatments.push(child);
+            if (found) return;
+            const t = typeFromName(child.name);
+            if (t !== 'unknown') { componentType = t; found = true; return; }
+            if (child.type === 'INSTANCE') {
+                const compName = ((child as InstanceNode).mainComponent?.name || '').toLowerCase();
+                const t2 = typeFromName(compName);
+                if (t2 !== 'unknown') { componentType = t2; found = true; }
             }
         });
+        if (found) break;
     }
-    return titleTreatments;
+    return componentType;
+}
+
+// -- Send current selection info to UI --
+// Pass 1 (sync): full tree walk — node names + sync mainComponent.name.
+//   walkTree visits parent before children, so a VPS frame is detected before
+//   any nested card instances inside it.
+// Pass 2 (async): full tree walk — getMainComponentAsync for remote/library
+//   instances that had null mainComponent in Pass 1.
+// Version counter discards stale results when selection changes mid-async.
+async function sendSelection() {
+    const myVersion = ++selectionVersion;
+    const selection = figma.currentPage.selection;
+    let componentType = 'unknown';
+
+    // Pass 1 — full tree walk, sync (node name + mainComponent.name if available)
+    let found = false;
+    for (const node of selection) {
+        walkTree(node, (child) => {
+            if (found) return;
+            const t = typeFromName(child.name);
+            if (t !== 'unknown') { componentType = t; found = true; return; }
+            if (child.type === 'INSTANCE') {
+                const compName = ((child as InstanceNode).mainComponent?.name || '').toLowerCase();
+                const t2 = typeFromName(compName);
+                if (t2 !== 'unknown') { componentType = t2; found = true; }
+            }
+        });
+        if (found) break;
+    }
+
+    // Pass 2 — full tree walk, async (getMainComponentAsync for remote/library instances)
+    if (componentType === 'unknown') {
+        const allInstances: InstanceNode[] = [];
+        for (const node of selection) {
+            walkTree(node, (child) => {
+                if (child.type === 'INSTANCE') allInstances.push(child as InstanceNode);
+            });
+        }
+        for (const inst of allInstances) {
+            const compName = await getComponentNameAsync(inst);
+            if (myVersion !== selectionVersion) return; // stale — newer selection started
+            const t = typeFromName(compName);
+            if (t !== 'unknown') { componentType = t; break; }
+        }
+    }
+
+    if (myVersion !== selectionVersion) return; // stale — discard
+
+    // For VPS: resolve card instance IDs so cover search skips them
+    if (componentType === 'vps') {
+        await refreshCardCache(selection);
+        if (myVersion !== selectionVersion) return;
+    } else {
+        cachedAllCardIds = new Set<string>();
+    }
+
+    const coverCount = findCoverNodes(selection, cachedAllCardIds).length;
+    const titleTreatmentCount = findTitleTreatmentNodes(selection, cachedAllCardIds).length;
+    figma.ui.postMessage({ type: 'selection-info', count: selection.length, coverCount, titleTreatmentCount, componentType });
 }
 
 // -- Listen to selection changes --
 figma.on('selectionchange', () => {
+    // Immediately notify UI to reset componentType (prevents stale type being used at apply time)
+    figma.ui.postMessage({ type: 'selection-changed' });
     sendSelection();
 });
 
@@ -343,46 +411,31 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
     if (msg.type === 'apply-cover' && msg.imageBytes) {
         const bytes = new Uint8Array(msg.imageBytes);
         const image = figma.createImage(bytes);
-        const coverNodes = findCoverNodes(figma.currentPage.selection);
+        const selection = figma.currentPage.selection;
+        const coverNodes = findCoverNodes(selection, cachedAllCardIds);
 
         if (coverNodes.length === 0) {
             figma.notify('⚠️ No se encontró ningún frame llamado "cover" en la selección.', { error: true });
             return;
         }
 
-        // Apply cover image
         for (const cover of coverNodes) {
             if ('fills' in cover) {
-                (cover as GeometryMixin & SceneNode).fills = [
-                    {
-                        type: 'IMAGE',
-                        imageHash: image.hash,
-                        scaleMode: 'FILL'
-                    }
-                ];
+                (cover as GeometryMixin & SceneNode).fills = [{ type: 'IMAGE', imageHash: image.hash, scaleMode: 'FILL' }];
             }
         }
 
-        // Apply title treatment if provided
         if (msg.titleTreatmentBytes) {
             const ttBytes = new Uint8Array(msg.titleTreatmentBytes);
             const ttImage = figma.createImage(ttBytes);
-            const ttNodes = findTitleTreatmentNodes(figma.currentPage.selection);
-
+            const ttNodes = findTitleTreatmentNodes(selection, cachedAllCardIds);
             for (const ttNode of ttNodes) {
                 if ('fills' in ttNode) {
-                    (ttNode as GeometryMixin & SceneNode).fills = [
-                        {
-                            type: 'IMAGE',
-                            imageHash: ttImage.hash,
-                            scaleMode: 'FIT'
-                        }
-                    ];
+                    (ttNode as GeometryMixin & SceneNode).fills = [{ type: 'IMAGE', imageHash: ttImage.hash, scaleMode: 'FIT' }];
                 }
             }
         }
 
-        // Fill metadata for each cover's component scope
         if (msg.metadata) {
             const scopesDone = new Set<string>();
             for (const cover of coverNodes) {
@@ -394,16 +447,22 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
             }
         }
 
-        const ttCount = msg.titleTreatmentBytes ? findTitleTreatmentNodes(figma.currentPage.selection).length : 0;
-        const message = ttCount > 0
+        const ttCount = msg.titleTreatmentBytes ? findTitleTreatmentNodes(selection, cachedAllCardIds).length : 0;
+        figma.notify(ttCount > 0
             ? `✅ Cover y título aplicados a ${coverNodes.length} elemento(s).`
-            : `✅ Cover aplicada a ${coverNodes.length} elemento(s).`;
-        figma.notify(message);
+            : `✅ Cover aplicada a ${coverNodes.length} elemento(s).`);
     }
 
-    // -- Apply cover via URL (OTV CDN - uses figma.createImageAsync to bypass CORS) --
+    // -- Apply cover via URL (OTV CDN) --
     if (msg.type === 'apply-cover-url' && msg.coverUrl) {
-        const coverNodes = findCoverNodes(figma.currentPage.selection);
+        const selection = figma.currentPage.selection;
+        const coverUrl = msg.coverUrl;
+
+        // If VPS, run sync card cache pass at apply time to handle timing gaps
+        // (the async refreshCardCache in sendSelection may not have completed yet)
+        if (detectTypeSync(selection) === 'vps') refreshCardCacheSync(selection);
+
+        const coverNodes = findCoverNodes(selection, cachedAllCardIds);
 
         if (coverNodes.length === 0) {
             figma.notify('⚠️ No se encontró ningún frame llamado "cover" en la selección.', { error: true });
@@ -412,34 +471,25 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
         }
 
         try {
-            const image = await figma.createImageAsync(msg.coverUrl);
-
+            const image = await figma.createImageAsync(coverUrl);
             for (const cover of coverNodes) {
                 if ('fills' in cover) {
-                    (cover as GeometryMixin & SceneNode).fills = [
-                        { type: 'IMAGE', imageHash: image.hash, scaleMode: 'FILL' }
-                    ];
+                    (cover as GeometryMixin & SceneNode).fills = [{ type: 'IMAGE', imageHash: image.hash, scaleMode: 'FILL' }];
                 }
             }
 
-            // Apply title treatment if URL provided
             if (msg.titleTreatmentUrl) {
                 try {
                     const ttImage = await figma.createImageAsync(msg.titleTreatmentUrl);
-                    const ttNodes = findTitleTreatmentNodes(figma.currentPage.selection);
+                    const ttNodes = findTitleTreatmentNodes(selection, cachedAllCardIds);
                     for (const ttNode of ttNodes) {
                         if ('fills' in ttNode) {
-                            (ttNode as GeometryMixin & SceneNode).fills = [
-                                { type: 'IMAGE', imageHash: ttImage.hash, scaleMode: 'FIT' }
-                            ];
+                            (ttNode as GeometryMixin & SceneNode).fills = [{ type: 'IMAGE', imageHash: ttImage.hash, scaleMode: 'FIT' }];
                         }
                     }
-                } catch (e) {
-                    // Title treatment load failed, continue without it
-                }
+                } catch (_) {}
             }
 
-            // Fill metadata
             if (msg.metadata) {
                 const scopesDone = new Set<string>();
                 for (const cover of coverNodes) {
@@ -451,11 +501,10 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
                 }
             }
 
-            const ttCount = msg.titleTreatmentUrl ? findTitleTreatmentNodes(figma.currentPage.selection).length : 0;
-            const message = ttCount > 0
+            const ttCount = msg.titleTreatmentUrl ? findTitleTreatmentNodes(selection, cachedAllCardIds).length : 0;
+            figma.notify(ttCount > 0
                 ? `✅ Cover y título aplicados a ${coverNodes.length} elemento(s).`
-                : `✅ Cover aplicada a ${coverNodes.length} elemento(s).`;
-            figma.notify(message);
+                : `✅ Cover aplicada a ${coverNodes.length} elemento(s).`);
             figma.ui.postMessage({ type: 'apply-done', success: true });
         } catch (e) {
             figma.notify('⚠️ Error al cargar la imagen.', { error: true });
@@ -465,7 +514,8 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
 
     // -- Apply multiple covers via URL (OTV CDN) --
     if (msg.type === 'apply-multiple-covers-url' && msg.coversUrlData) {
-        const coverNodes = findCoverNodes(figma.currentPage.selection);
+        const selection = figma.currentPage.selection;
+        const coverNodes = findCoverNodes(selection, cachedAllCardIds);
 
         if (coverNodes.length === 0) {
             figma.notify('⚠️ No se encontró ningún frame llamado "cover" en la selección.', { error: true });
@@ -483,29 +533,20 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
 
                 const image = await figma.createImageAsync(coverData.coverUrl);
                 if ('fills' in coverNode) {
-                    (coverNode as GeometryMixin & SceneNode).fills = [
-                        { type: 'IMAGE', imageHash: image.hash, scaleMode: 'FILL' }
-                    ];
+                    (coverNode as GeometryMixin & SceneNode).fills = [{ type: 'IMAGE', imageHash: image.hash, scaleMode: 'FILL' }];
                 }
 
-                // Title treatment
                 if (coverData.titleTreatmentUrl) {
                     try {
                         const ttImage = await figma.createImageAsync(coverData.titleTreatmentUrl);
                         const scope = findMetadataScope(coverNode);
                         const ttNodes = findTitleTreatmentNodes([scope]);
-                        if (ttNodes.length > 0) {
-                            const ttNode = ttNodes[0];
-                            if ('fills' in ttNode) {
-                                (ttNode as GeometryMixin & SceneNode).fills = [
-                                    { type: 'IMAGE', imageHash: ttImage.hash, scaleMode: 'FIT' }
-                                ];
-                            }
+                        if (ttNodes.length > 0 && 'fills' in ttNodes[0]) {
+                            (ttNodes[0] as GeometryMixin & SceneNode).fills = [{ type: 'IMAGE', imageHash: ttImage.hash, scaleMode: 'FIT' }];
                         }
-                    } catch (_) { /* skip failed title treatment */ }
+                    } catch (_) {}
                 }
 
-                // Metadata
                 if (coverData.metadata) {
                     const scope = findMetadataScope(coverNode);
                     await fillMetadata([scope], coverData.metadata);
@@ -521,7 +562,8 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
     }
 
     if (msg.type === 'apply-multiple-covers' && msg.coversData) {
-        const coverNodes = findCoverNodes(figma.currentPage.selection);
+        const selection = figma.currentPage.selection;
+        const coverNodes = findCoverNodes(selection, cachedAllCardIds);
 
         if (coverNodes.length === 0) {
             figma.notify('⚠️ No se encontró ningún frame llamado "cover" en la selección.', { error: true });
@@ -535,43 +577,22 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
             const coverNode = coverNodes[i];
             const coverData = coversData[i];
 
-            // Apply image
             const bytes = new Uint8Array(coverData.imageBytes);
             const image = figma.createImage(bytes);
-
             if ('fills' in coverNode) {
-                (coverNode as GeometryMixin & SceneNode).fills = [
-                    {
-                        type: 'IMAGE',
-                        imageHash: image.hash,
-                        scaleMode: 'FILL'
-                    }
-                ];
+                (coverNode as GeometryMixin & SceneNode).fills = [{ type: 'IMAGE', imageHash: image.hash, scaleMode: 'FILL' }];
             }
 
-            // Apply title treatment if provided
             if (coverData.titleTreatmentBytes) {
                 const ttBytes = new Uint8Array(coverData.titleTreatmentBytes);
                 const ttImage = figma.createImage(ttBytes);
-
                 const scope = findMetadataScope(coverNode);
                 const ttNodes = findTitleTreatmentNodes([scope]);
-
-                if (ttNodes.length > 0) {
-                    const ttNode = ttNodes[0];
-                    if ('fills' in ttNode) {
-                        (ttNode as GeometryMixin & SceneNode).fills = [
-                            {
-                                type: 'IMAGE',
-                                imageHash: ttImage.hash,
-                                scaleMode: 'FIT'
-                            }
-                        ];
-                    }
+                if (ttNodes.length > 0 && 'fills' in ttNodes[0]) {
+                    (ttNodes[0] as GeometryMixin & SceneNode).fills = [{ type: 'IMAGE', imageHash: ttImage.hash, scaleMode: 'FIT' }];
                 }
             }
 
-            // Fill metadata scoped to this cover's component
             if (coverData.metadata) {
                 const scope = findMetadataScope(coverNode);
                 await fillMetadata([scope], coverData.metadata);

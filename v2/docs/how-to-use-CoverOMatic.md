@@ -172,5 +172,68 @@ En la pestaña **Personas**, ahora puedes buscar de dos formas:
 
 ---
 
+## 🔄 Actualizar el catálogo con nuevos contenidos
+
+Cuando se añadan nuevas secciones al `OrangeCatalog.html`, seguir este flujo para actualizar el plugin.
+
+### Paso 1 — Añadir el HTML nuevo
+
+Pegar el HTML de Orange TV al final de `OrangeCatalog.html`.
+
+### Paso 2 — Ejecutar el pipeline de extracción
+
+Desde la carpeta `v2/catalog/`:
+
+```bash
+node extract-catalog-v2.js   # Extrae y hace merge (preserva TMDB data existente)
+node enrich-catalog.js        # Solo enriquece entradas nuevas con TMDB
+node enrich-genres.js         # Solo añade géneros a entradas nuevas
+node clean-catalog.js         # Elimina entradas con imágenes rotas (COVER_ART)
+```
+
+> Los tres primeros scripts son **incrementales**: saltan entradas que ya tienen datos TMDB, por lo que solo procesan las nuevas. El cuarto testea todas las imágenes con HEAD requests y elimina las que fallan.
+
+### Paso 3 — Embeber en el plugin
+
+Ejecutar este script Python (desde la carpeta `v2/`):
+
+```bash
+python3 << 'EOF'
+import json
+
+ui_path = 'plugin/ui.html'
+cat_path = 'catalog/otv-catalog.json'
+
+with open(cat_path) as f:
+    catalog = json.load(f)
+
+minified = json.dumps(catalog, ensure_ascii=False, separators=(',', ':'))
+new_line = f'    const OTV_CATALOG_DATA = {minified};\n'
+
+with open(ui_path, 'r', encoding='utf-8') as f:
+    lines = f.readlines()
+
+start_idx = next(i for i, l in enumerate(lines) if 'const OTV_CATALOG_DATA = ' in l)
+end_idx = next(i for i in range(start_idx, len(lines)) if lines[i].rstrip().endswith('};'))
+lines[start_idx:end_idx+1] = [new_line]
+
+with open(ui_path, 'w', encoding='utf-8') as f:
+    f.writelines(lines)
+
+print(f'OK: {catalog["totalContents"]} entradas en ui.html')
+EOF
+```
+
+> **Importante:** usar siempre este script Python (no `re.sub`) para el embedding. `re.sub` interpreta `\n` como salto de línea literal, rompiendo la sintaxis JavaScript.
+
+### Notas técnicas
+
+- `extract-catalog-v2.js` busca el patrón `card__name` + `background-image: url(...)` en el HTML. Los títulos se normalizan (minúsculas, sin acentos) como clave del catálogo.
+- El merge **preserva todos los datos TMDB** de entradas existentes y solo añade las nuevas.
+- `clean-catalog.js` testea `COVER_ART` con HEAD request. Si se quieren filtrar también por `VERTICAL` (necesario para componentes portrait), modificar el script para testear ese tipo.
+- El JSON se embebe minificado en una **sola línea** en `ui.html` para evitar errores de sintaxis JS.
+
+---
+
 **Versión**: 2.0
 **Desarrollado para**: OrangeTV | CitrusDLS
