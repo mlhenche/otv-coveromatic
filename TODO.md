@@ -1,6 +1,6 @@
 # TODO — CoverOmatic v2
 
-> Última actualización: 2026-02-18
+> Última actualización: 2026-02-19
 
 ---
 
@@ -25,22 +25,19 @@ Implementación: al aplicar contenido, parsear el `id` del entry y mapear al nom
 
 ---
 
-### 2. Búsqueda de reparto por ID de TMDB (VPS)
-Al aplicar contenido a una VPS, la búsqueda de actores en la pestaña Personas debe usar el **`person_id` de TMDB** en lugar del nombre.
-
-Motivo: buscar por nombre falla cuando hay caracteres especiales, nombres ambiguos o variaciones de escritura.
-
-Endpoint correcto:
-- `GET /person/{person_id}` → datos del actor
-- `GET /person/{person_id}/images` → fotos del actor
-
-Cambio necesario: el catálogo ya almacena el `tmdbId` del contenido; al cargar el reparto usar los IDs de persona del endpoint `GET /movie/{id}/credits` o `GET /tv/{id}/credits` → campo `cast[].id` en lugar de `cast[].name` para hacer lookups posteriores.
-
----
-
-### 3. Retransmisiones deportivas
+### 2. Retransmisiones deportivas
 Empezar a pensar cómo gestionar el flujo para **contenido deportivo en directo**:
 - ¿Qué tipo de card/componente usan?
 - ¿Qué datos necesitan? (equipos, competición, fecha/hora, canal)
 - ¿Fuente de datos? (TMDB no cubre deportes — ¿API propia, manual?)
 - ¿Cómo encaja con el sistema de tipos actuales (portrait/landscape/vps)?
+
+---
+
+### 3. Restringir diálogo VPS solo a componentes VPS
+El diálogo con las opciones "Añadir capítulos", "Añadir contenido relacionado" y "Ver reparto" debe aparecer **solo cuando se aplica contenido a componentes VPS**, no en slideshows u otros tipos de componentes.
+
+Implementación:
+- Detectar el tipo de componente antes de mostrar el diálogo
+- Solo mostrar el diálogo si `componentType === 'vps'`
+- Los slideshows y otros componentes con background deben aplicar contenido sin mostrar el diálogo

@@ -2192,13 +2192,53 @@
       loadContentCredits(id, mediaType);
     }
 
-    async function loadContentCredits(contentId, mediaType) {
+    async function loadContentCredits(contentId, mediaType, contentTitle = null) {
       if (!apiKey) return;
 
       showLoading();
 
+      let finalId = contentId;
+
+      // VALIDACIÓN: Si no hay ID, intentar fallback por título
+      if (!contentId || contentId === 'undefined' || contentId === 'null') {
+        if (!contentTitle) {
+          showEmpty('⚠️', 'No se pudo cargar el reparto:\nFalta información de identificación');
+          return;
+        }
+
+        // FALLBACK: Buscar por título
+        try {
+          console.log(`[FALLBACK] Buscando "${contentTitle}" en TMDB...`);
+          const searchUrl = `${API_BASE}/search/multi?api_key=${apiKey}&language=es-ES&query=${encodeURIComponent(contentTitle)}`;
+          const searchResponse = await tmdbFetch(searchUrl);
+          if (!searchResponse.ok) throw new Error(`HTTP ${searchResponse.status}`);
+
+          const searchData = await searchResponse.json();
+
+          if (searchData.results && searchData.results.length > 0) {
+            // Filtrar solo resultados que coincidan con el mediaType (movie o tv)
+            const matchingResult = searchData.results.find(r => r.media_type === mediaType);
+
+            if (matchingResult) {
+              finalId = matchingResult.id;
+              console.log(`[FALLBACK] ID encontrado para "${contentTitle}": ${finalId}`);
+            } else {
+              showEmpty('🔍', `No se encontró "${contentTitle}" en TMDB`);
+              return;
+            }
+          } else {
+            showEmpty('🔍', `No se encontró "${contentTitle}" en TMDB`);
+            return;
+          }
+        } catch (error) {
+          console.error('[FALLBACK ERROR]', error);
+          showEmpty('⚠️', `Error al buscar el contenido en TMDB:\n${error.message}`);
+          return;
+        }
+      }
+
       try {
-        const url = `${API_BASE}/${mediaType}/${contentId}/credits?api_key=${apiKey}&language=es-ES`;
+        const url = `${API_BASE}/${mediaType}/${finalId}/credits?api_key=${apiKey}&language=es-ES`;
         const response = await tmdbFetch(url);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
@@ -2745,7 +2785,7 @@
       document.getElementById('contextTitle').textContent = `Personas de: ${entry.title}`;
 
       // Load cast/crew in correct order
-      loadContentCredits(entry.tmdbId, entry.mediaType);
+      loadContentCredits(entry.tmdbId, entry.mediaType, entry.title);
     }
 
     // -- Season Picker: open, navigate, apply --
