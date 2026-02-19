@@ -198,18 +198,21 @@ function findChapterCardInstancesSync(nodes) {
     }
     return chapterCards;
 }
+// -- Helper: check if an instance has a "cover" child (confirms it's a real card) --
+function hasCoverChild(node) {
+    let found = false;
+    walkTree(node, (child) => {
+        if (!found && isCoverNode(child))
+            found = true;
+    });
+    return found;
+}
 // -- Find chapter card instances (async - resolves remote components) --
 async function findChapterCardInstancesAsync(nodes) {
     var _a, _b, _c;
     const chapterCards = [];
     const allInstances = [];
-    // First, check if any of the selected nodes themselves are instances
-    for (const node of nodes) {
-        if (node.type === 'INSTANCE') {
-            allInstances.push(node);
-        }
-    }
-    // Then collect all nested instances
+    // Collect all instances from the selection tree
     for (const node of nodes) {
         walkTree(node, (child) => {
             if (child.type === 'INSTANCE' && !allInstances.includes(child)) {
@@ -225,35 +228,31 @@ async function findChapterCardInstancesAsync(nodes) {
             continue;
         const instanceName = inst.name;
         const syncName = ((_a = inst.mainComponent) === null || _a === void 0 ? void 0 : _a.name) || '';
-        // First check instance name (handles ComponentSets where mainComponent is a variant)
+        let isChapter = false;
+        // Check instance name, mainComponent name, or ComponentSet parent name
         if (isChapterCardComponent(instanceName)) {
-            chapterCards.push(inst);
-            addedIds.add(inst.id);
-            continue;
+            isChapter = true;
         }
-        // Then check mainComponent name (sync)
-        if (syncName && isChapterCardComponent(syncName)) {
-            chapterCards.push(inst);
-            addedIds.add(inst.id);
-            continue;
+        else if (syncName && isChapterCardComponent(syncName)) {
+            isChapter = true;
         }
-        // Check if mainComponent's parent is a ComponentSet with "chapter" in name
-        // (handles custom instance names like "card01" when component is a variant of card_chapters)
-        if (((_c = (_b = inst.mainComponent) === null || _b === void 0 ? void 0 : _b.parent) === null || _c === void 0 ? void 0 : _c.type) === 'COMPONENT_SET') {
+        else if (((_c = (_b = inst.mainComponent) === null || _b === void 0 ? void 0 : _b.parent) === null || _c === void 0 ? void 0 : _c.type) === 'COMPONENT_SET') {
             const componentSetName = inst.mainComponent.parent.name;
             if (isChapterCardComponent(componentSetName)) {
-                chapterCards.push(inst);
-                addedIds.add(inst.id);
-                continue;
+                isChapter = true;
             }
         }
-        // Finally try async for remote components
-        if (!syncName) {
+        else if (!syncName) {
             const asyncName = await getComponentNameAsync(inst);
             if (isChapterCardComponent(asyncName)) {
-                chapterCards.push(inst);
-                addedIds.add(inst.id);
+                isChapter = true;
             }
+        }
+        // Only add if it matches AND has a "cover" child (confirms it's a real card,
+        // not a nested sub-component like a chapter badge or indicator)
+        if (isChapter && hasCoverChild(inst)) {
+            chapterCards.push(inst);
+            addedIds.add(inst.id);
         }
     }
     return chapterCards;
