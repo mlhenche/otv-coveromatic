@@ -6,6 +6,16 @@ figma.showUI(__html__, { width: 380, height: 580, themeColors: true });
 let cachedAllCardIds = new Set();
 // -- Version counter: cancels stale async sendSelection calls --
 let selectionVersion = 0;
+// -- Provider prefix → variable value mapping --
+const PROVIDER_MAP = {
+    'PRIME': 'Prime Video',
+    'SKYS': 'SkyShowtime',
+    'DSN': 'Disney+',
+    'MAX': 'Max',
+    'RTVE': 'RTVE Play',
+    'FLMN': 'Filmin',
+    'APREM': 'A3 Premium'
+};
 // -- Recursive traversal that includes hidden nodes --
 function walkTree(node, callback) {
     callback(node);
@@ -63,6 +73,34 @@ function findInstanceNode(parent, name) {
         }
     });
     return result;
+}
+// -- Extract provider from contentId prefix --
+function extractProvider(contentId) {
+    if (!contentId)
+        return null;
+    // ContentId format: PREFIX_12345_... or PREFIX-12345-...
+    // Extract the part before first _ or -
+    const prefix = contentId.split(/[_-]/)[0].toUpperCase();
+    return PROVIDER_MAP[prefix] || null;
+}
+// -- Check if node is a provider logo component --
+function isProviderLogoComponent(node) {
+    if (node.type !== 'INSTANCE')
+        return false;
+    const name = node.name.trim().toLowerCase();
+    return name === 'providerlogosquare' || name === 'providerlogorectangle';
+}
+// -- Find all provider logo components in selection --
+function findProviderLogoNodes(nodes, excludeIds = new Set()) {
+    const logos = [];
+    for (const node of nodes) {
+        walkTreeExcludingIds(node, excludeIds, (child) => {
+            if (isProviderLogoComponent(child)) {
+                logos.push(child);
+            }
+        });
+    }
+    return logos;
 }
 // -- Async: resolve component name for an instance (works for remote library components) --
 async function getComponentNameAsync(inst) {
@@ -468,6 +506,7 @@ figma.on('selectionchange', () => {
     sendSelection();
 });
 figma.ui.onmessage = async (msg) => {
+    var _a;
     if (msg.type === 'get-selection') {
         sendSelection();
     }
@@ -557,6 +596,43 @@ figma.ui.onmessage = async (msg) => {
                     if (!scopesDone.has(scope.id)) {
                         scopesDone.add(scope.id);
                         await fillMetadata([scope], msg.metadata);
+                    }
+                }
+            }
+            // Apply provider logo if contentId has known prefix
+            if ((_a = msg.metadata) === null || _a === void 0 ? void 0 : _a.contentId) {
+                const providerValue = extractProvider(msg.metadata.contentId);
+                if (providerValue) {
+                    const providerLogos = findProviderLogoNodes(selection, cachedAllCardIds);
+                    for (const logo of providerLogos) {
+                        const props = logo.componentProperties;
+                        let providerKey = null;
+                        // Find the provider property key (handles variant names with #)
+                        for (const key of Object.keys(props)) {
+                            if (key === 'provider' || key.startsWith('provider#')) {
+                                providerKey = key;
+                                break;
+                            }
+                        }
+                        if (providerKey) {
+                            try {
+                                // Swap to main component first (refreshes the component)
+                                const mainComponent = logo.mainComponent;
+                                if (mainComponent)
+                                    logo.swapComponent(mainComponent);
+                                // Set the provider variable value
+                                logo.setProperties({ [providerKey]: providerValue });
+                            }
+                            catch (e) {
+                                // Fallback: try without swapping
+                                try {
+                                    logo.setProperties({ [providerKey]: providerValue });
+                                }
+                                catch (_) {
+                                    // Silently fail if property value doesn't exist
+                                }
+                            }
+                        }
                     }
                 }
             }

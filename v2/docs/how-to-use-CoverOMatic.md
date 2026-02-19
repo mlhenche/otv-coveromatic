@@ -90,6 +90,8 @@ Todos los componentes **deben tener** un frame llamado `cover` para que el plugi
 | `name` | TEXT | Nombre de persona | Personas |
 | `rol` | TEXT | Rol de persona | Personas |
 | `ageTag` | INSTANCE | Clasificación edad | Películas, series, VPS |
+| `providerLogoSquare` | INSTANCE | Logo del proveedor (cuadrado) | Todos |
+| `providerLogoRectangle` | INSTANCE | Logo del proveedor (rectangular) | Todos |
 
 **Importante:**
 - Los nombres NO son case-sensitive: `Cover`, `COVER`, `cover` funcionan igual
@@ -208,6 +210,34 @@ En la pestaña **Personas**, puedes buscar de dos formas:
 **Cambiar orientación** (Cine y Series):
 - Icono 📱 = Portrait (poster vertical)
 - Icono 📺 = Landscape (backdrop horizontal)
+
+### 7. Provider Logo Automático
+
+El plugin detecta **automáticamente el proveedor** del contenido desde el ID y actualiza el componente `providerLogoSquare` o `providerLogoRectangle` si lo tienes en tu diseño.
+
+**Cómo funciona:**
+1. El plugin extrae el prefijo del `contentId` (parte antes del primer `_` o `-`)
+2. Mapea el prefijo al valor correcto de la variable "provider"
+3. Actualiza automáticamente el componente providerLogo
+
+**Tabla de correspondencias:**
+
+| Prefijo en contentId | Variable "provider" en Figma |
+|----------------------|------------------------------|
+| `PRIME`              | Prime Video                  |
+| `SKYS`               | SkyShowtime                  |
+| `DSN`                | Disney+                      |
+| `MAX`                | Max                          |
+| `RTVE`               | RTVE Play                    |
+| `FLMN`               | Filmin                       |
+| `APREM`              | A3 Premium                   |
+
+**Ejemplo:**
+- Si aplicas contenido con `contentId = "PRIME_12345_..."`
+- El componente `providerLogo` cambiará su variable `provider` a `"Prime Video"`
+- El logo se actualizará automáticamente
+
+**Nota:** Si el contentId no tiene un prefijo reconocido, el componente providerLogo no se modifica (mantiene su valor actual).
 
 ---
 

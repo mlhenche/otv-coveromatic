@@ -8,6 +8,17 @@ let cachedAllCardIds = new Set<string>();
 // -- Version counter: cancels stale async sendSelection calls --
 let selectionVersion = 0;
 
+// -- Provider prefix → variable value mapping --
+const PROVIDER_MAP: { [prefix: string]: string } = {
+  'PRIME': 'Prime Video',
+  'SKYS': 'SkyShowtime',
+  'DSN': 'Disney+',
+  'MAX': 'Max',
+  'RTVE': 'RTVE Play',
+  'FLMN': 'Filmin',
+  'APREM': 'A3 Premium'
+};
+
 // -- Recursive traversal that includes hidden nodes --
 function walkTree(node: SceneNode, callback: (n: SceneNode) => void) {
     callback(node);
@@ -70,6 +81,37 @@ function findInstanceNode(parent: SceneNode, name: string): InstanceNode | null 
         }
     });
     return result;
+}
+
+// -- Extract provider from contentId prefix --
+function extractProvider(contentId: string | undefined): string | null {
+    if (!contentId) return null;
+
+    // ContentId format: PREFIX_12345_... or PREFIX-12345-...
+    // Extract the part before first _ or -
+    const prefix = contentId.split(/[_-]/)[0].toUpperCase();
+
+    return PROVIDER_MAP[prefix] || null;
+}
+
+// -- Check if node is a provider logo component --
+function isProviderLogoComponent(node: SceneNode): boolean {
+    if (node.type !== 'INSTANCE') return false;
+    const name = node.name.trim().toLowerCase();
+    return name === 'providerlogosquare' || name === 'providerlogorectangle';
+}
+
+// -- Find all provider logo components in selection --
+function findProviderLogoNodes(nodes: readonly SceneNode[], excludeIds: Set<string> = new Set()): InstanceNode[] {
+    const logos: InstanceNode[] = [];
+    for (const node of nodes) {
+        walkTreeExcludingIds(node, excludeIds, (child) => {
+            if (isProviderLogoComponent(child)) {
+                logos.push(child as InstanceNode);
+            }
+        });
+    }
+    return logos;
 }
 
 // -- Async: resolve component name for an instance (works for remote library components) --
@@ -452,12 +494,14 @@ interface MovieTvMetadata {
     ageRating: string;
     sinopsis: string;
     genres?: string[];
+    contentId?: string;
 }
 
 interface PersonMetadata {
     personName: string;
     rol: string;
     isActor: boolean;
+    contentId?: string;
 }
 
 type Metadata = MovieTvMetadata | PersonMetadata;
@@ -600,6 +644,46 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
                     if (!scopesDone.has(scope.id)) {
                         scopesDone.add(scope.id);
                         await fillMetadata([scope], msg.metadata);
+                    }
+                }
+            }
+
+            // Apply provider logo if contentId has known prefix
+            if (msg.metadata?.contentId) {
+                const providerValue = extractProvider(msg.metadata.contentId);
+
+                if (providerValue) {
+                    const providerLogos = findProviderLogoNodes(selection, cachedAllCardIds);
+
+                    for (const logo of providerLogos) {
+                        const props = logo.componentProperties;
+                        let providerKey: string | null = null;
+
+                        // Find the provider property key (handles variant names with #)
+                        for (const key of Object.keys(props)) {
+                            if (key === 'provider' || key.startsWith('provider#')) {
+                                providerKey = key;
+                                break;
+                            }
+                        }
+
+                        if (providerKey) {
+                            try {
+                                // Swap to main component first (refreshes the component)
+                                const mainComponent = logo.mainComponent;
+                                if (mainComponent) logo.swapComponent(mainComponent);
+
+                                // Set the provider variable value
+                                logo.setProperties({ [providerKey]: providerValue });
+                            } catch (e) {
+                                // Fallback: try without swapping
+                                try {
+                                    logo.setProperties({ [providerKey]: providerValue });
+                                } catch (_) {
+                                    // Silently fail if property value doesn't exist
+                                }
+                            }
+                        }
                     }
                 }
             }

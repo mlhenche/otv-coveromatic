@@ -2587,7 +2587,8 @@
           duration: '',
           ageRating: '',
           sinopsis: '',
-          genres: []
+          genres: [],
+          contentId: entry.contentId
         };
       }
 
@@ -2604,7 +2605,8 @@
           duration: '',
           ageRating: '',
           sinopsis: '',
-          genres: []
+          genres: [],
+          contentId: entry.contentId
         };
       }
 
@@ -2633,7 +2635,7 @@
         .map(id => otvCatalog.genreNames[id])
         .filter(Boolean);
 
-      return { title, rating, year, duration, ageRating, sinopsis, genres };
+      return { title, rating, year, duration, ageRating, sinopsis, genres, contentId: entry.contentId };
     }
 
     // -- Fetch seasons for a TV series from TMDB --
