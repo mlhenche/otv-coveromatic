@@ -229,19 +229,26 @@ async function findChapterCardInstancesAsync(nodes: readonly SceneNode[]): Promi
     }
 
     // Check each instance (check instance name OR component name OR ComponentSet parent name)
+    const addedIds = new Set<string>();
+
     for (const inst of allInstances) {
+        // Skip if already added (prevent duplicates)
+        if (addedIds.has(inst.id)) continue;
+
         const instanceName = inst.name;
         const syncName = inst.mainComponent?.name || '';
 
         // First check instance name (handles ComponentSets where mainComponent is a variant)
         if (isChapterCardComponent(instanceName)) {
             chapterCards.push(inst);
+            addedIds.add(inst.id);
             continue;
         }
 
         // Then check mainComponent name (sync)
         if (syncName && isChapterCardComponent(syncName)) {
             chapterCards.push(inst);
+            addedIds.add(inst.id);
             continue;
         }
 
@@ -251,6 +258,7 @@ async function findChapterCardInstancesAsync(nodes: readonly SceneNode[]): Promi
             const componentSetName = inst.mainComponent.parent.name;
             if (isChapterCardComponent(componentSetName)) {
                 chapterCards.push(inst);
+                addedIds.add(inst.id);
                 continue;
             }
         }
@@ -260,6 +268,7 @@ async function findChapterCardInstancesAsync(nodes: readonly SceneNode[]): Promi
             const asyncName = await getComponentNameAsync(inst);
             if (isChapterCardComponent(asyncName)) {
                 chapterCards.push(inst);
+                addedIds.add(inst.id);
             }
         }
     }
