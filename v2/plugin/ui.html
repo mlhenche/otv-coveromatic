@@ -2653,7 +2653,10 @@
       const res = await tmdbFetch(url);
       if (!res.ok) return [];
       const data = await res.json();
-      return data.episodes || [];
+      // Filter out special episodes (episode_number 0) and sort by episode number
+      return (data.episodes || [])
+        .filter(ep => ep.episode_number > 0)
+        .sort((a, b) => a.episode_number - b.episode_number);
     }
 
     // -- Format episode chapter string (T01 | E03) --
