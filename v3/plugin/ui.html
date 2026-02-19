@@ -1,0 +1,3698 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <style>
+    /* ============================================
+       OTV CoverOmatic 3.0 — Figma Plugin UI
+       Orange TV look & feel
+       ============================================ */
+
+    :root {
+      --bg-primary: #000000;
+      --bg-secondary: #111111;
+      --bg-tertiary: #1a1a1a;
+      --bg-hover: #262626;
+      --text-primary: #ffffff;
+      --text-secondary: #aaaaaa;
+      --text-muted: #666666;
+      --accent: #ff7900;
+      --accent-hover: #e06a00;
+      --accent-glow: rgba(255, 121, 0, 0.25);
+      --success: #1bc47d;
+      --warning: #ff7900;
+      --error: #f24822;
+      --border: #2a2a2a;
+      --radius: 8px;
+      --radius-sm: 6px;
+      --radius-lg: 12px;
+      --transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+      --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 12px;
+      color: var(--text-primary);
+      background: var(--bg-primary);
+      overflow-x: hidden;
+    }
+
+    /* -- Layout -- */
+    .plugin {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    /* -- Header / Brand -- */
+    .header {
+      padding: 12px 14px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      position: relative;
+      z-index: 10;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-logo {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      box-shadow: 0 2px 4px rgba(255, 121, 0, 0.3);
+      border-radius: 0px;
+      overflow: hidden;
+    }
+
+    .brand-logo svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .brand-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.4px;
+      line-height: 1;
+    }
+
+    .brand-name span {
+      color: var(--accent);
+      font-weight: 800;
+    }
+
+    .header-key-btn {
+      width: 26px;
+      height: 26px;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--transition);
+    }
+
+    .header-key-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .header-key-btn.connected {
+      border-color: var(--success);
+      color: var(--success);
+    }
+
+    /* -- API Key Section -- */
+    .api-key-section {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-secondary);
+    }
+
+    .api-key-section.collapsed {
+      display: none;
+    }
+
+    .api-key-input-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    .api-key-input-row input {
+      flex: 1;
+      padding: 8px 12px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-primary);
+      font-size: 11px;
+      outline: none;
+      transition: all var(--transition);
+    }
+
+    .api-key-input-row input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+      background: var(--bg-secondary);
+    }
+
+    .api-key-input-row button {
+      padding: 8px 16px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all var(--transition);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .api-key-input-row button:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(255, 121, 0, 0.3);
+    }
+
+    .api-key-input-row button:active {
+      transform: translateY(0);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* -- Tabs -- */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-primary);
+    }
+
+    .tab {
+      flex: 1;
+      padding: 10px 0;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all var(--transition);
+      user-select: none;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      position: relative;
+    }
+
+    .tab:hover:not(.active) {
+      color: var(--text-secondary);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+      font-weight: 700;
+    }
+
+    .tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -3px;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--accent);
+      box-shadow: 0 0 8px rgba(255, 121, 0, 0.5);
+    }
+
+    /* -- Controls bar (search + orientation toggle) -- */
+    .controls-bar {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .search-input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      flex: 1;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 8px;
+      color: var(--text-muted);
+      font-size: 11px;
+      pointer-events: none;
+    }
+
+    .search-clear-btn {
+      position: absolute;
+      right: 6px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      padding: 0;
+      border: none;
+      border-radius: 50%;
+      background: var(--text-muted);
+      color: var(--bg-secondary);
+      cursor: pointer;
+      opacity: 0.6;
+      transition: opacity var(--transition);
+    }
+
+    .search-clear-btn:hover {
+      opacity: 1;
+    }
+
+    .search-clear-btn.visible {
+      display: flex;
+    }
+
+    .controls-bar input[type="text"] {
+      width: 100%;
+      padding: 8px 28px 8px 32px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-primary);
+      font-size: 11px;
+      outline: none;
+      transition: all var(--transition);
+    }
+
+    .controls-bar input[type="text"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+      background: var(--bg-tertiary);
+    }
+
+    .controls-bar input[type="text"]::placeholder {
+      color: var(--text-muted);
+    }
+
+    /* -- Orientation toggle -- */
+    .orientation-toggle {
+      display: flex;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      flex-shrink: 0;
+      background: var(--bg-secondary);
+    }
+
+    .orientation-btn {
+      padding: 6px 10px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 14px;
+      cursor: pointer;
+      transition: all var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+
+    .orientation-btn + .orientation-btn {
+      border-left: 1px solid var(--border);
+    }
+
+    .orientation-btn:hover:not(:disabled) {
+      color: var(--text-primary);
+      background: var(--bg-hover);
+    }
+
+    .orientation-btn.active {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    .orientation-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    /* SVG icons in orientation buttons */
+    .orientation-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* -- Genre filter dropdown -- */
+    .genre-filter {
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .genre-filter.hidden {
+      display: none !important;
+    }
+
+    .genre-btn {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all var(--transition);
+      white-space: nowrap;
+    }
+
+    .genre-btn:hover {
+      color: var(--text-primary);
+      border-color: var(--text-muted);
+    }
+
+    .genre-btn.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .genre-btn .genre-clear {
+      margin-left: 2px;
+      font-size: 13px;
+      line-height: 1;
+      opacity: 0.8;
+    }
+
+    .genre-btn .genre-clear:hover {
+      opacity: 1;
+    }
+
+    .genre-dropdown {
+      display: none;
+      position: absolute;
+      top: calc(100% + 4px);
+      right: 0;
+      min-width: 140px;
+      max-height: 250px;
+      overflow-y: auto;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      z-index: 100;
+      padding: 4px;
+    }
+
+    .genre-dropdown.open {
+      display: block;
+    }
+
+    .genre-option {
+      display: block;
+      width: 100%;
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      background: none;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      text-align: left;
+      transition: background var(--transition);
+    }
+
+    .genre-option:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+
+    .genre-option.active {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    /* -- Image Grid -- */
+    .grid-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+    }
+
+    .grid-container::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .grid-container::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .grid-container::-webkit-scrollbar-thumb {
+      background: var(--bg-tertiary);
+      border-radius: 2px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    .grid.landscape {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .grid-item {
+      position: relative;
+      aspect-ratio: 2/3;
+      border-radius: var(--radius);
+      overflow: hidden;
+      cursor: pointer;
+      background: var(--bg-secondary);
+      transition: all var(--transition);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .grid.landscape .grid-item {
+      aspect-ratio: 16/9;
+    }
+
+    .grid-item:hover {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 8px 24px rgba(255, 121, 0, 0.25), 0 0 0 1px var(--accent);
+      border-color: var(--accent);
+    }
+
+    .grid-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      opacity: 0;
+      transition: opacity 300ms ease;
+    }
+
+    .grid-item img.loaded {
+      opacity: 1;
+    }
+
+    .grid-item .overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 24px 8px 8px;
+      background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
+      opacity: 0;
+      transition: opacity var(--transition);
+    }
+
+    .grid-item:hover .overlay {
+      opacity: 1;
+    }
+
+    .overlay-title {
+      font-size: 10px;
+      font-weight: 700;
+      line-height: 1.3;
+      color: #fff;
+    }
+
+    .overlay-year {
+      font-size: 9px;
+      color: var(--accent);
+      margin-top: 2px;
+      font-weight: 600;
+    }
+
+    /* No image placeholder */
+    .grid-item.no-image {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-tertiary);
+    }
+
+    .grid-item.no-image span {
+      font-size: 9px;
+      color: var(--text-muted);
+      text-align: center;
+      padding: 4px;
+    }
+
+    /* -- Loading -- */
+    .loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 0;
+      color: var(--text-secondary);
+      gap: 12px;
+    }
+
+    .spinner {
+      width: 24px;
+      height: 24px;
+      border: 3px solid var(--bg-tertiary);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* -- Empty / Error states -- */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      color: var(--text-secondary);
+      text-align: center;
+      gap: 8px;
+    }
+
+    .empty-state .icon {
+      font-size: 28px;
+      opacity: 0.4;
+    }
+
+    .empty-state p {
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    /* -- Footer -- */
+    .footer {
+      padding: 8px 12px;
+      border-top: 1px solid var(--border);
+      background: var(--bg-secondary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .footer .selection-info {
+      flex: 1;
+      font-size: 10px;
+      color: var(--text-secondary);
+    }
+
+    .footer .selection-info strong {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .btn {
+      padding: 6px 12px;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .btn-reload {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-reload:hover:not(:disabled) {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--bg-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn-reload:active:not(:disabled) {
+      transform: translateY(0);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-reload .reload-icon {
+      display: inline-block;
+      transition: transform 0.3s ease;
+    }
+
+    .btn-reload:hover .reload-icon {
+      transform: rotate(180deg);
+    }
+
+    .btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    /* -- Applying overlay -- */
+    .applying-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      backdrop-filter: blur(6px);
+    }
+
+    .applying-overlay .message {
+      background: var(--bg-secondary);
+      padding: 24px 32px;
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 121, 0, 0.2);
+      border: 1px solid rgba(255, 121, 0, 0.3);
+      backdrop-filter: blur(10px);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* -- Image type picker overlay -- */
+    .type-picker-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      backdrop-filter: blur(6px);
+    }
+
+    .type-picker-card {
+      background: var(--bg-secondary);
+      border: 1px solid rgba(255, 121, 0, 0.3);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      width: 280px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
+    }
+
+    .type-picker-card h3 {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+
+    .type-picker-card p {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-bottom: 14px;
+      line-height: 1.4;
+    }
+
+    .type-picker-options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .type-picker-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 12px;
+      cursor: pointer;
+      text-align: left;
+      transition: background var(--transition), border-color var(--transition);
+    }
+
+    .type-picker-btn:hover {
+      background: var(--bg-hover);
+      border-color: var(--accent);
+    }
+
+    .type-picker-btn .icon {
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .type-picker-btn .label {
+      font-weight: 600;
+    }
+
+    .type-picker-btn .desc {
+      font-size: 10px;
+      color: var(--text-secondary);
+      display: block;
+    }
+
+    .type-picker-cancel {
+      width: 100%;
+      padding: 8px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      font-size: 11px;
+      cursor: pointer;
+      transition: color var(--transition), border-color var(--transition);
+    }
+
+    .type-picker-cancel:hover {
+      color: var(--text-secondary);
+      border-color: var(--text-muted);
+    }
+
+    /* -- Series overlay with dual buttons -- */
+    .overlay-series {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+
+    .overlay-buttons {
+      display: flex;
+      gap: 4px;
+      margin-top: 4px;
+    }
+
+    .overlay-btn {
+      flex: 1;
+      padding: 5px 8px;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 9px;
+      font-weight: 700;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      transition: all var(--transition);
+    }
+
+    .overlay-btn-datos {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .overlay-btn-datos:hover {
+      background: var(--accent-hover);
+    }
+
+    .overlay-btn-temporadas {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+    }
+
+    .overlay-btn-temporadas:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* -- Season Picker Overlay -- */
+    .season-picker-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      backdrop-filter: blur(6px);
+    }
+
+    .season-picker-card {
+      background: var(--bg-secondary);
+      border: 1px solid rgba(255, 121, 0, 0.3);
+      border-radius: var(--radius-lg);
+      width: 320px;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
+    }
+
+    .season-picker-header {
+      display: flex;
+      align-items: center;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      gap: 8px;
+    }
+
+    .season-picker-header h3 {
+      flex: 1;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .season-picker-back {
+      background: none;
+      border: none;
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: var(--radius-sm);
+      transition: background var(--transition);
+      flex-shrink: 0;
+    }
+
+    .season-picker-back:hover {
+      background: var(--bg-hover);
+    }
+
+    .season-picker-close {
+      width: 24px;
+      height: 24px;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      color: var(--text-muted);
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--transition);
+      flex-shrink: 0;
+    }
+
+    .season-picker-close:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .season-picker-content {
+      overflow-y: auto;
+      padding: 8px;
+      max-height: 60vh;
+    }
+
+    .season-picker-content::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .season-picker-content::-webkit-scrollbar-thumb {
+      background: var(--bg-tertiary);
+      border-radius: 2px;
+    }
+
+    .season-picker-loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 24px;
+      color: var(--text-secondary);
+      font-size: 11px;
+    }
+
+    .season-picker-empty {
+      text-align: center;
+      padding: 24px;
+      color: var(--text-muted);
+      font-size: 11px;
+    }
+
+    .season-item,
+    .episode-item {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 12px;
+      cursor: pointer;
+      text-align: left;
+      transition: background var(--transition), border-color var(--transition);
+      margin-bottom: 4px;
+    }
+
+    .season-item:hover,
+    .episode-item:hover {
+      background: var(--bg-hover);
+      border-color: var(--accent);
+    }
+
+    .season-name,
+    .ep-name {
+      font-weight: 600;
+    }
+
+    .season-episodes {
+      font-size: 10px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .episode-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2px;
+    }
+
+    .ep-num {
+      font-size: 10px;
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .ep-duration {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    .ep-name {
+      font-size: 11px;
+    }
+
+    .episode-batch-info {
+      padding: 12px;
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 11px;
+      line-height: 1.6;
+    }
+
+    .episode-batch-note {
+      color: var(--accent);
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    .btn-apply-episodes {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 12px rgba(255, 121, 0, 0.4);
+      transition: all var(--transition);
+    }
+
+    .btn-apply-episodes:hover {
+      box-shadow: 0 6px 20px rgba(255, 121, 0, 0.5);
+    }
+
+    .episode-preview-list {
+      padding: 4px 0;
+    }
+
+    .episode-preview-item {
+      display: flex;
+      gap: 8px;
+      padding: 6px 8px;
+      font-size: 10px;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .episode-preview-item:last-child {
+      border-bottom: none;
+    }
+
+    /* -- VPS Next Step Dialog -- */
+    .vps-next-dialog-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 250;
+      backdrop-filter: blur(6px);
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .vps-next-dialog-card {
+      background: var(--bg-secondary);
+      border: 1px solid rgba(255, 121, 0, 0.3);
+      border-radius: var(--radius-lg);
+      width: 340px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
+      animation: slideUp 0.3s ease-out;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .vps-next-dialog-header {
+      padding: 20px 20px 12px;
+      text-align: center;
+    }
+
+    .vps-next-dialog-icon {
+      font-size: 32px;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .vps-next-dialog-header h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0;
+    }
+
+    .vps-next-dialog-message {
+      text-align: center;
+      padding: 0 20px 16px;
+      color: var(--text-secondary);
+      font-size: 12px;
+      margin: 0;
+    }
+
+    .vps-next-dialog-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 0 20px 20px;
+    }
+
+    .vps-next-btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all var(--transition);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .vps-next-btn-primary {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(255, 121, 0, 0.4);
+    }
+
+    .vps-next-btn-primary:hover {
+      box-shadow: 0 6px 20px rgba(255, 121, 0, 0.5);
+      transform: translateY(-1px);
+    }
+
+    .vps-next-btn-secondary {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+    }
+
+    .vps-next-btn-secondary:hover {
+      background: var(--bg-hover);
+      border-color: var(--accent);
+    }
+
+    .vps-next-btn-tertiary {
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: none;
+      letter-spacing: normal;
+      padding: 8px;
+    }
+
+    .vps-next-btn-tertiary:hover {
+      color: var(--text-primary);
+    }
+
+    /* -- API Log Panel -- */
+    .log-panel {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .log-panel.visible {
+      display: flex;
+    }
+
+    .log-panel::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .log-panel::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .log-panel::-webkit-scrollbar-thumb {
+      background: var(--bg-tertiary);
+      border-radius: 2px;
+    }
+
+    .log-entry {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px 10px;
+      font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
+      font-size: 10px;
+      line-height: 1.5;
+      cursor: pointer;
+      transition: border-color var(--transition);
+    }
+
+    .log-entry:hover {
+      border-color: var(--text-muted);
+    }
+
+    .log-entry.success {
+      border-left: 3px solid var(--success);
+    }
+
+    .log-entry.error {
+      border-left: 3px solid var(--error);
+    }
+
+    .log-entry-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .log-entry-status {
+      font-weight: 700;
+    }
+
+    .log-entry-status.ok {
+      color: var(--success);
+    }
+
+    .log-entry-status.fail {
+      color: var(--error);
+    }
+
+    .log-entry-time {
+      color: var(--text-muted);
+      font-size: 9px;
+    }
+
+    .log-entry-url {
+      color: var(--text-secondary);
+      word-break: break-all;
+      margin-bottom: 2px;
+    }
+
+    .log-entry-duration {
+      color: var(--text-muted);
+      font-size: 9px;
+    }
+
+    .log-entry-body {
+      margin-top: 6px;
+      padding-top: 6px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .log-entry.expanded .log-entry-body {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .log-clear-btn {
+      align-self: flex-end;
+      padding: 4px 10px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-size: 10px;
+      cursor: pointer;
+      transition: all var(--transition);
+      flex-shrink: 0;
+    }
+
+    .log-clear-btn:hover {
+      border-color: var(--error);
+      color: var(--error);
+    }
+
+    .log-empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 11px;
+      padding: 40px 0;
+    }
+
+    /* -- Random Content Button -- */
+    .random-bar {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-primary);
+      display: none;
+      justify-content: center;
+    }
+
+    .random-bar.visible {
+      display: flex;
+    }
+
+    .btn-random {
+      width: 100%;
+      padding: 10px 20px;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 12px rgba(255, 121, 0, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-random::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: left 0.5s;
+    }
+
+    .btn-random:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 121, 0, 0.5);
+    }
+
+    .btn-random:hover:not(:disabled)::before {
+      left: 100%;
+    }
+
+    .btn-random:active:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(255, 121, 0, 0.4);
+    }
+
+    .btn-random:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-random .icon {
+      font-size: 14px;
+    }
+
+    /* -- Person Search Mode Toggle -- */
+    .person-search-mode-toggle {
+      display: flex;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      flex-shrink: 0;
+      background: var(--bg-secondary);
+    }
+
+    .person-search-mode-toggle.hidden {
+      display: none !important;
+    }
+
+    .mode-btn {
+      padding: 6px 10px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+      white-space: nowrap;
+    }
+
+    .mode-btn + .mode-btn {
+      border-left: 1px solid var(--border);
+    }
+
+    .mode-btn:hover:not(.active) {
+      color: var(--text-primary);
+      background: var(--bg-hover);
+    }
+
+    .mode-btn.active {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    /* -- Autocomplete Dropdown -- */
+    .autocomplete-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      margin-top: 4px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      max-height: 280px;
+      overflow-y: auto;
+      z-index: 50;
+    }
+
+    .autocomplete-dropdown.hidden {
+      display: none !important;
+    }
+
+    .autocomplete-dropdown::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .autocomplete-dropdown::-webkit-scrollbar-thumb {
+      background: var(--bg-tertiary);
+      border-radius: 2px;
+    }
+
+    .autocomplete-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 12px;
+      cursor: pointer;
+      transition: all var(--transition);
+      border-bottom: 1px solid var(--border);
+      gap: 10px;
+    }
+
+    .autocomplete-item:last-child {
+      border-bottom: none;
+    }
+
+    .autocomplete-item:hover {
+      background: var(--bg-hover);
+    }
+
+    .autocomplete-item-poster {
+      width: 32px;
+      height: 48px;
+      border-radius: 4px;
+      background: var(--bg-tertiary);
+      flex-shrink: 0;
+      object-fit: cover;
+    }
+
+    .autocomplete-item-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .autocomplete-item-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-primary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .autocomplete-item-meta {
+      font-size: 9px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .autocomplete-empty {
+      padding: 16px 12px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 10px;
+    }
+
+    .autocomplete-loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      gap: 8px;
+      color: var(--text-secondary);
+      font-size: 11px;
+    }
+
+    .autocomplete-loading .spinner {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* -- Content Context Bar -- */
+    .content-context-bar {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-tertiary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .content-context-bar.hidden {
+      display: none !important;
+    }
+
+    .content-context-info {
+      flex: 1;
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .context-label {
+      font-size: 9px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      flex-shrink: 0;
+    }
+
+    .context-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .context-clear-btn {
+      width: 20px;
+      height: 20px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1;
+      cursor: pointer;
+      transition: all var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .context-clear-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="plugin">
+
+    <!-- Header -->
+    <div class="header">
+      <div class="brand">
+        <div class="brand-logo">
+          <svg viewBox="0 0 58 58" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+            <path d="M58 0H0V58H58V0Z" fill="#FF7900"/>
+            <path d="M22.7528 52.3851C21.9302 52.9253 21.0422 53.1872 20.0826 53.1872C18.5766 53.1872 17.6865 52.1845 17.6865 50.8423C17.6865 49.0355 19.348 48.0779 22.7712 47.6933V47.2431C22.7712 46.6559 22.3272 46.3162 21.5046 46.3162C20.6821 46.3162 20.015 46.6415 19.5362 47.2431L18.0978 46.4247C18.8508 45.375 19.9966 44.8491 21.5394 44.8491C23.6449 44.8491 24.8255 45.7597 24.8255 47.2431C24.8255 47.2431 24.8214 53.0808 24.8255 53.0951H22.941L22.7528 52.3851ZM19.7736 50.6888C19.7736 51.229 20.1153 51.7364 20.7332 51.7364C21.4003 51.7364 22.0509 51.4582 22.7016 50.8873V48.9741C20.7169 49.2217 19.7756 49.7312 19.7756 50.6888H19.7736Z" fill="white"/>
+            <path d="M26.5049 45.234L28.2625 44.9905L28.4569 45.9481C29.4493 45.2217 30.2371 44.835 31.2294 44.835C32.8889 44.835 33.7462 45.7148 33.7462 47.4602V53.0809H31.6223V47.8305C31.6223 46.8422 31.3665 46.3941 30.5951 46.3941C29.9608 46.3941 29.3286 46.6867 28.6104 47.2903V53.0809H26.5049V45.2319V45.234Z" fill="white"/>
+            <path d="M47.8163 53.2363C45.4366 53.2363 44.0166 51.7079 44.0166 49.052C44.0166 46.3961 45.455 44.8369 47.7815 44.8369C50.108 44.8369 51.4953 46.3204 51.4953 48.9456C51.4953 49.0847 51.4789 49.2238 51.4789 49.363H46.1057C46.1221 50.8915 46.7564 51.6629 48.0066 51.6629C48.8107 51.6629 49.3407 51.3396 49.8379 50.6295L51.395 51.493C50.7116 52.6368 49.4778 53.2384 47.8183 53.2384L47.8163 53.2363ZM49.4082 47.9859C49.4082 46.9035 48.7923 46.2713 47.7815 46.2713C46.8239 46.2713 46.2244 46.8892 46.1385 47.9859H49.4082Z" fill="white"/>
+            <path d="M7.1386 53.3243C5.03926 53.3243 3.14453 51.9862 3.14453 49.0643C3.14453 46.1424 5.03926 44.8042 7.1386 44.8042C9.23795 44.8042 11.1327 46.1424 11.1327 49.0643C11.1327 51.9862 9.23795 53.3243 7.1386 53.3243ZM7.1386 46.6007C5.55284 46.6007 5.26024 48.031 5.26024 49.0643C5.26024 50.0976 5.55284 51.5278 7.1386 51.5278C8.72437 51.5278 9.01901 50.0976 9.01901 49.0643C9.01901 48.031 8.72437 46.6007 7.1386 46.6007Z" fill="white"/>
+            <path d="M12.5898 45.0173H14.6094V45.9667C14.9941 45.4552 15.9455 44.8516 16.8335 44.8516C16.9195 44.8516 17.0218 44.8516 17.1077 44.8659V46.8588H17.0054C16.0806 46.8588 15.0718 47.0021 14.7465 47.7203V53.0893H12.5898V45.0173Z" fill="white"/>
+            <path d="M38.9454 51.3562C40.5578 51.344 40.6928 49.705 40.6928 48.6328C40.6928 47.3724 40.0749 46.3452 38.9311 46.3452C38.1679 46.3452 37.3167 46.9018 37.3167 48.7208C37.3167 49.7193 37.3863 51.3665 38.9454 51.3562ZM42.7328 44.9886V52.633C42.7328 53.9835 42.6305 56.2015 38.7838 56.2261C37.196 56.2363 35.7268 55.602 35.4322 54.2167L37.5295 53.8791C37.6175 54.2761 37.861 54.671 39.0498 54.671C40.1506 54.671 40.6806 54.1431 40.6806 52.8827V51.9435L40.6519 51.9148C40.3143 52.5164 39.8007 53.0873 38.5669 53.0873C36.6865 53.0873 35.2051 51.7818 35.2051 49.0543C35.2051 46.3268 36.7315 44.8454 38.4503 44.8413C40.0585 44.8393 40.6581 45.5718 40.7951 45.9585L40.7706 45.9544L40.9445 44.9886H42.7369H42.7328Z" fill="white"/>
+            <path d="M52.3293 42.3121H51.4945V44.6242H51.0546V42.3121H50.2197V41.9561H52.3293V42.3121ZM55.8057 44.6242H55.3658V42.398H55.3515L54.4778 44.6242H54.1995L53.3258 42.398H53.3135V44.6242H52.8736V41.9581H53.5529L54.3488 43.9838L55.1325 41.9581H55.8057V44.6242Z" fill="white"/>
+          </svg>
+        </div>
+        <div class="brand-name"><span>CoverOmatic</span> <small style="opacity: 0.5; font-weight: 400; font-size: 11px;">v3.0</small></div>
+      </div>
+      <button class="header-key-btn" id="headerKeyBtn" onclick="toggleApiKey()" title="API Key TMDB">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path
+            d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- API Key -->
+    <div class="api-key-section collapsed" id="apiKeySection">
+      <div class="api-key-input-row">
+        <input type="password" id="apiKeyInput" placeholder="Pega tu API Key de TMDB..." />
+        <button onclick="saveApiKey()">Guardar</button>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <div class="tab active" data-category="movie" onclick="switchTab('movie')">Cine</div>
+      <div class="tab" data-category="tv" onclick="switchTab('tv')">Series</div>
+      <div class="tab" data-category="person" onclick="switchTab('person')">Personas</div>
+      <div class="tab" data-category="log" onclick="switchTab('log')">Log</div>
+    </div>
+
+    <!-- Controls: Search + Orientation -->
+    <div class="controls-bar">
+      <div class="person-search-mode-toggle hidden" id="personSearchModeToggle">
+        <button class="mode-btn active" id="btnByName" onclick="setPersonSearchMode('by-name')">Por nombre</button>
+        <button class="mode-btn" id="btnByContent" onclick="setPersonSearchMode('by-content')">Por contenido</button>
+      </div>
+      <div class="search-input-wrapper">
+        <span class="search-icon">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+        </span>
+        <input type="text" id="searchInput" placeholder="Buscar películas..." />
+        <button class="search-clear-btn" id="searchClearBtn" title="Borrar búsqueda">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+        <div class="autocomplete-dropdown hidden" id="autocompleteDropdown"></div>
+      </div>
+      <!-- Genre dropdown -->
+      <div class="genre-filter" id="genreFilter">
+        <button class="genre-btn" id="genreBtn" onclick="toggleGenreDropdown()">
+          Género <span style="font-size:8px">▾</span>
+        </button>
+        <div class="genre-dropdown" id="genreDropdown"></div>
+      </div>
+    </div>
+
+    <!-- Content context bar (visible when a movie/series is selected in person-by-content mode) -->
+    <div class="content-context-bar hidden" id="contentContextBar">
+      <div class="content-context-info">
+        <span class="context-label">Personas de:</span>
+        <span class="context-title" id="contextTitle"></span>
+      </div>
+      <button class="context-clear-btn" onclick="clearSelectedContent()" title="Limpiar selección">×</button>
+    </div>
+
+    <!-- Random Content Button -->
+    <div class="random-bar" id="randomBar">
+      <button class="btn-random" id="btnRandom" onclick="applyRandomContent()">
+        <span class="icon">🎲</span>
+        <span>Contenido aleatorio</span>
+      </button>
+    </div>
+
+    <!-- Grid -->
+    <div class="grid-container" id="gridContainer">
+      <div class="loading" id="loadingState">
+        <div class="spinner"></div>
+        <span>Cargando...</span>
+      </div>
+      <div class="empty-state hidden" id="emptyState">
+        <span class="icon"></span>
+        <p>No se encontraron resultados</p>
+      </div>
+      <div class="grid hidden" id="imageGrid"></div>
+    </div>
+
+    <!-- Log Panel -->
+    <div class="log-panel" id="logPanel">
+      <button class="log-clear-btn" onclick="clearLog()">Limpiar log</button>
+      <div id="logEntries"></div>
+      <div class="log-empty" id="logEmpty">Sin peticiones registradas</div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <div class="selection-info" id="selectionInfo">
+        Selecciona componentes en Figma
+      </div>
+      <button class="btn btn-reload" onclick="reloadImages()" id="reloadBtn">
+        <span class="reload-icon">↻</span> Más
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Applying overlay -->
+  <div class="applying-overlay hidden" id="applyingOverlay">
+    <div class="message">
+      <div class="spinner"></div>
+      Aplicando cover...
+    </div>
+  </div>
+
+  <!-- Image type picker (shown when auto-detection fails) -->
+  <div class="type-picker-overlay hidden" id="typePickerOverlay">
+    <div class="type-picker-card">
+      <h3>¿Qué tipo de imagen?</h3>
+      <p>No se pudo detectar el tipo automáticamente. Elige el formato de imagen para los frames seleccionados.</p>
+      <div class="type-picker-options">
+        <button class="type-picker-btn" id="btnPickPortrait">
+          <span class="icon">🖼</span>
+          <span><span class="label">Portrait</span><span class="desc">Imagen vertical (VERTICAL)</span></span>
+        </button>
+        <button class="type-picker-btn" id="btnPickLandscape">
+          <span class="icon">🎬</span>
+          <span><span class="label">Landscape</span><span class="desc">Imagen horizontal (COVER_ART)</span></span>
+        </button>
+        <button class="type-picker-btn" id="btnPickBackground">
+          <span class="icon">🌅</span>
+          <span><span class="label">Background</span><span class="desc">Fondo pantalla completa (BACKGROUND)</span></span>
+        </button>
+      </div>
+      <button class="type-picker-cancel" id="btnPickCancel">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- Season/Episode Picker Overlay -->
+  <div class="season-picker-overlay hidden" id="seasonPickerOverlay">
+    <div class="season-picker-card">
+      <div class="season-picker-header">
+        <button class="season-picker-back hidden" id="seasonPickerBack">&#8592;</button>
+        <h3 id="seasonPickerTitle">Temporadas</h3>
+        <button class="season-picker-close" id="seasonPickerClose">&times;</button>
+      </div>
+      <div class="season-picker-content" id="seasonPickerContent">
+      </div>
+    </div>
+  </div>
+
+  <!-- VPS Next Step Dialog -->
+  <div class="vps-next-dialog-overlay hidden" id="vpsNextDialog">
+    <div class="vps-next-dialog-card">
+      <div class="vps-next-dialog-header">
+        <span class="vps-next-dialog-icon">✅</span>
+        <h3 id="vpsNextDialogTitle">Contenido aplicado</h3>
+      </div>
+      <p class="vps-next-dialog-message" id="vpsNextDialogMessage">¿Qué quieres hacer ahora?</p>
+      <div class="vps-next-dialog-buttons" id="vpsNextDialogButtons">
+        <!-- Buttons will be added dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ============================================
+    // OTV CoverOmatic 3.0 — Plugin UI Logic
+    // ============================================
+
+    // -- State --
+    let apiKey = '';
+    let currentCategory = 'movie';   // movie | tv | person
+    let currentQuery = '';
+    let currentResults = [];
+    let selectionCount = 0;
+    let coverCount = 0;
+    let componentType = 'unknown';   // card-portrait | card-landscape | vps | unknown
+    let currentGenreId = null;       // null = all genres
+    let genresCache = {};            // { movie: [...], tv: [...] }
+    let apiLog = [];                 // API log entries
+
+    // -- OTV catalog state --
+    let otvCatalog = null;           // Full catalog object
+    let otvMovies = [];              // Filtered: movies only
+    let otvSeries = [];              // Filtered: series only
+    let filteredCatalog = [];        // Current filtered results (before random selection)
+    const ITEMS_PER_PAGE = 25;       // Number of random items to show
+
+    // -- Episode/Chapter state --
+    let chapterCardCount = 0;              // Number of card_chapters in selection
+    let seasonPickerEntry = null;          // OTV entry being used for season picker
+    let seasonPickerSeasons = [];          // Seasons array from TMDB
+    let seasonPickerEpisodes = [];         // Episodes array from selected season
+
+    // -- VPS Next Step Dialog state --
+    let vpsCurrentEntry = null;            // Current VPS entry for persistent dialog
+
+    // -- Person search by content state --
+    let personSearchMode = 'by-name';     // 'by-name' | 'by-content'
+    let contentAutocomplete = [];         // Autocomplete results
+    let selectedContent = null;           // { id, title, media_type }
+    let autocompleteTimer = null;         // Debounce timer
+
+    const IMAGE_BASE = 'https://image.tmdb.org/t/p/';
+    const API_BASE = 'https://api.themoviedb.org/3';
+    const OTV_BASE = 'https://pc.orangetv.orange.es/pc/api/rtv/v1/images/vod';
+
+    // -- Supabase configuration (v3) --
+    const SUPABASE_URL = 'https://zmzehngquxtqirpjxyhn.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InptemVobmdxdXh0cWlycGp4eWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1MjU3ODksImV4cCI6MjA4NzEwMTc4OX0.aE19KXi3m0WjmZpxRyLNyETDVI5sAyg0JfLNOe_c4Aw';
+    const CACHE_TTL_MS = 4 * 60 * 60 * 1000; // 4 hours
+
+    // -- REMOVED: Embedded OTV catalog is now in Supabase --
+    // To reduce plugin size and enable dynamic updates, catalog now loads from Supabase
+    // Catalog now loaded from Supabase (removed ~50KB of embedded JSON)
+    // URL patterns are fetched from Supabase config table
+
+    // -- Supabase helper --
+    async function sbFetch(endpoint) {
+      const url = `${SUPABASE_URL}/rest/v1/${endpoint}`;
+      const response = await fetch(url, {
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Supabase error ${response.status}: ${await response.text()}`);
+      }
+
+      return response.json();
+    }
+
+    // -- Load OTV catalog from Supabase --
+    async function loadOTVCatalog() {
+      try {
+        console.log('Loading OTV catalog from Supabase...');
+
+        // Fetch contents and genres in parallel
+        const [contents, genres, config] = await Promise.all([
+          sbFetch('contents?active=eq.true&select=title,content_id,media_type,tmdb_id,tmdb_title,genre_ids,provider'),
+          sbFetch('genres?select=id,name'),
+          sbFetch('config?key=eq.url_patterns&select=value')
+        ]);
+
+        // Build genre names map
+        const genreNames = {};
+        genres.forEach(g => {
+          genreNames[g.id] = g.name;
+        });
+
+        // Transform to match expected format (camelCase properties)
+        const catalog = {};
+        contents.forEach(c => {
+          const key = c.title.toLowerCase().replace(/[^a-z0-9]/g, '');
+          catalog[key] = {
+            title: c.title,
+            contentId: c.content_id,
+            mediaType: c.media_type,
+            tmdbId: c.tmdb_id,
+            tmdbTitle: c.tmdb_title,
+            genreIds: c.genre_ids || []
+          };
+        });
+
+        // Get URL patterns from config or use defaults
+        const urlPatterns = config[0]?.value || {
+          coverArt: 'https://pc.orangetv.orange.es/pc/api/rtv/v1/images/vod/COVER_ART/{contentId}_COVER_ART.jpg?width=3840&height=2160',
+          vertical: 'https://pc.orangetv.orange.es/pc/api/rtv/v1/images/vod/VERTICAL/{contentId}_VERTICAL.jpg?width=3840&height=2160',
+          background: 'https://pc.orangetv.orange.es/pc/api/rtv/v1/images/vod/BACKGROUND/{contentId}_BACKGROUND.jpg?width=3840&height=2160',
+          titleTreatment: 'https://pc.orangetv.orange.es/pc/api/rtv/v1/images/vod/TITLE_TREATMENT/{contentId}_title_treatment.png?width=1280&height=720'
+        };
+
+        // Build catalog object matching expected structure
+        otvCatalog = {
+          generatedAt: new Date().toISOString(),
+          source: 'Supabase',
+          totalContents: contents.length,
+          urlPatterns,
+          catalog,
+          genreNames
+        };
+
+        // Filter into movies and series
+        const entries = Object.values(catalog);
+        otvMovies = entries.filter(e => e.mediaType === 'movie');
+        otvSeries = entries.filter(e => e.mediaType === 'tv');
+
+        console.log(`OTV catalog loaded from Supabase: ${otvMovies.length} movies, ${otvSeries.length} series`);
+
+        // Save to cache via code.ts
+        parent.postMessage({
+          pluginMessage: {
+            type: 'cache-catalog',
+            data: otvCatalog
+          }
+        }, '*');
+
+        // Render UI if we're on an OTV tab (movie or tv)
+        if (currentCategory === 'movie' || currentCategory === 'tv') {
+          loadGenres(currentCategory);
+          loadContent();
+        }
+
+        return true;
+      } catch (error) {
+        console.error('Error loading catalog from Supabase:', error);
+
+        // Try to load from cache via code.ts
+        console.log('Attempting to load from cache...');
+        parent.postMessage({
+          pluginMessage: {
+            type: 'get-cached-catalog'
+          }
+        }, '*');
+
+        return false;
+      }
+    }
+
+    // -- Shuffle array (Fisher-Yates algorithm) --
+    function shuffleArray(array) {
+      const shuffled = [...array];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      return shuffled;
+    }
+
+    // -- API Log: fetch wrapper --
+    async function tmdbFetch(url) {
+      const maskedUrl = url.replace(/api_key=[^&]+/, 'api_key=***');
+      const startTime = performance.now();
+      const entry = {
+        timestamp: new Date().toLocaleTimeString('es-ES', { hour12: false }),
+        url: maskedUrl,
+        status: null,
+        statusText: '',
+        duration: 0,
+        responsePreview: '',
+        success: false
+      };
+
+      try {
+        const response = await fetch(url);
+        entry.duration = Math.round(performance.now() - startTime);
+        entry.status = response.status;
+        entry.statusText = response.statusText;
+        entry.success = response.ok;
+
+        // Clone to read body for log while returning original
+        const cloned = response.clone();
+        try {
+          const body = await cloned.json();
+          // Summarize response
+          const summary = {};
+          if (body.total_results !== undefined) summary.total_results = body.total_results;
+          if (body.total_pages !== undefined) summary.total_pages = body.total_pages;
+          if (body.results) summary.results_count = body.results.length;
+          if (body.id) summary.id = body.id;
+          if (body.title) summary.title = body.title;
+          if (body.name) summary.name = body.name;
+          if (body.genres) summary.genres = body.genres.length;
+          if (body.status_message) summary.status_message = body.status_message;
+          entry.responsePreview = JSON.stringify(summary, null, 2);
+        } catch (_) {
+          entry.responsePreview = '(no se pudo leer el body)';
+        }
+
+        addLogEntry(entry);
+        return response;
+      } catch (err) {
+        entry.duration = Math.round(performance.now() - startTime);
+        entry.status = 'ERR';
+        entry.statusText = err.message;
+        entry.success = false;
+        entry.responsePreview = err.stack || err.message;
+        addLogEntry(entry);
+        throw err;
+      }
+    }
+
+    function addLogEntry(entry) {
+      apiLog.unshift(entry);
+      if (apiLog.length > 100) apiLog.pop();
+      renderLog();
+    }
+
+    function renderLog() {
+      const container = document.getElementById('logEntries');
+      const empty = document.getElementById('logEmpty');
+      if (!container) return;
+
+      if (apiLog.length === 0) {
+        container.innerHTML = '';
+        empty.classList.remove('hidden');
+        return;
+      }
+      empty.classList.add('hidden');
+
+      container.innerHTML = apiLog.map((e, i) => `
+        <div class="log-entry ${e.success ? 'success' : 'error'}" onclick="this.classList.toggle('expanded')">
+          <div class="log-entry-header">
+            <span class="log-entry-status ${e.success ? 'ok' : 'fail'}">${e.status} ${e.statusText}</span>
+            <span class="log-entry-time">${e.timestamp}</span>
+          </div>
+          <div class="log-entry-url">${escapeHtml(e.url)}</div>
+          <div class="log-entry-duration">${e.duration}ms</div>
+          <div class="log-entry-body">${escapeHtml(e.responsePreview)}</div>
+        </div>
+      `).join('');
+    }
+
+    function clearLog() {
+      apiLog = [];
+      renderLog();
+    }
+
+    // -- DOM refs --
+    const apiKeySection = document.getElementById('apiKeySection');
+    const headerKeyBtn = document.getElementById('headerKeyBtn');
+    const apiKeyInput = document.getElementById('apiKeyInput');
+    const searchInput = document.getElementById('searchInput');
+    const searchClearBtn = document.getElementById('searchClearBtn');
+    const gridContainer = document.getElementById('gridContainer');
+    const imageGrid = document.getElementById('imageGrid');
+    const loadingState = document.getElementById('loadingState');
+    const emptyState = document.getElementById('emptyState');
+    const selectionInfo = document.getElementById('selectionInfo');
+    const reloadBtn = document.getElementById('reloadBtn');
+    const applyingOverlay = document.getElementById('applyingOverlay');
+    const btnPortrait = document.getElementById('btnPortrait');
+    const btnLandscape = document.getElementById('btnLandscape');
+    const genreFilter = document.getElementById('genreFilter');
+    const logPanel = document.getElementById('logPanel');
+    const randomBar = document.getElementById('randomBar');
+    const btnRandom = document.getElementById('btnRandom');
+
+    // -- Init --
+    (function init() {
+      // Load catalog asynchronously from Supabase
+      // If it fails, it will request cached catalog and the 'cached-catalog' handler will decide what to show
+      loadOTVCatalog();
+      parent.postMessage({ pluginMessage: { type: 'load-api-key' } }, '*');
+      parent.postMessage({ pluginMessage: { type: 'get-selection' } }, '*');
+      loadContent();
+    })();
+
+    // -- API Key --
+    function toggleApiKey() {
+      apiKeySection.classList.toggle('collapsed');
+    }
+
+    function saveApiKey() {
+      const key = apiKeyInput.value.trim();
+      if (!key) return;
+      apiKey = key;
+      parent.postMessage({ pluginMessage: { type: 'save-api-key', apiKey: apiKey } }, '*');
+      headerKeyBtn.classList.add('connected');
+      apiKeySection.classList.add('collapsed');
+      currentPage = 1;
+      if (currentCategory !== 'person') loadGenres(currentCategory);
+      loadContent();
+    }
+
+    // -- Tabs --
+    function switchTab(category) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelector(`.tab[data-category="${category}"]`).classList.add('active');
+
+      // Log tab — show log panel, hide everything else
+      const controlsBar = document.querySelector('.controls-bar');
+      if (category === 'log') {
+        controlsBar.classList.add('hidden');
+        genreFilter.classList.add('hidden');
+        randomBar.classList.remove('visible');
+        gridContainer.classList.add('hidden');
+        logPanel.classList.add('visible');
+        document.querySelector('.footer').classList.add('hidden');
+        renderLog();
+        return;
+      }
+
+      // Normal content tabs — hide log, show content
+      logPanel.classList.remove('visible');
+      controlsBar.classList.remove('hidden');
+      gridContainer.classList.remove('hidden');
+      document.querySelector('.footer').classList.remove('hidden');
+
+      currentCategory = category;
+      currentPage = 1;
+      currentQuery = '';
+      currentGenreId = null;
+      searchInput.value = '';
+
+      const placeholders = {
+        movie: 'Buscar películas...',
+        tv: 'Buscar series...',
+        person: personSearchMode === 'by-content' ? 'Buscar película o serie...' : 'Buscar personas...'
+      };
+      searchInput.placeholder = placeholders[category] || 'Buscar...';
+
+      // Toggle UI elements based on category
+      const btnRandomIcon = document.querySelector('#btnRandom .icon');
+      const btnRandomLabel = document.querySelector('#btnRandom span:last-child');
+      if (category === 'person') {
+        genreFilter.classList.add('hidden');
+        document.getElementById('personSearchModeToggle').classList.remove('hidden');
+        if (btnRandomIcon) btnRandomIcon.textContent = '🎬';
+        if (btnRandomLabel) btnRandomLabel.textContent = 'Añadir reparto';
+      } else {
+        genreFilter.classList.remove('hidden');
+        loadGenres(category);
+        document.getElementById('personSearchModeToggle').classList.add('hidden');
+        // Reset person search state when leaving Personas tab
+        resetPersonSearchState();
+        if (btnRandomIcon) btnRandomIcon.textContent = '🎲';
+        if (btnRandomLabel) btnRandomLabel.textContent = 'Contenido aleatorio';
+      }
+
+      loadContent();
+    }
+
+    // -- Genres --
+    async function loadGenres(category) {
+      // For movie/tv: extract genres from OTV catalog
+      if (category === 'movie' || category === 'tv') {
+        if (!otvCatalog) return;
+
+        // Use cache if available
+        if (genresCache[category]) {
+          renderGenres(genresCache[category]);
+          return;
+        }
+
+        // Extract unique genre IDs from catalog
+        const source = category === 'movie' ? otvMovies : otvSeries;
+        const genreSet = new Set();
+        source.forEach(e => {
+          (e.genreIds || []).forEach(id => genreSet.add(id));
+        });
+
+        // Build genre list with names from catalog
+        const genres = Array.from(genreSet)
+          .map(id => ({ id, name: otvCatalog.genreNames[id] }))
+          .filter(g => g.name)
+          .sort((a, b) => a.name.localeCompare(b.name));
+
+        genresCache[category] = genres;
+        renderGenres(genres);
+        return;
+      }
+
+      // For person: no genres
+      return;
+    }
+
+    function renderGenres(genres) {
+      const dropdown = document.getElementById('genreDropdown');
+      dropdown.innerHTML = '';
+
+      const allOpt = document.createElement('button');
+      allOpt.className = 'genre-option' + (currentGenreId === null ? ' active' : '');
+      allOpt.textContent = 'Todos';
+      allOpt.addEventListener('click', () => selectGenre(null));
+      dropdown.appendChild(allOpt);
+
+      for (const genre of genres) {
+        const opt = document.createElement('button');
+        opt.className = 'genre-option' + (currentGenreId === genre.id ? ' active' : '');
+        opt.textContent = genre.name;
+        opt.addEventListener('click', () => selectGenre(genre.id));
+        dropdown.appendChild(opt);
+      }
+    }
+
+    function selectGenre(genreId) {
+      currentGenreId = genreId;
+      currentPage = 1;
+
+      const btn = document.getElementById('genreBtn');
+      if (genreId === null) {
+        btn.className = 'genre-btn';
+        btn.innerHTML = 'Género <span style="font-size:8px">▾</span>';
+      } else {
+        const name = otvCatalog.genreNames[genreId] || 'Género';
+        btn.className = 'genre-btn active';
+        btn.innerHTML = name + ' <span class="genre-clear" onclick="event.stopPropagation(); selectGenre(null)">×</span>';
+      }
+
+      document.querySelectorAll('.genre-option').forEach(o => o.classList.remove('active'));
+      document.getElementById('genreDropdown').classList.remove('open');
+      loadContent();
+    }
+
+    function toggleGenreDropdown() {
+      document.getElementById('genreDropdown').classList.toggle('open');
+    }
+
+    document.addEventListener('click', (e) => {
+      const filter = document.getElementById('genreFilter');
+      if (filter && !filter.contains(e.target)) {
+        document.getElementById('genreDropdown').classList.remove('open');
+      }
+    });
+
+    // -- Person Search by Content --
+    function setPersonSearchMode(mode) {
+      personSearchMode = mode;
+      document.getElementById('btnByName').classList.toggle('active', mode === 'by-name');
+      document.getElementById('btnByContent').classList.toggle('active', mode === 'by-content');
+
+      // Reset state
+      clearSelectedContent();
+      searchInput.value = '';
+      currentQuery = '';
+      currentPage = 1;
+      hideAutocomplete();
+
+      // Update placeholder
+      if (mode === 'by-content') {
+        searchInput.placeholder = 'Buscar película o serie...';
+      } else {
+        searchInput.placeholder = 'Buscar personas...';
+      }
+
+      loadContent();
+    }
+
+    function resetPersonSearchState() {
+      personSearchMode = 'by-name';
+      selectedContent = null;
+      contentAutocomplete = [];
+      document.getElementById('btnByName').classList.add('active');
+      document.getElementById('btnByContent').classList.remove('active');
+      document.getElementById('contentContextBar').classList.add('hidden');
+      hideAutocomplete();
+    }
+
+    async function loadContentAutocomplete(query) {
+      if (!apiKey) return;
+
+      const dropdown = document.getElementById('autocompleteDropdown');
+      dropdown.classList.remove('hidden');
+      dropdown.innerHTML = '<div class="autocomplete-loading"><div class="spinner"></div>Buscando...</div>';
+
+      try {
+        const url = `${API_BASE}/search/multi?api_key=${apiKey}&language=es-ES&query=${encodeURIComponent(query)}&page=1`;
+        const response = await tmdbFetch(url);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const data = await response.json();
+        // Filter only movies and tv shows
+        contentAutocomplete = (data.results || [])
+          .filter(item => item.media_type === 'movie' || item.media_type === 'tv')
+          .slice(0, 10);
+
+        renderAutocomplete();
+      } catch (err) {
+        console.error('Autocomplete error:', err);
+        dropdown.innerHTML = '<div class="autocomplete-empty">Error al buscar contenido</div>';
+      }
+    }
+
+    function renderAutocomplete() {
+      const dropdown = document.getElementById('autocompleteDropdown');
+
+      if (contentAutocomplete.length === 0) {
+        dropdown.innerHTML = '<div class="autocomplete-empty">No se encontraron películas ni series</div>';
+        return;
+      }
+
+      dropdown.innerHTML = '';
+      for (const item of contentAutocomplete) {
+        const title = item.title || item.name || 'Sin título';
+        const date = item.release_date || item.first_air_date || '';
+        const year = date ? date.substring(0, 4) : '';
+        const typeLabel = item.media_type === 'movie' ? 'Película' : 'Serie';
+        const posterPath = item.poster_path;
+
+        const div = document.createElement('div');
+        div.className = 'autocomplete-item';
+
+        const posterHtml = posterPath
+          ? `<img class="autocomplete-item-poster" src="${IMAGE_BASE}w92${posterPath}" alt="" />`
+          : `<div class="autocomplete-item-poster"></div>`;
+
+        div.innerHTML = `
+          ${posterHtml}
+          <div class="autocomplete-item-info">
+            <div class="autocomplete-item-title">${escapeHtml(title)}</div>
+            <div class="autocomplete-item-meta">${typeLabel}${year ? ' · ' + year : ''}</div>
+          </div>
+        `;
+
+        div.addEventListener('click', () => selectContentItem(item.id, title, item.media_type));
+        dropdown.appendChild(div);
+      }
+    }
+
+    function hideAutocomplete() {
+      const dropdown = document.getElementById('autocompleteDropdown');
+      dropdown.classList.add('hidden');
+      dropdown.innerHTML = '';
+      contentAutocomplete = [];
+    }
+
+    function selectContentItem(id, title, mediaType) {
+      selectedContent = { id, title, media_type: mediaType };
+      hideAutocomplete();
+
+      // Show context bar
+      const contextBar = document.getElementById('contentContextBar');
+      document.getElementById('contextTitle').textContent = title;
+      contextBar.classList.remove('hidden');
+
+      // Clear search input
+      searchInput.value = '';
+      searchInput.placeholder = 'Buscar película o serie...';
+
+      // Load credits
+      loadContentCredits(id, mediaType);
+    }
+
+    async function loadContentCredits(contentId, mediaType, contentTitle = null) {
+      if (!apiKey) return;
+
+      showLoading();
+
+      let finalId = contentId;
+
+      // VALIDACIÓN: Si no hay ID, intentar fallback por título
+      if (!contentId || contentId === 'undefined' || contentId === 'null') {
+        if (!contentTitle) {
+          showEmpty('⚠️', 'No se pudo cargar el reparto:\nFalta información de identificación');
+          return;
+        }
+
+        // FALLBACK: Buscar por título
+        try {
+          console.log(`[FALLBACK] Buscando "${contentTitle}" en TMDB...`);
+          const searchUrl = `${API_BASE}/search/multi?api_key=${apiKey}&language=es-ES&query=${encodeURIComponent(contentTitle)}`;
+          const searchResponse = await tmdbFetch(searchUrl);
+          if (!searchResponse.ok) throw new Error(`HTTP ${searchResponse.status}`);
+
+          const searchData = await searchResponse.json();
+
+          if (searchData.results && searchData.results.length > 0) {
+            // Filtrar solo resultados que coincidan con el mediaType (movie o tv)
+            const matchingResult = searchData.results.find(r => r.media_type === mediaType);
+
+            if (matchingResult) {
+              finalId = matchingResult.id;
+              console.log(`[FALLBACK] ID encontrado para "${contentTitle}": ${finalId}`);
+            } else {
+              showEmpty('🔍', `No se encontró "${contentTitle}" en TMDB`);
+              return;
+            }
+          } else {
+            showEmpty('🔍', `No se encontró "${contentTitle}" en TMDB`);
+            return;
+          }
+        } catch (error) {
+          console.error('[FALLBACK ERROR]', error);
+          showEmpty('⚠️', `Error al buscar el contenido en TMDB:\n${error.message}`);
+          return;
+        }
+      }
+
+      try {
+        const url = `${API_BASE}/${mediaType}/${finalId}/credits?api_key=${apiKey}&language=es-ES`;
+        const response = await tmdbFetch(url);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const data = await response.json();
+
+        const castAll = (data.cast || []).filter(p => p.profile_path);
+        const crewAll = (data.crew || []).filter(p => p.profile_path);
+
+        // Order: Director → Writer/Screenplay → rest of cast (deduplicated)
+        const director = crewAll.find(c => c.job === 'Director');
+        const writers = crewAll.filter(c => c.job === 'Screenplay' || c.job === 'Writer');
+
+        const seen = new Set();
+        const people = [];
+        if (director) { seen.add(director.id); people.push(director); }
+        for (const w of writers) {
+          if (!seen.has(w.id)) { seen.add(w.id); people.push(w); }
+        }
+        for (const c of castAll) {
+          if (!seen.has(c.id)) { seen.add(c.id); people.push(c); }
+        }
+
+        if (people.length === 0) {
+          showEmpty('👤', 'No se encontraron personas con foto para este contenido');
+          return;
+        }
+
+        // Map to the format expected by renderGrid
+        currentResults = people.map(p => ({
+          id: p.id,
+          name: p.name,
+          profile_path: p.profile_path,
+          known_for_department: p.known_for_department || (p.job ? 'Crew' : 'Acting'),
+          character: p.character || p.job || ''
+        }));
+        totalPages = 1;
+        currentPage = 1;
+
+        renderGrid();
+      } catch (err) {
+        console.error('Credits fetch error:', err);
+        showEmpty('⚠️', `Error al cargar créditos:\n${err.message}`);
+      }
+    }
+
+    function clearSelectedContent() {
+      selectedContent = null;
+      document.getElementById('contentContextBar').classList.add('hidden');
+      document.getElementById('contextTitle').textContent = '';
+      searchInput.value = '';
+      currentQuery = '';
+      currentPage = 1;
+
+      if (currentCategory === 'person') {
+        if (personSearchMode === 'by-content') {
+          searchInput.placeholder = 'Buscar película o serie...';
+        } else {
+          searchInput.placeholder = 'Buscar personas...';
+        }
+        loadContent();
+      }
+    }
+
+    // Close autocomplete when clicking outside
+    document.addEventListener('click', (e) => {
+      const dropdown = document.getElementById('autocompleteDropdown');
+      const searchWrapper = document.querySelector('.search-input-wrapper');
+      if (!searchWrapper.contains(e.target)) {
+        hideAutocomplete();
+      }
+    });
+
+    // -- Search --
+    let searchTimeout = null;
+    searchInput.addEventListener('input', () => {
+      clearTimeout(searchTimeout);
+      const query = searchInput.value.trim();
+
+      // In person-by-content mode, show autocomplete instead of searching persons
+      if (currentCategory === 'person' && personSearchMode === 'by-content') {
+        clearTimeout(autocompleteTimer);
+        if (query.length >= 3) {
+          autocompleteTimer = setTimeout(() => loadContentAutocomplete(query), 300);
+        } else {
+          hideAutocomplete();
+        }
+        return;
+      }
+
+      searchTimeout = setTimeout(() => {
+        currentQuery = query;
+        currentPage = 1;
+        loadContent();
+      }, 400);
+
+      // Toggle clear button visibility
+      searchClearBtn.classList.toggle('visible', query.length > 0);
+    });
+
+    searchClearBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      searchClearBtn.classList.remove('visible');
+      searchInput.focus();
+      searchInput.dispatchEvent(new Event('input'));
+    });
+
+    // -- Load Content --
+    async function loadContent() {
+      // For movie/tv tabs: use OTV catalog
+      if (currentCategory === 'movie' || currentCategory === 'tv') {
+        renderCatalog();
+        return;
+      }
+
+      // For person tab: use TMDB (v1 behavior)
+      if (!apiKey) {
+        showEmpty('🔑', 'Introduce tu API Key de TMDB para empezar');
+        return;
+      }
+
+      // If we have a selected content in person-by-content mode, don't reload
+      if (selectedContent && currentCategory === 'person' && personSearchMode === 'by-content') {
+        return;
+      }
+
+      showLoading();
+
+      try {
+        let url;
+        if (currentQuery) {
+          // Search endpoint
+          url = `${API_BASE}/search/${currentCategory}?api_key=${apiKey}&language=es-ES&query=${encodeURIComponent(currentQuery)}&page=1`;
+        } else {
+          // Trending
+          url = `${API_BASE}/trending/${currentCategory}/week?api_key=${apiKey}&language=es-ES&page=1`;
+        }
+
+        const response = await tmdbFetch(url);
+        if (!response.ok) {
+          if (response.status === 401) {
+            showEmpty('🔑', 'API Key inválida. Haz clic en el icono de llave para revisarla.');
+            headerKeyBtn.classList.remove('connected');
+            return;
+          }
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        // Filter results with profile_path
+        let results = data.results || [];
+        currentResults = results.filter(item => item.profile_path);
+
+        if (currentResults.length === 0) {
+          showEmpty('🎬', 'No se encontraron resultados');
+        } else {
+          console.log(`Loaded ${currentResults.length} results for ${currentCategory}`);
+          renderGrid();
+        }
+      } catch (err) {
+        console.error('TMDB fetch error:', err);
+        const errorMsg = err.message || 'Error desconocido';
+        showEmpty('⚠️', `Error al conectar con TMDB:\n${errorMsg}\n\nVerifica tu conexión y API Key.`);
+      }
+    }
+
+    // -- Render OTV Catalog (local filtering) --
+    function renderCatalog() {
+      if (!otvCatalog) {
+        showEmpty('⚠️', 'Catálogo OTV no cargado.');
+        return;
+      }
+
+      // Get source based on category
+      const source = currentCategory === 'movie' ? otvMovies : otvSeries;
+
+      // Filter by query
+      let results = source;
+      if (currentQuery) {
+        const q = normalizeTitle(currentQuery);
+        results = results.filter(e => normalizeTitle(e.title).includes(q));
+      }
+
+      // Filter by genre
+      if (currentGenreId) {
+        results = results.filter(e => e.genreIds && e.genreIds.includes(currentGenreId));
+      }
+
+      // Save filtered results
+      filteredCatalog = results;
+
+      if (filteredCatalog.length === 0) {
+        showEmpty('🎬', 'No se encontraron resultados');
+      } else {
+        // Shuffle and show first 25
+        const shuffled = shuffleArray(filteredCatalog);
+        currentResults = shuffled.slice(0, ITEMS_PER_PAGE);
+
+        console.log(`Showing ${currentResults.length} of ${filteredCatalog.length} OTV catalog entries`);
+        renderGrid();
+      }
+    }
+
+    // -- Render Grid (OTV catalog or Personas) --
+    function renderGrid() {
+      imageGrid.innerHTML = '';
+      loadingState.classList.add('hidden');
+      emptyState.classList.add('hidden');
+      imageGrid.classList.remove('hidden');
+
+      // Always portrait for OTV grid (uses VERTICAL thumbnails)
+      imageGrid.classList.remove('landscape');
+
+      for (const item of currentResults) {
+        // Check if this is OTV catalog entry or TMDB result
+        const isOTVEntry = !!item.contentId;
+
+        let imagePath, thumbUrl, title, year;
+
+        if (isOTVEntry) {
+          // OTV catalog entry: use VERTICAL for thumbnail
+          title = item.title || 'Sin título';
+          year = ''; // We'll get year from TMDB metadata when applying
+          thumbUrl = `${OTV_BASE}/VERTICAL/${item.contentId}_VERTICAL.jpg?width=3840&height=2160`;
+        } else {
+          // TMDB result (for Personas tab)
+          imagePath = currentCategory === 'person' ? item.profile_path : item.poster_path;
+          title = item.title || item.name || 'Sin título';
+          const date = item.release_date || item.first_air_date || '';
+          year = date ? date.substring(0, 4) : '';
+          thumbUrl = imagePath ? `${IMAGE_BASE}w342${imagePath}` : null;
+        }
+
+        const div = document.createElement('div');
+
+        if (thumbUrl) {
+          div.className = 'grid-item';
+          const isSeries = isOTVEntry && item.mediaType === 'tv';
+
+          if (isSeries) {
+            // Series: show dual buttons on hover (Datos + Temporadas)
+            div.innerHTML = `
+              <img src="${thumbUrl}" alt="${escapeHtml(title)}"
+                   onload="this.classList.add('loaded')"
+                   onerror="this.parentElement.classList.add('no-image'); this.style.display='none'; this.parentElement.innerHTML='<span>Error al cargar imagen</span>';" />
+              <div class="overlay overlay-series">
+                <div class="overlay-title">${escapeHtml(title)}</div>
+                <div class="overlay-buttons">
+                  <button class="overlay-btn overlay-btn-datos">Serie</button>
+                  <button class="overlay-btn overlay-btn-temporadas">Capit.</button>
+                </div>
+              </div>
+            `;
+            div.querySelector('.overlay-btn-datos').addEventListener('click', (e) => {
+              e.stopPropagation();
+              applyOTVContent(item);
+            });
+            div.querySelector('.overlay-btn-temporadas').addEventListener('click', (e) => {
+              e.stopPropagation();
+              openSeasonPicker(item);
+            });
+          } else {
+            div.innerHTML = `
+              <img src="${thumbUrl}" alt="${escapeHtml(title)}"
+                   onload="this.classList.add('loaded')"
+                   onerror="this.parentElement.classList.add('no-image'); this.style.display='none'; this.parentElement.innerHTML='<span>Error al cargar imagen</span>';" />
+              <div class="overlay">
+                <div class="overlay-title">${escapeHtml(title)}</div>
+                ${year ? `<div class="overlay-year">${year}</div>` : ''}
+              </div>
+            `;
+
+            if (isOTVEntry) {
+              div.addEventListener('click', () => applyOTVContent(item));
+            } else {
+              // Personas: use v1 logic
+              const fullUrl = `${IMAGE_BASE}original${imagePath}`;
+              div.addEventListener('click', () => applyImage(fullUrl, item));
+            }
+          }
+        } else {
+          div.className = 'grid-item no-image';
+          div.innerHTML = `<span>${escapeHtml(title)}</span>`;
+        }
+
+        imageGrid.appendChild(div);
+      }
+
+      // Enable reload button for movie/tv (random reload), disable for empty results
+      const isOTVCatalog = currentCategory === 'movie' || currentCategory === 'tv';
+      reloadBtn.disabled = isOTVCatalog ? false : (currentResults.length === 0);
+      updateSelectionInfo(); // Update random button visibility
+    }
+
+    // -- Fetch detail (with age certification via append_to_response) --
+    async function fetchDetail(id) {
+      const append = currentCategory === 'movie' ? 'release_dates' : 'content_ratings';
+      const detailUrl = `${API_BASE}/${currentCategory}/${id}?api_key=${apiKey}&language=es-ES&append_to_response=${append}`;
+      const res = await tmdbFetch(detailUrl);
+      if (!res.ok) return null;
+      return await res.json();
+    }
+
+    // -- Extract Spanish age certification from detail response --
+    const AGE_RATING_MAP = { 'A': 'TP', '7': '7', '12': '12', '16': '16', '18': '18' };
+
+    function extractAgeRating(detail) {
+      let certification = '';
+
+      if (currentCategory === 'movie' && detail.release_dates) {
+        const esRelease = detail.release_dates.results.find(r => r.iso_3166_1 === 'ES');
+        if (esRelease) {
+          const entry = esRelease.release_dates.find(rd => rd.certification) || {};
+          certification = entry.certification || '';
+        }
+      } else if (currentCategory === 'tv' && detail.content_ratings) {
+        const esRating = detail.content_ratings.results.find(r => r.iso_3166_1 === 'ES');
+        if (esRating) {
+          certification = esRating.rating || '';
+        }
+      }
+
+      return AGE_RATING_MAP[certification] || '';
+    }
+
+    // -- Map TMDB department to Spanish role label --
+    const DEPARTMENT_MAP = {
+      'Directing': 'Director/a',
+      'Writing': 'Guionista',
+      'Production': 'Productor/a',
+      'Editing': 'Editor/a',
+      'Camera': 'Director/a de fotografía',
+      'Sound': 'Sonido',
+      'Art': 'Dirección de arte',
+      'Costume & Make-Up': 'Vestuario y maquillaje',
+      'Visual Effects': 'Efectos visuales',
+      'Crew': 'Equipo técnico',
+      'Lighting': 'Iluminación',
+    };
+
+    // -- Format duration --
+    function formatDuration(minutes) {
+      if (!minutes || minutes <= 0) return '';
+      const h = Math.floor(minutes / 60);
+      const m = minutes % 60;
+      if (h === 0) return `${m}min`;
+      return `${h}h ${m}min`;
+    }
+
+    // -- Fetch OTV metadata from TMDB --
+    async function fetchOTVMetadata(entry) {
+      if (!entry.tmdbId) {
+        return {
+          title: entry.title,
+          rating: '',
+          year: '',
+          duration: '',
+          ageRating: '',
+          sinopsis: '',
+          genres: [],
+          contentId: entry.contentId
+        };
+      }
+
+      const type = entry.mediaType || 'movie';
+      const append = type === 'movie' ? 'release_dates' : 'content_ratings';
+      const detailUrl = `${API_BASE}/${type}/${entry.tmdbId}?api_key=${apiKey}&language=es-ES&append_to_response=${append}`;
+
+      const res = await tmdbFetch(detailUrl);
+      if (!res.ok) {
+        return {
+          title: entry.title,
+          rating: '',
+          year: '',
+          duration: '',
+          ageRating: '',
+          sinopsis: '',
+          genres: [],
+          contentId: entry.contentId
+        };
+      }
+
+      const detail = await res.json();
+
+      // Extract metadata (same as v1)
+      const title = detail.title || detail.name || entry.title;
+      const rating = detail.vote_average ? detail.vote_average.toFixed(1) : '';
+      const year = detail.release_date || detail.first_air_date ?
+                   (detail.release_date || detail.first_air_date).substring(0, 4) : '';
+
+      let duration = '';
+      if (type === 'movie') {
+        duration = formatDuration(detail.runtime);
+      } else {
+        const n = detail.number_of_seasons;
+        if (n) duration = `${n} temporada${n === 1 ? '' : 's'}`;
+      }
+
+      const ageRating = extractAgeRating(detail);
+      const sinopsis = detail.overview || '';
+
+      // Convert genreIds to genre names (max 3)
+      const genres = (entry.genreIds || [])
+        .slice(0, 3)
+        .map(id => otvCatalog.genreNames[id])
+        .filter(Boolean);
+
+      return { title, rating, year, duration, ageRating, sinopsis, genres, contentId: entry.contentId };
+    }
+
+    // -- Fetch seasons for a TV series from TMDB --
+    async function fetchSeasons(tmdbId) {
+      const url = `${API_BASE}/tv/${tmdbId}?api_key=${apiKey}&language=es-ES`;
+      const res = await tmdbFetch(url);
+      if (!res.ok) return [];
+      const data = await res.json();
+      return (data.seasons || []).filter(s => s.season_number > 0);
+    }
+
+    // -- Fetch episodes for a specific season from TMDB --
+    async function fetchEpisodes(tmdbId, seasonNumber) {
+      const url = `${API_BASE}/tv/${tmdbId}/season/${seasonNumber}?api_key=${apiKey}&language=es-ES`;
+      const res = await tmdbFetch(url);
+      if (!res.ok) return [];
+      const data = await res.json();
+      // Filter out special episodes (episode_number 0) and sort by episode number
+      return (data.episodes || [])
+        .filter(ep => ep.episode_number > 0)
+        .sort((a, b) => a.episode_number - b.episode_number);
+    }
+
+    // -- Format episode chapter string (T01 E03) --
+    function formatChapter(seasonNumber, episodeNumber) {
+      const s = String(seasonNumber).padStart(2, '0');
+      const e = String(episodeNumber).padStart(2, '0');
+      return `T${s} E${e}`;
+    }
+
+    // -- Build episode still URL from TMDB --
+    function episodeStillUrl(stillPath) {
+      if (!stillPath) return null;
+      return `https://image.tmdb.org/t/p/w780${stillPath}`;
+    }
+
+    // -- Image type picker: shows overlay and resolves with user's choice --
+    let _resolveTypePicker = null;
+
+    function pickImageType() {
+      return new Promise((resolve) => {
+        _resolveTypePicker = resolve;
+        document.getElementById('typePickerOverlay').classList.remove('hidden');
+      });
+    }
+
+    document.getElementById('btnPickPortrait').addEventListener('click', () => {
+      document.getElementById('typePickerOverlay').classList.add('hidden');
+      if (_resolveTypePicker) { _resolveTypePicker('card-portrait'); _resolveTypePicker = null; }
+    });
+    document.getElementById('btnPickLandscape').addEventListener('click', () => {
+      document.getElementById('typePickerOverlay').classList.add('hidden');
+      if (_resolveTypePicker) { _resolveTypePicker('card-landscape'); _resolveTypePicker = null; }
+    });
+    document.getElementById('btnPickBackground').addEventListener('click', () => {
+      document.getElementById('typePickerOverlay').classList.add('hidden');
+      if (_resolveTypePicker) { _resolveTypePicker('vps'); _resolveTypePicker = null; }
+    });
+    document.getElementById('btnPickCancel').addEventListener('click', () => {
+      document.getElementById('typePickerOverlay').classList.add('hidden');
+      if (_resolveTypePicker) { _resolveTypePicker(null); _resolveTypePicker = null; }
+    });
+
+    // -- Apply OTV content --
+    async function applyOTVContent(entry) {
+      if (coverCount === 0) {
+        alert('No hay frames "cover" en la selección actual.\n\nSelecciona componentes que contengan un frame llamado "cover".');
+        return;
+      }
+
+      applyingOverlay.classList.remove('hidden');
+
+      try {
+        // 1. Resolve the image type (detected or user-chosen)
+        let typeToUse = componentType;
+        if (typeToUse === 'unknown') {
+          typeToUse = await pickImageType();
+          if (!typeToUse) {
+            applyingOverlay.classList.add('hidden');
+            return; // user cancelled
+          }
+        }
+
+        // 2. Build the URL for the resolved type
+        let coverUrl, titleTreatmentUrl;
+        switch (typeToUse) {
+          case 'card-portrait':
+            coverUrl = `${OTV_BASE}/VERTICAL/${entry.contentId}_VERTICAL.jpg?width=3840&height=2160`;
+            break;
+          case 'card-landscape':
+            coverUrl = `${OTV_BASE}/COVER_ART/${entry.contentId}_COVER_ART.jpg?width=3840&height=2160`;
+            break;
+          case 'slideshow':
+          case 'vps':
+            coverUrl = `${OTV_BASE}/BACKGROUND/${entry.contentId}_BACKGROUND.jpg?width=3840&height=2160`;
+            titleTreatmentUrl = `${OTV_BASE}/TITLE_TREATMENT/${entry.contentId}_title_treatment.png?width=1280&height=720`;
+            break;
+          default:
+            coverUrl = `${OTV_BASE}/VERTICAL/${entry.contentId}_VERTICAL.jpg?width=3840&height=2160`;
+        }
+
+        // 3. Fetch metadata from TMDB (using tmdbId)
+        const metadata = await fetchOTVMetadata(entry);
+
+        // 4. Send to sandbox
+        parent.postMessage({
+          pluginMessage: {
+            type: 'apply-cover-url',
+            coverUrl,
+            titleTreatmentUrl: titleTreatmentUrl || null,
+            metadata: metadata
+          }
+        }, '*');
+
+        setTimeout(() => {
+          applyingOverlay.classList.add('hidden');
+        }, 800);
+
+        // 4. If VPS → show next step dialog
+        if (typeToUse === 'vps' && entry.tmdbId) {
+          // Clear previous VPS entry if different
+          if (vpsCurrentEntry && vpsCurrentEntry.contentId !== entry.contentId) {
+            vpsCurrentEntry = null;
+            hideVPSNextDialog();
+          }
+
+          setTimeout(() => {
+            showVPSNextDialog(entry);
+          }, 1000);
+        }
+      } catch (err) {
+        console.error('Error applying OTV cover:', err);
+        applyingOverlay.classList.add('hidden');
+        alert(`Error al aplicar la cover:\n\n${err.message}\n\nInténtalo de nuevo o prueba con otra imagen.`);
+      }
+    }
+
+    // -- Switch to Personas tab for content --
+    function switchToPersonasForContent(entry) {
+      // Set state BEFORE switchTab so loadContent()'s guard fires and skips trending load
+      personSearchMode = 'by-content';
+      selectedContent = { id: entry.tmdbId, title: entry.title, media_type: entry.mediaType };
+
+      switchTab('person'); // loadContent() returns early because selectedContent is already set
+
+      // Sync mode-toggle button states (bypassed setPersonSearchMode to avoid reset)
+      document.getElementById('btnByName').classList.remove('active');
+      document.getElementById('btnByContent').classList.add('active');
+      searchInput.placeholder = 'Buscar película o serie...';
+
+      // Show context bar
+      document.getElementById('contentContextBar').classList.remove('hidden');
+      document.getElementById('contextTitle').textContent = `Personas de: ${entry.title}`;
+
+      // Load cast/crew in correct order
+      loadContentCredits(entry.tmdbId, entry.mediaType, entry.title);
+    }
+
+    // -- Season Picker: open, navigate, apply --
+
+    async function openSeasonPicker(entry) {
+      if (!entry.tmdbId) {
+        alert('Esta serie no tiene ID de TMDB asociado.');
+        return;
+      }
+
+      seasonPickerEntry = entry;
+      seasonPickerEpisodes = [];
+
+      const overlay = document.getElementById('seasonPickerOverlay');
+      const content = document.getElementById('seasonPickerContent');
+      const title = document.getElementById('seasonPickerTitle');
+      const backBtn = document.getElementById('seasonPickerBack');
+
+      overlay.classList.remove('hidden');
+      backBtn.classList.add('hidden');
+      title.textContent = entry.title;
+      content.innerHTML = '<div class="season-picker-loading"><div class="spinner"></div><span>Cargando temporadas...</span></div>';
+
+      const seasons = await fetchSeasons(entry.tmdbId);
+      seasonPickerSeasons = seasons;
+
+      if (seasons.length === 0) {
+        content.innerHTML = '<div class="season-picker-empty">No se encontraron temporadas</div>';
+        return;
+      }
+
+      renderSeasonList(seasons);
+    }
+
+    function renderSeasonList(seasons) {
+      const content = document.getElementById('seasonPickerContent');
+      const backBtn = document.getElementById('seasonPickerBack');
+      backBtn.classList.add('hidden');
+      document.getElementById('seasonPickerTitle').textContent = seasonPickerEntry.title;
+
+      content.innerHTML = seasons.map(s => `
+        <button class="season-item" data-season="${s.season_number}">
+          <span class="season-name">Temporada ${s.season_number}</span>
+          <span class="season-episodes">${s.episode_count} episodios</span>
+        </button>
+      `).join('');
+
+      content.querySelectorAll('.season-item').forEach(btn => {
+        btn.addEventListener('click', () => {
+          selectSeason(parseInt(btn.dataset.season));
+        });
+      });
+    }
+
+    async function selectSeason(seasonNumber) {
+      const content = document.getElementById('seasonPickerContent');
+      const backBtn = document.getElementById('seasonPickerBack');
+      const title = document.getElementById('seasonPickerTitle');
+
+      title.textContent = `${seasonPickerEntry.title} — T${String(seasonNumber).padStart(2, '0')}`;
+      backBtn.classList.remove('hidden');
+      content.innerHTML = '<div class="season-picker-loading"><div class="spinner"></div><span>Cargando episodios...</span></div>';
+
+      const episodes = await fetchEpisodes(seasonPickerEntry.tmdbId, seasonNumber);
+      seasonPickerEpisodes = episodes;
+
+      if (episodes.length === 0) {
+        content.innerHTML = '<div class="season-picker-empty">No se encontraron episodios</div>';
+        return;
+      }
+
+      renderEpisodeList(episodes, seasonNumber);
+    }
+
+    function renderEpisodeList(episodes, seasonNumber) {
+      const content = document.getElementById('seasonPickerContent');
+
+      if (chapterCardCount > 1) {
+        // MULTI-CARD: show batch apply button + preview
+        const applyCount = Math.min(episodes.length, chapterCardCount);
+        content.innerHTML = `
+          <div class="episode-batch-info">
+            <p>${episodes.length} episodios disponibles</p>
+            <p>${chapterCardCount} tarjetas seleccionadas</p>
+            <p class="episode-batch-note">Se aplicarán los primeros ${applyCount} episodios en orden.</p>
+          </div>
+          <button class="btn-apply-episodes" id="btnApplyEpisodesBatch">Añadir capítulos</button>
+          <div class="episode-preview-list">
+            ${episodes.slice(0, applyCount).map(ep => `
+              <div class="episode-preview-item">
+                <span class="ep-num">${formatChapter(seasonNumber, ep.episode_number)}</span>
+                <span class="ep-name">${escapeHtml(ep.name || 'Sin título')}</span>
+              </div>
+            `).join('')}
+          </div>
+        `;
+        document.getElementById('btnApplyEpisodesBatch').addEventListener('click', () => {
+          applyEpisodesBatch(seasonNumber);
+        });
+      } else {
+        // SINGLE-CARD: show episode list for user to pick one
+        content.innerHTML = episodes.map(ep => `
+          <button class="episode-item" data-episode="${ep.episode_number}">
+            <div class="episode-item-header">
+              <span class="ep-num">${formatChapter(seasonNumber, ep.episode_number)}</span>
+              <span class="ep-duration">${formatDuration(ep.runtime)}</span>
+            </div>
+            <span class="ep-name">${escapeHtml(ep.name || 'Sin título')}</span>
+          </button>
+        `).join('');
+
+        content.querySelectorAll('.episode-item').forEach(btn => {
+          btn.addEventListener('click', () => {
+            applySingleEpisode(seasonNumber, parseInt(btn.dataset.episode));
+          });
+        });
+      }
+    }
+
+    async function applySingleEpisode(seasonNumber, episodeNumber) {
+      const episode = seasonPickerEpisodes.find(ep => ep.episode_number === episodeNumber);
+      if (!episode) return;
+
+      // Copy entry BEFORE closing picker (which clears this variable)
+      const entry = seasonPickerEntry;
+
+      closeSeasonPicker();
+      applyingOverlay.classList.remove('hidden');
+
+      try {
+        const stillUrl = episodeStillUrl(episode.still_path);
+        const coverUrl = stillUrl || `${OTV_BASE}/COVER_ART/${entry.contentId}_COVER_ART.jpg?width=3840&height=2160`;
+
+        parent.postMessage({
+          pluginMessage: {
+            type: 'apply-episode-covers',
+            episodesData: [{
+              coverUrl,
+              metadata: {
+                title: episode.name || 'Sin título',
+                chapter: formatChapter(seasonNumber, episode.episode_number),
+                duration: formatDuration(episode.runtime),
+                sinopsis: episode.overview || ''
+              }
+            }]
+          }
+        }, '*');
+
+        setTimeout(() => { applyingOverlay.classList.add('hidden'); }, 800);
+      } catch (err) {
+        console.error('Error applying episode:', err);
+        applyingOverlay.classList.add('hidden');
+        alert(`Error al aplicar el episodio:\n\n${err.message}`);
+      }
+    }
+
+    async function applyEpisodesBatch(seasonNumber) {
+      // Copy episodes and entry BEFORE closing picker (which clears these variables)
+      const episodes = seasonPickerEpisodes;
+      const entry = seasonPickerEntry;
+
+      closeSeasonPicker();
+      applyingOverlay.classList.remove('hidden');
+
+      try {
+        const applyCount = Math.min(episodes.length, chapterCardCount);
+
+        const episodesData = [];
+
+        for (let i = 0; i < applyCount; i++) {
+          const ep = episodes[i];
+          const stillUrl = episodeStillUrl(ep.still_path);
+          const coverUrl = stillUrl || `${OTV_BASE}/COVER_ART/${entry.contentId}_COVER_ART.jpg?width=3840&height=2160`;
+
+          episodesData.push({
+            coverUrl,
+            metadata: {
+              title: ep.name || 'Sin título',
+              chapter: formatChapter(seasonNumber, ep.episode_number),
+              duration: formatDuration(ep.runtime),
+              sinopsis: ep.overview || ''
+            }
+          });
+        }
+
+        parent.postMessage({
+          pluginMessage: {
+            type: 'apply-episode-covers',
+            episodesData
+          }
+        }, '*');
+
+        setTimeout(() => { applyingOverlay.classList.add('hidden'); }, 800);
+      } catch (err) {
+        console.error('Error applying episode batch:', err);
+        applyingOverlay.classList.add('hidden');
+        alert(`Error al aplicar los capítulos:\n\n${err.message}`);
+      }
+    }
+
+    function seasonPickerGoBack() {
+      renderSeasonList(seasonPickerSeasons);
+    }
+
+    function closeSeasonPicker() {
+      document.getElementById('seasonPickerOverlay').classList.add('hidden');
+      seasonPickerEntry = null;
+      seasonPickerSeasons = [];
+      seasonPickerEpisodes = [];
+
+      // Reopen VPS dialog if there's a saved entry
+      if (vpsCurrentEntry) {
+        setTimeout(() => showVPSNextDialog(vpsCurrentEntry), 300);
+      }
+    }
+
+    // -- VPS Next Step Dialog --
+    function showVPSNextDialog(entry) {
+      // Save entry for persistence
+      vpsCurrentEntry = entry;
+
+      const overlay = document.getElementById('vpsNextDialog');
+      const buttonsContainer = document.getElementById('vpsNextDialogButtons');
+
+      const isSeries = entry.mediaType === 'tv';
+
+      if (isSeries) {
+        // Series: show "Añadir capítulos", "Contenido relacionado", and "Ver reparto"
+        buttonsContainer.innerHTML = `
+          <button class="vps-next-btn vps-next-btn-primary" id="vpsNextBtnChapters">Añadir capítulos</button>
+          <button class="vps-next-btn vps-next-btn-secondary" id="vpsNextBtnRelated">Añadir contenido relacionado</button>
+          <button class="vps-next-btn vps-next-btn-secondary" id="vpsNextBtnCast">Ver reparto</button>
+          <button class="vps-next-btn vps-next-btn-tertiary" id="vpsNextBtnClose">Más tarde</button>
+        `;
+
+        document.getElementById('vpsNextBtnChapters').addEventListener('click', () => {
+          hideVPSNextDialog();
+          openSeasonPicker(entry);
+        });
+
+        document.getElementById('vpsNextBtnRelated').addEventListener('click', () => {
+          applyRelatedContent(entry);
+        });
+
+        document.getElementById('vpsNextBtnCast').addEventListener('click', () => {
+          hideVPSNextDialog();
+          switchToPersonasForContent(entry);
+        });
+      } else {
+        // Movie: show "Contenido relacionado" and "Ver reparto"
+        buttonsContainer.innerHTML = `
+          <button class="vps-next-btn vps-next-btn-primary" id="vpsNextBtnRelated">Añadir contenido relacionado</button>
+          <button class="vps-next-btn vps-next-btn-secondary" id="vpsNextBtnCast">Ver reparto</button>
+          <button class="vps-next-btn vps-next-btn-tertiary" id="vpsNextBtnClose">Más tarde</button>
+        `;
+
+        document.getElementById('vpsNextBtnRelated').addEventListener('click', () => {
+          applyRelatedContent(entry);
+        });
+
+        document.getElementById('vpsNextBtnCast').addEventListener('click', () => {
+          hideVPSNextDialog();
+          switchToPersonasForContent(entry);
+        });
+      }
+
+      document.getElementById('vpsNextBtnClose').addEventListener('click', closeVPSNextDialog);
+
+      overlay.classList.remove('hidden');
+    }
+
+    function hideVPSNextDialog() {
+      // Temporarily hide without clearing the entry
+      document.getElementById('vpsNextDialog').classList.add('hidden');
+    }
+
+    function closeVPSNextDialog() {
+      // Fully close and clear the entry
+      document.getElementById('vpsNextDialog').classList.add('hidden');
+      vpsCurrentEntry = null;
+    }
+
+    async function applyRelatedContent(entry) {
+      // Check if we have portrait/landscape cards selected (not VPS)
+      if (coverCount <= 1) {
+        alert('Selecciona múltiples componentes card portrait o landscape para añadir contenido relacionado.');
+        return;
+      }
+
+      if (componentType === 'vps') {
+        alert('El contenido relacionado solo se puede aplicar a cards portrait o landscape, no a VPS.');
+        return;
+      }
+
+      if (!entry.genreIds || entry.genreIds.length === 0) {
+        alert('Este contenido no tiene géneros asociados.');
+        return;
+      }
+
+      hideVPSNextDialog();
+      applyingOverlay.classList.remove('hidden');
+
+      try {
+        // Exclude the VPS content itself and build catalog
+        const allOTVItems = [...otvMovies, ...otvSeries].filter(
+          item => item.contentId !== entry.contentId
+        );
+
+        const selectedIds = new Set();
+        const selectedItems = [];
+
+        // 1. Iterate genre by genre from the main content
+        for (const genreId of entry.genreIds) {
+          if (selectedItems.length >= coverCount) break;
+
+          // Find content from this genre that hasn't been selected yet
+          const genreItems = allOTVItems.filter(item => {
+            if (selectedIds.has(item.contentId)) return false;
+            if (!item.genreIds || item.genreIds.length === 0) return false;
+            return item.genreIds.includes(genreId);
+          });
+
+          // Shuffle randomly and add as many as fit
+          const shuffled = genreItems.sort(() => Math.random() - 0.5);
+          for (const item of shuffled) {
+            if (selectedItems.length >= coverCount) break;
+            selectedIds.add(item.contentId);
+            selectedItems.push(item);
+          }
+        }
+
+        // 2. If still missing, fill with random content from catalog
+        if (selectedItems.length < coverCount) {
+          const remaining = allOTVItems.filter(item => !selectedIds.has(item.contentId));
+          const shuffledRemaining = remaining.sort(() => Math.random() - 0.5);
+
+          for (const item of shuffledRemaining) {
+            if (selectedItems.length >= coverCount) break;
+            selectedIds.add(item.contentId);
+            selectedItems.push(item);
+          }
+        }
+
+        // Resolve image type (detected or user-chosen)
+        let typeToUse = componentType;
+        if (typeToUse === 'unknown') {
+          typeToUse = await pickImageType();
+          if (!typeToUse) {
+            applyingOverlay.classList.add('hidden');
+            setTimeout(() => showVPSNextDialog(entry), 300);
+            return; // user cancelled
+          }
+        }
+
+        // Build URLs for each item
+        const coversUrlData = [];
+        for (const item of selectedItems) {
+          let coverUrl;
+          switch (typeToUse) {
+            case 'card-portrait':
+              coverUrl = `${OTV_BASE}/VERTICAL/${item.contentId}_VERTICAL.jpg?width=3840&height=2160`;
+              break;
+            case 'card-landscape':
+              coverUrl = `${OTV_BASE}/COVER_ART/${item.contentId}_COVER_ART.jpg?width=3840&height=2160`;
+              break;
+            default:
+              coverUrl = `${OTV_BASE}/VERTICAL/${item.contentId}_VERTICAL.jpg?width=3840&height=2160`;
+          }
+          const metadata = await fetchOTVMetadata(item);
+          coversUrlData.push({ coverUrl, titleTreatmentUrl: null, metadata });
+        }
+
+        // Send to sandbox
+        parent.postMessage({
+          pluginMessage: {
+            type: 'apply-multiple-covers-url',
+            coversUrlData: coversUrlData.slice(0, coverCount)
+          }
+        }, '*');
+
+        setTimeout(() => {
+          applyingOverlay.classList.add('hidden');
+          // Reopen dialog after applying
+          setTimeout(() => showVPSNextDialog(entry), 300);
+        }, 800);
+
+      } catch (err) {
+        console.error('Error applying related content:', err);
+        applyingOverlay.classList.add('hidden');
+        alert(`Error al aplicar contenido relacionado:\n\n${err.message}`);
+        setTimeout(() => showVPSNextDialog(entry), 300);
+      }
+    }
+
+    // Wire up season picker buttons
+    document.getElementById('seasonPickerBack').addEventListener('click', seasonPickerGoBack);
+    document.getElementById('seasonPickerClose').addEventListener('click', closeSeasonPicker);
+
+    // -- Apply Image (v1 - kept for Personas tab) --
+    async function applyImage(imageUrl, item) {
+      if (coverCount === 0) {
+        alert('No hay frames "cover" en la selección actual.\n\nSelecciona componentes que contengan un frame llamado "cover".');
+        return;
+      }
+
+      applyingOverlay.classList.remove('hidden');
+
+      try {
+        // Build metadata from list data
+        const title = item.title || item.name || '';
+        const rating = item.vote_average ? item.vote_average.toFixed(1) : '';
+        const date = item.release_date || item.first_air_date || '';
+        const year = date ? date.substring(0, 4) : '';
+        let duration = '';
+        let ageRating = '';
+        let sinopsis = '';
+
+        // Fetch detail for duration/seasons (only for movies and TV)
+        if (currentCategory === 'movie' || currentCategory === 'tv') {
+          try {
+            const detail = await fetchDetail(item.id);
+            if (detail) {
+              if (currentCategory === 'movie') {
+                duration = formatDuration(detail.runtime);
+              } else {
+                const n = detail.number_of_seasons;
+                if (n) duration = `${n} temporada${n === 1 ? '' : 's'}`;
+              }
+              ageRating = extractAgeRating(detail);
+              sinopsis = detail.overview || '';
+            }
+          } catch (detailErr) {
+            // Continue without detail data
+          }
+        }
+
+        // Fetch image bytes
+        const response = await fetch(imageUrl);
+        if (!response.ok) {
+          throw new Error(`Error al descargar la imagen: HTTP ${response.status}`);
+        }
+        const buffer = await response.arrayBuffer();
+        const bytes = Array.from(new Uint8Array(buffer));
+
+        // Build metadata object
+        let metadata = null;
+        if (currentCategory === 'person') {
+          const personName = item.name || '';
+          const dept = item.known_for_department || '';
+          const isActor = dept === 'Acting';
+          const rol = isActor ? '' : (DEPARTMENT_MAP[dept] || dept);
+          metadata = { personName, rol, isActor: isActor };
+        } else {
+          metadata = { title, rating, year, duration, ageRating, sinopsis };
+        }
+
+        parent.postMessage({
+          pluginMessage: {
+            type: 'apply-cover',
+            imageBytes: bytes,
+            metadata: metadata
+          }
+        }, '*');
+
+        setTimeout(() => {
+          applyingOverlay.classList.add('hidden');
+        }, 800);
+      } catch (err) {
+        console.error('Error applying cover:', err);
+        applyingOverlay.classList.add('hidden');
+        alert(`Error al aplicar la cover:\n\n${err.message}\n\nInténtalo de nuevo o prueba con otra imagen.`);
+      }
+    }
+
+    // -- Apply Random Content to Multiple Covers --
+    async function applyRandomContent() {
+      if (coverCount <= 1) {
+        alert('Selecciona múltiples componentes con "cover" para usar contenido aleatorio.');
+        return;
+      }
+
+      // Check if we have enough items
+      const validItems = currentResults.filter(item => {
+        // For OTV catalog: all items have images
+        if (item.contentId) return true;
+        // For TMDB (personas): check profile_path
+        return !!item.profile_path;
+      });
+
+      if (validItems.length === 0) {
+        alert('No hay contenidos con imagen disponibles.');
+        return;
+      }
+      if (currentCategory !== 'person' && validItems.length < coverCount) {
+        alert(`No hay suficientes contenidos con imagen. Se necesitan al menos ${coverCount}.\n\nResultados disponibles: ${validItems.length}\nIntenta cargar más resultados o selecciona menos componentes.`);
+        return;
+      }
+
+      applyingOverlay.classList.remove('hidden');
+
+      try {
+        // For personas from a selected content: preserve Director → Writer → Cast order
+        // For everything else: shuffle randomly
+        let selectedItems;
+        if (currentCategory === 'person' && personSearchMode === 'by-content') {
+          selectedItems = validItems.slice(0, coverCount);
+        } else {
+          const shuffled = [...validItems].sort(() => Math.random() - 0.5);
+          selectedItems = shuffled.slice(0, coverCount);
+        }
+
+        const isOTVMode = !!selectedItems[0].contentId;
+
+        if (isOTVMode) {
+          // Resolve image type (detected or user-chosen)
+          let typeToUse = componentType;
+          if (typeToUse === 'unknown') {
+            typeToUse = await pickImageType();
+            if (!typeToUse) {
+              applyingOverlay.classList.add('hidden');
+              return; // user cancelled
+            }
+          }
+
+          // OTV catalog: build URL for each item using resolved type
+          const coversUrlData = [];
+
+          for (const item of selectedItems) {
+            let coverUrl, titleTreatmentUrl;
+            switch (typeToUse) {
+              case 'card-portrait':
+                coverUrl = `${OTV_BASE}/VERTICAL/${item.contentId}_VERTICAL.jpg?width=3840&height=2160`;
+                break;
+              case 'card-landscape':
+                coverUrl = `${OTV_BASE}/COVER_ART/${item.contentId}_COVER_ART.jpg?width=3840&height=2160`;
+                break;
+              case 'vps':
+                coverUrl = `${OTV_BASE}/BACKGROUND/${item.contentId}_BACKGROUND.jpg?width=3840&height=2160`;
+                titleTreatmentUrl = `${OTV_BASE}/TITLE_TREATMENT/${item.contentId}_title_treatment.png?width=1280&height=720`;
+                break;
+              default:
+                coverUrl = `${OTV_BASE}/VERTICAL/${item.contentId}_VERTICAL.jpg?width=3840&height=2160`;
+            }
+            const metadata = await fetchOTVMetadata(item);
+            coversUrlData.push({ coverUrl, titleTreatmentUrl: titleTreatmentUrl || null, metadata });
+          }
+
+          parent.postMessage({
+            pluginMessage: {
+              type: 'apply-multiple-covers-url',
+              coversUrlData: coversUrlData.slice(0, coverCount)
+            }
+          }, '*');
+        } else {
+          // TMDB personas: fetch bytes in UI (CORS supported by TMDB)
+          const coversData = [];
+
+          for (let i = 0; i < selectedItems.length; i++) {
+            const item = selectedItems[i];
+            try {
+              const coverUrl = `${IMAGE_BASE}original${item.profile_path}`;
+              const personName = item.name || '';
+              const dept = item.known_for_department || '';
+              const isActor = dept === 'Acting';
+              const rol = isActor ? '' : (DEPARTMENT_MAP[dept] || dept);
+              const metadata = { personName, rol, isActor: isActor };
+
+              const response = await fetch(coverUrl);
+              if (!response.ok) throw new Error(`HTTP ${response.status}`);
+              const buffer = await response.arrayBuffer();
+              const bytes = Array.from(new Uint8Array(buffer));
+
+              coversData.push({ imageBytes: bytes, metadata: metadata });
+            } catch (itemErr) {
+              console.error(`Error processing person ${i}:`, itemErr);
+            }
+          }
+
+          if (coversData.length === 0) {
+            throw new Error('No se pudo procesar ninguna imagen.');
+          }
+
+          parent.postMessage({
+            pluginMessage: {
+              type: 'apply-multiple-covers',
+              coversData: coversData.slice(0, coverCount)
+            }
+          }, '*');
+        }
+
+        setTimeout(() => {
+          applyingOverlay.classList.add('hidden');
+        }, 800);
+      } catch (err) {
+        console.error('Error applying random content:', err);
+        applyingOverlay.classList.add('hidden');
+        alert(`Error al aplicar contenido aleatorio:\n\n${err.message}\n\nRevisar la consola para más detalles.`);
+      }
+    }
+
+    // -- Reload / More --
+    function reloadImages() {
+      // For movie/tv tabs: reload random 25 from filtered catalog
+      if (currentCategory === 'movie' || currentCategory === 'tv') {
+        if (filteredCatalog && filteredCatalog.length > 0) {
+          const shuffled = shuffleArray(filteredCatalog);
+          currentResults = shuffled.slice(0, ITEMS_PER_PAGE);
+          console.log(`Reloading ${currentResults.length} random items from ${filteredCatalog.length} total`);
+          renderGrid();
+        }
+        return;
+      }
+
+      // For person tab: use pagination (original behavior)
+      if (currentPage < totalPages) {
+        currentPage++;
+      } else {
+        currentPage = 1;
+      }
+      loadContent();
+    }
+
+    // -- Messages from Sandbox --
+    window.onmessage = (event) => {
+      const msg = event.data.pluginMessage;
+      if (!msg) return;
+
+      if (msg.type === 'selection-changed') {
+        // Immediately reset componentType so stale values don't get used at apply time
+        componentType = 'unknown';
+      }
+
+      if (msg.type === 'selection-info') {
+        selectionCount = msg.count;
+        coverCount = msg.coverCount;
+        componentType = msg.componentType || 'unknown';
+        chapterCardCount = msg.chapterCardCount || 0;
+        updateSelectionInfo();
+      }
+
+      if (msg.type === 'loaded-api-key') {
+        if (msg.apiKey) {
+          apiKey = msg.apiKey;
+          apiKeyInput.value = apiKey;
+          headerKeyBtn.classList.add('connected');
+          apiKeySection.classList.add('collapsed');
+          if (currentCategory !== 'person') loadGenres(currentCategory);
+          loadContent();
+        } else {
+          apiKeySection.classList.remove('collapsed');
+          showEmpty('🔑', 'Introduce tu API Key de TMDB para empezar');
+        }
+      }
+
+      // -- Handle cached catalog (v3) --
+      if (msg.type === 'cached-catalog') {
+        if (msg.data) {
+          const cacheAge = Date.now() - (msg.timestamp || 0);
+          const isExpired = cacheAge > CACHE_TTL_MS;
+
+          // Use cached data even if expired (better than nothing)
+          otvCatalog = msg.data;
+          const entries = Object.values(otvCatalog.catalog);
+          otvMovies = entries.filter(e => e.mediaType === 'movie');
+          otvSeries = entries.filter(e => e.mediaType === 'tv');
+
+          if (isExpired) {
+            const ageHours = Math.round(cacheAge / 1000 / 60 / 60);
+            console.warn(`Using EXPIRED cached catalog (age: ${ageHours} hours). Offline mode.`);
+            console.log(`OTV catalog loaded from cache: ${otvMovies.length} movies, ${otvSeries.length} series`);
+          } else {
+            const ageMinutes = Math.round(cacheAge / 1000 / 60);
+            console.log(`Using cached catalog (age: ${ageMinutes} minutes)`);
+            console.log(`OTV catalog loaded from cache: ${otvMovies.length} movies, ${otvSeries.length} series`);
+          }
+
+          // Render UI if we're on an OTV tab (movie or tv)
+          if (currentCategory === 'movie' || currentCategory === 'tv') {
+            loadGenres(currentCategory);
+            loadContent();
+          }
+        } else {
+          // No cache at all and Supabase failed
+          showEmpty('⚠️', 'No hay catálogo disponible.\\nComprueba tu conexión a internet.');
+        }
+      }
+    };
+
+    function updateSelectionInfo() {
+      if (selectionCount === 0) {
+        selectionInfo.innerHTML = '<span style="color:var(--warning)">Selecciona componentes</span>';
+      } else if (coverCount === 0) {
+        selectionInfo.innerHTML = `${selectionCount} seleccionado(s) · <span style="color:var(--error)">sin "cover"</span>`;
+      } else {
+        selectionInfo.innerHTML = `<strong>${coverCount}</strong> cover(s)`;
+      }
+
+      // Show/hide random button based on cover count and results
+      if (coverCount > 1 && currentResults.length > 0) {
+        randomBar.classList.add('visible');
+
+        // Count valid items with images
+        const validItemsCount = currentResults.filter(item => {
+          // OTV catalog entries have contentId
+          if (item.contentId) return true;
+          // Personas have profile_path
+          if (currentCategory === 'person') return !!item.profile_path;
+          // Fallback for TMDB results
+          return !!(item.poster_path || item.backdrop_path);
+        }).length;
+
+        // Disable if not enough valid results (for persons, allow partial — apply as many as available)
+        btnRandom.disabled = currentCategory === 'person' ? validItemsCount === 0 : validItemsCount < coverCount;
+      } else {
+        randomBar.classList.remove('visible');
+      }
+    }
+
+    // -- Helpers --
+    function showLoading() {
+      imageGrid.classList.add('hidden');
+      emptyState.classList.add('hidden');
+      loadingState.classList.remove('hidden');
+      randomBar.classList.remove('visible');
+    }
+
+    function showEmpty(icon, text) {
+      imageGrid.classList.add('hidden');
+      loadingState.classList.add('hidden');
+      emptyState.classList.remove('hidden');
+      randomBar.classList.remove('visible');
+      emptyState.innerHTML = `
+        <span class="icon">${icon}</span>
+        <p>${text}</p>
+      `;
+    }
+
+    // -- Normalize title for OTV matching --
+    function normalizeTitle(title) {
+      return title.toLowerCase().trim()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^\w\s]/g, '').replace(/\s+/g, ' ');
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+  </script>
+</body>
+
+</html>
