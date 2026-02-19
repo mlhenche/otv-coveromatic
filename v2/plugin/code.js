@@ -178,8 +178,9 @@ function findTitleTreatmentNodes(nodes, excludeIds = new Set()) {
 // -- Helper: check if component name is a chapter card --
 function isChapterCardComponent(name) {
     const n = name.toLowerCase();
-    // Match: card_chapters, card-chapters, CardChapters, chapter, chapters, etc.
-    return n.includes('chapter');
+    // Match: card_chapters, card-chapters, CardChapters, etc.
+    // Require both "card" and "chapter" to avoid matching containers like "rowChapters"
+    return n.includes('card') && n.includes('chapter');
 }
 // -- Find chapter card instances (sync - uses only mainComponent.name) --
 function findChapterCardInstancesSync(nodes) {

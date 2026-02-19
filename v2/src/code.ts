@@ -186,8 +186,9 @@ function findTitleTreatmentNodes(nodes: readonly SceneNode[], excludeIds: Set<st
 // -- Helper: check if component name is a chapter card --
 function isChapterCardComponent(name: string): boolean {
     const n = name.toLowerCase();
-    // Match: card_chapters, card-chapters, CardChapters, chapter, chapters, etc.
-    return n.includes('chapter');
+    // Match: card_chapters, card-chapters, CardChapters, etc.
+    // Require both "card" and "chapter" to avoid matching containers like "rowChapters"
+    return n.includes('card') && n.includes('chapter');
 }
 
 // -- Find chapter card instances (sync - uses only mainComponent.name) --
@@ -812,7 +813,6 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
             for (let i = 0; i < applyCount; i++) {
                 const chapterCard = chapterInstances[i];
                 const epData = episodesData[i];
-
                 // Find the cover node inside this specific card instance
                 let coverNode: SceneNode | null = null;
                 walkTree(chapterCard, (child) => {
