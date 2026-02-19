@@ -388,7 +388,9 @@ function typeFromName(name) {
         return 'card-landscape';
     if (n.includes('card') && n.includes('chapter'))
         return 'card-chapters';
-    if (n.includes('slideshow') || n.includes('vps'))
+    if (n.includes('slideshow'))
+        return 'slideshow';
+    if (n.includes('vps'))
         return 'vps';
     return 'unknown';
 }

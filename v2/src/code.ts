@@ -387,7 +387,8 @@ function typeFromName(name: string): string {
     if (n.includes('card') && n.includes('portrait')) return 'card-portrait';
     if (n.includes('card') && n.includes('landscape')) return 'card-landscape';
     if (n.includes('card') && n.includes('chapter')) return 'card-chapters';
-    if (n.includes('slideshow') || n.includes('vps')) return 'vps';
+    if (n.includes('slideshow')) return 'slideshow';
+    if (n.includes('vps')) return 'vps';
     return 'unknown';
 }
 
