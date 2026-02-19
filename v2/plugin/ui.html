@@ -255,9 +255,35 @@
       pointer-events: none;
     }
 
+    .search-clear-btn {
+      position: absolute;
+      right: 6px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      padding: 0;
+      border: none;
+      border-radius: 50%;
+      background: var(--text-muted);
+      color: var(--bg-secondary);
+      cursor: pointer;
+      opacity: 0.6;
+      transition: opacity var(--transition);
+    }
+
+    .search-clear-btn:hover {
+      opacity: 1;
+    }
+
+    .search-clear-btn.visible {
+      display: flex;
+    }
+
     .controls-bar input[type="text"] {
       width: 100%;
-      padding: 8px 10px 8px 32px;
+      padding: 8px 28px 8px 32px;
       background: var(--bg-secondary);
       border: 1px solid var(--border);
       border-radius: var(--radius);
@@ -1618,6 +1644,13 @@
           </svg>
         </span>
         <input type="text" id="searchInput" placeholder="Buscar películas..." />
+        <button class="search-clear-btn" id="searchClearBtn" title="Borrar búsqueda">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
         <div class="autocomplete-dropdown hidden" id="autocompleteDropdown"></div>
       </div>
       <!-- Genre dropdown -->
@@ -1894,6 +1927,7 @@
     const headerKeyBtn = document.getElementById('headerKeyBtn');
     const apiKeyInput = document.getElementById('apiKeyInput');
     const searchInput = document.getElementById('searchInput');
+    const searchClearBtn = document.getElementById('searchClearBtn');
     const gridContainer = document.getElementById('gridContainer');
     const imageGrid = document.getElementById('imageGrid');
     const loadingState = document.getElementById('loadingState');
@@ -2333,6 +2367,16 @@
         currentPage = 1;
         loadContent();
       }, 400);
+
+      // Toggle clear button visibility
+      searchClearBtn.classList.toggle('visible', query.length > 0);
+    });
+
+    searchClearBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      searchClearBtn.classList.remove('visible');
+      searchInput.focus();
+      searchInput.dispatchEvent(new Event('input'));
     });
 
     // -- Load Content --
@@ -2574,6 +2618,7 @@
       if (!minutes || minutes <= 0) return '';
       const h = Math.floor(minutes / 60);
       const m = minutes % 60;
+      if (h === 0) return `${m}min`;
       return `${h}h ${m}min`;
     }
 
@@ -2659,11 +2704,11 @@
         .sort((a, b) => a.episode_number - b.episode_number);
     }
 
-    // -- Format episode chapter string (T01 | E03) --
+    // -- Format episode chapter string (T01 E03) --
     function formatChapter(seasonNumber, episodeNumber) {
       const s = String(seasonNumber).padStart(2, '0');
       const e = String(episodeNumber).padStart(2, '0');
-      return `T${s} | E${e}`;
+      return `T${s} E${e}`;
     }
 
     // -- Build episode still URL from TMDB --
