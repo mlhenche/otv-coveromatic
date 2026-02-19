@@ -3326,7 +3326,11 @@
         return !!item.profile_path;
       });
 
-      if (validItems.length < coverCount) {
+      if (validItems.length === 0) {
+        alert('No hay contenidos con imagen disponibles.');
+        return;
+      }
+      if (currentCategory !== 'person' && validItems.length < coverCount) {
         alert(`No hay suficientes contenidos con imagen. Se necesitan al menos ${coverCount}.\n\nResultados disponibles: ${validItems.length}\nIntenta cargar más resultados o selecciona menos componentes.`);
         return;
       }
@@ -3411,8 +3415,8 @@
             }
           }
 
-          if (coversData.length < coverCount) {
-            throw new Error(`Solo se pudieron procesar ${coversData.length} de ${coverCount} contenidos necesarios.`);
+          if (coversData.length === 0) {
+            throw new Error('No se pudo procesar ninguna imagen.');
           }
 
           parent.postMessage({
@@ -3511,8 +3515,8 @@
           return !!(item.poster_path || item.backdrop_path);
         }).length;
 
-        // Disable if not enough valid results
-        btnRandom.disabled = validItemsCount < coverCount;
+        // Disable if not enough valid results (for persons, allow partial — apply as many as available)
+        btnRandom.disabled = currentCategory === 'person' ? validItemsCount === 0 : validItemsCount < coverCount;
       } else {
         randomBar.classList.remove('visible');
       }
