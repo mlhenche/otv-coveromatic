@@ -3092,26 +3092,45 @@
       applyingOverlay.classList.remove('hidden');
 
       try {
-        // Determine if we need movies or series based on component type or entry type
-        // For simplicity, we'll use both and let the user's selection filter naturally
-        const allOTVItems = [...otvMovies, ...otvSeries];
+        // Exclude the VPS content itself and build catalog
+        const allOTVItems = [...otvMovies, ...otvSeries].filter(
+          item => item.contentId !== entry.contentId
+        );
 
-        // Filter by genre: items that share at least one genre with the VPS entry
-        const relatedItems = allOTVItems.filter(item => {
-          if (!item.genreIds || item.genreIds.length === 0) return false;
-          return item.genreIds.some(genreId => entry.genreIds.includes(genreId));
-        });
+        const selectedIds = new Set();
+        const selectedItems = [];
 
-        if (relatedItems.length < coverCount) {
-          alert(`No hay suficiente contenido relacionado. Se necesitan al menos ${coverCount}.\n\nContenidos relacionados disponibles: ${relatedItems.length}`);
-          applyingOverlay.classList.add('hidden');
-          setTimeout(() => showVPSNextDialog(entry), 300);
-          return;
+        // 1. Iterate genre by genre from the main content
+        for (const genreId of entry.genreIds) {
+          if (selectedItems.length >= coverCount) break;
+
+          // Find content from this genre that hasn't been selected yet
+          const genreItems = allOTVItems.filter(item => {
+            if (selectedIds.has(item.contentId)) return false;
+            if (!item.genreIds || item.genreIds.length === 0) return false;
+            return item.genreIds.includes(genreId);
+          });
+
+          // Shuffle randomly and add as many as fit
+          const shuffled = genreItems.sort(() => Math.random() - 0.5);
+          for (const item of shuffled) {
+            if (selectedItems.length >= coverCount) break;
+            selectedIds.add(item.contentId);
+            selectedItems.push(item);
+          }
         }
 
-        // Shuffle and select random items
-        const shuffled = [...relatedItems].sort(() => Math.random() - 0.5);
-        const selectedItems = shuffled.slice(0, coverCount);
+        // 2. If still missing, fill with random content from catalog
+        if (selectedItems.length < coverCount) {
+          const remaining = allOTVItems.filter(item => !selectedIds.has(item.contentId));
+          const shuffledRemaining = remaining.sort(() => Math.random() - 0.5);
+
+          for (const item of shuffledRemaining) {
+            if (selectedItems.length >= coverCount) break;
+            selectedIds.add(item.contentId);
+            selectedItems.push(item);
+          }
+        }
 
         // Resolve image type (detected or user-chosen)
         let typeToUse = componentType;
