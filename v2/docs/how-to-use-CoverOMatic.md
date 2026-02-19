@@ -4,6 +4,20 @@ Plugin de Figma para aplicar imágenes y metadatos de películas, series, episod
 
 ---
 
+## ⚠️ Advertencia Importante para Diseñadores
+
+**IMPORTANTE:** Siempre comprobar y validar los datos que añade el plugin antes de publicar los diseños. El plugin obtiene información automáticamente de TMDB y del catálogo OTV, pero pueden existir:
+
+- **Errores en metadatos de TMDB:** Títulos, sinopsis o fechas incorrectas
+- **Imágenes de baja calidad:** O con relaciones de aspecto incorrectas
+- **Clasificaciones por edad:** Pueden no corresponder con las clasificaciones españolas
+- **Géneros mal asignados:** O información incompleta
+- **Contenido inapropiado:** En sinopsis o títulos que no pasan validación
+
+**Responsabilidad final:** El diseñador debe revisar y corregir cualquier información antes de entregar los diseños finales al cliente.
+
+---
+
 ## ⚙️ Configuración Inicial
 
 ### Obtener API Key de TMDB
