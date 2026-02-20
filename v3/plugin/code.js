@@ -16,25 +16,17 @@ const PROVIDER_MAP = {
     'FLMN': 'Filmin',
     'APREM': 'A3 Premium'
 };
-// -- Recursive traversal that includes hidden nodes --
-function walkTree(node, callback) {
-    callback(node);
-    if ('children' in node) {
-        for (const child of node.children) {
-            walkTree(child, callback);
-        }
+// -- Helper: check if a node or its ancestors are in the exclude set --
+function isExcluded(node, excludeIds) {
+    if (excludeIds.size === 0)
+        return false;
+    let current = node;
+    while (current && current.type !== 'PAGE' && current.type !== 'DOCUMENT') {
+        if (excludeIds.has(current.id))
+            return true;
+        current = current.parent;
     }
-}
-// -- Like walkTree but skips nodes whose IDs are in the exclude set --
-function walkTreeExcludingIds(node, excludeIds, callback) {
-    callback(node);
-    if ('children' in node) {
-        for (const child of node.children) {
-            if (excludeIds.has(child.id))
-                continue;
-            walkTreeExcludingIds(child, excludeIds, callback);
-        }
-    }
+    return false;
 }
 // -- Check if a node is a valid "cover" target --
 function isCoverNode(node) {
@@ -46,33 +38,34 @@ function isTitleTreatmentNode(node) {
 }
 // -- Find a text node by name inside a parent (including hidden) --
 function findTextNode(parent, name) {
-    let result = null;
-    walkTree(parent, (node) => {
-        if (!result && node.type === 'TEXT' && node.name.trim().toLowerCase() === name) {
-            result = node;
-        }
-    });
-    return result;
+    if (parent.type === 'TEXT' && parent.name.trim().toLowerCase() === name)
+        return parent;
+    if ('findAllWithCriteria' in parent) {
+        const texts = parent.findAllWithCriteria({ types: ['TEXT'] });
+        return texts.find(n => n.name.trim().toLowerCase() === name) || null;
+    }
+    return null;
 }
 // -- Find all text nodes by name inside a parent (including hidden) --
 function findAllTextNodes(parent, name) {
     const results = [];
-    walkTree(parent, (node) => {
-        if (node.type === 'TEXT' && node.name.trim().toLowerCase() === name) {
-            results.push(node);
-        }
-    });
+    if (parent.type === 'TEXT' && parent.name.trim().toLowerCase() === name)
+        results.push(parent);
+    if ('findAllWithCriteria' in parent) {
+        const texts = parent.findAllWithCriteria({ types: ['TEXT'] });
+        results.push(...texts.filter(n => n.name.trim().toLowerCase() === name));
+    }
     return results;
 }
 // -- Find a component instance by name inside a parent (including hidden) --
 function findInstanceNode(parent, name) {
-    let result = null;
-    walkTree(parent, (node) => {
-        if (!result && node.type === 'INSTANCE' && node.name.trim().toLowerCase() === name) {
-            result = node;
-        }
-    });
-    return result;
+    if (parent.type === 'INSTANCE' && parent.name.trim().toLowerCase() === name)
+        return parent;
+    if ('findAllWithCriteria' in parent) {
+        const instances = parent.findAllWithCriteria({ types: ['INSTANCE'] });
+        return instances.find(n => n.name.trim().toLowerCase() === name) || null;
+    }
+    return null;
 }
 // -- Extract provider from contentId prefix --
 function extractProvider(contentId) {
@@ -94,11 +87,18 @@ function isProviderLogoComponent(node) {
 function findProviderLogoNodes(nodes, excludeIds = new Set()) {
     const logos = [];
     for (const node of nodes) {
-        walkTreeExcludingIds(node, excludeIds, (child) => {
-            if (isProviderLogoComponent(child)) {
-                logos.push(child);
+        if (isExcluded(node, excludeIds))
+            continue;
+        if (isProviderLogoComponent(node))
+            logos.push(node);
+        if ('findAllWithCriteria' in node) {
+            const instances = node.findAllWithCriteria({ types: ['INSTANCE'] });
+            for (const child of instances) {
+                if (isProviderLogoComponent(child) && !isExcluded(child, excludeIds)) {
+                    logos.push(child);
+                }
             }
-        });
+        }
     }
     return logos;
 }
@@ -123,15 +123,21 @@ function isCardComponentName(name) {
 // -- Sync: build card cache from nodes using only mainComponent.name (no await).
 // Fast — catches all locally accessible components immediately. --
 function refreshCardCacheSync(nodes) {
+    var _a, _b;
     for (const node of nodes) {
-        walkTree(node, (child) => {
-            var _a;
-            if (child.type !== 'INSTANCE')
-                return;
-            const compName = (((_a = child.mainComponent) === null || _a === void 0 ? void 0 : _a.name) || '').toLowerCase();
+        if (node.type === 'INSTANCE') {
+            const compName = (((_a = node.mainComponent) === null || _a === void 0 ? void 0 : _a.name) || '').toLowerCase();
             if (isCardComponentName(compName))
-                cachedAllCardIds.add(child.id);
-        });
+                cachedAllCardIds.add(node.id);
+        }
+        if ('findAllWithCriteria' in node) {
+            const instances = node.findAllWithCriteria({ types: ['INSTANCE'] });
+            for (const child of instances) {
+                const compName = (((_b = child.mainComponent) === null || _b === void 0 ? void 0 : _b.name) || '').toLowerCase();
+                if (isCardComponentName(compName))
+                    cachedAllCardIds.add(child.id);
+            }
+        }
     }
 }
 // -- Async: extend card cache with remote/library components (getMainComponentAsync).
@@ -141,11 +147,17 @@ async function refreshCardCache(nodes) {
     refreshCardCacheSync(nodes); // immediate sync pass first
     const instances = [];
     for (const node of nodes) {
-        walkTree(node, (child) => {
-            if (child.type === 'INSTANCE' && !cachedAllCardIds.has(child.id)) {
-                instances.push(child); // only unresolved instances
+        if (node.type === 'INSTANCE' && !cachedAllCardIds.has(node.id)) {
+            instances.push(node);
+        }
+        if ('findAllWithCriteria' in node) {
+            const children = node.findAllWithCriteria({ types: ['INSTANCE'] });
+            for (const child of children) {
+                if (!cachedAllCardIds.has(child.id)) {
+                    instances.push(child);
+                }
             }
-        });
+        }
     }
     for (const inst of instances) {
         const name = await getComponentNameAsync(inst);
@@ -157,10 +169,14 @@ async function refreshCardCache(nodes) {
 function findCoverNodes(nodes, excludeIds = new Set()) {
     const covers = [];
     for (const node of nodes) {
-        walkTreeExcludingIds(node, excludeIds, (child) => {
-            if (isCoverNode(child))
-                covers.push(child);
-        });
+        if (isExcluded(node, excludeIds))
+            continue;
+        if (isCoverNode(node))
+            covers.push(node);
+        if ('findAll' in node) {
+            const children = node.findAll(child => isCoverNode(child) && !isExcluded(child, excludeIds));
+            covers.push(...children);
+        }
     }
     return covers;
 }
@@ -168,10 +184,14 @@ function findCoverNodes(nodes, excludeIds = new Set()) {
 function findTitleTreatmentNodes(nodes, excludeIds = new Set()) {
     const titleTreatments = [];
     for (const node of nodes) {
-        walkTreeExcludingIds(node, excludeIds, (child) => {
-            if (isTitleTreatmentNode(child))
-                titleTreatments.push(child);
-        });
+        if (isExcluded(node, excludeIds))
+            continue;
+        if (isTitleTreatmentNode(node))
+            titleTreatments.push(node);
+        if ('findAll' in node) {
+            const children = node.findAll(child => isTitleTreatmentNode(child) && !isExcluded(child, excludeIds));
+            titleTreatments.push(...children);
+        }
     }
     return titleTreatments;
 }
@@ -184,29 +204,33 @@ function isChapterCardComponent(name) {
 }
 // -- Find chapter card instances (sync - uses only mainComponent.name) --
 function findChapterCardInstancesSync(nodes) {
+    var _a, _b;
     const chapterCards = [];
     for (const node of nodes) {
-        walkTree(node, (child) => {
-            var _a;
-            if (child.type === 'INSTANCE') {
-                const inst = child;
-                const compName = ((_a = inst.mainComponent) === null || _a === void 0 ? void 0 : _a.name) || '';
-                if (compName && isChapterCardComponent(compName)) {
+        if (node.type === 'INSTANCE') {
+            const compName = ((_a = node.mainComponent) === null || _a === void 0 ? void 0 : _a.name) || '';
+            if (compName && isChapterCardComponent(compName))
+                chapterCards.push(node);
+        }
+        if ('findAllWithCriteria' in node) {
+            const instances = node.findAllWithCriteria({ types: ['INSTANCE'] });
+            for (const inst of instances) {
+                const compName = ((_b = inst.mainComponent) === null || _b === void 0 ? void 0 : _b.name) || '';
+                if (compName && isChapterCardComponent(compName))
                     chapterCards.push(inst);
-                }
             }
-        });
+        }
     }
     return chapterCards;
 }
 // -- Helper: check if an instance has a "cover" child (confirms it's a real card) --
 function hasCoverChild(node) {
-    let found = false;
-    walkTree(node, (child) => {
-        if (!found && isCoverNode(child))
-            found = true;
-    });
-    return found;
+    if (isCoverNode(node))
+        return true;
+    if ('findOne' in node) {
+        return !!node.findOne(child => isCoverNode(child));
+    }
+    return false;
 }
 // -- Find chapter card instances (async - resolves remote components) --
 async function findChapterCardInstancesAsync(nodes) {
@@ -215,11 +239,16 @@ async function findChapterCardInstancesAsync(nodes) {
     const allInstances = [];
     // Collect all instances from the selection tree
     for (const node of nodes) {
-        walkTree(node, (child) => {
-            if (child.type === 'INSTANCE' && !allInstances.includes(child)) {
-                allInstances.push(child);
+        if (node.type === 'INSTANCE' && !allInstances.includes(node)) {
+            allInstances.push(node);
+        }
+        if ('findAllWithCriteria' in node) {
+            const instances = node.findAllWithCriteria({ types: ['INSTANCE'] });
+            for (const inst of instances) {
+                if (!allInstances.includes(inst))
+                    allInstances.push(inst);
             }
-        });
+        }
     }
     // Check each instance (check instance name OR component name OR ComponentSet parent name)
     const addedIds = new Set();
@@ -378,11 +407,13 @@ function findMetadataScope(coverNode) {
     let current = coverNode.parent;
     while (current && current.type !== 'PAGE' && current.type !== 'DOCUMENT') {
         const sceneNode = current;
-        let hasText = false;
-        walkTree(sceneNode, (n) => { if (!hasText && n.type === 'TEXT')
-            hasText = true; });
-        if (hasText)
+        if (sceneNode.type === 'TEXT')
             return sceneNode;
+        if ('findAllWithCriteria' in sceneNode) {
+            const texts = sceneNode.findAllWithCriteria({ types: ['TEXT'] });
+            if (texts.length > 0)
+                return sceneNode;
+        }
         current = sceneNode.parent;
     }
     return coverNode.parent || coverNode;
@@ -405,28 +436,40 @@ function typeFromName(name) {
 // -- Synchronous type detection from selection: walks entire tree, checks node names
 // and mainComponent.name (sync). Called at apply time to avoid race conditions. --
 function detectTypeSync(nodes) {
+    var _a;
     let componentType = 'unknown';
     let found = false;
     for (const node of nodes) {
-        walkTree(node, (child) => {
-            var _a;
-            if (found)
-                return;
-            const t = typeFromName(child.name);
-            if (t !== 'unknown') {
-                componentType = t;
-                found = true;
-                return;
-            }
-            if (child.type === 'INSTANCE') {
-                const compName = (((_a = child.mainComponent) === null || _a === void 0 ? void 0 : _a.name) || '').toLowerCase();
-                const t2 = typeFromName(compName);
-                if (t2 !== 'unknown') {
-                    componentType = t2;
+        const t = typeFromName(node.name);
+        if (t !== 'unknown')
+            return t;
+        if (node.type === 'INSTANCE') {
+            const compName = (((_a = node.mainComponent) === null || _a === void 0 ? void 0 : _a.name) || '').toLowerCase();
+            const t2 = typeFromName(compName);
+            if (t2 !== 'unknown')
+                return t2;
+        }
+        if ('findOne' in node) {
+            node.findOne(child => {
+                var _a;
+                const ct = typeFromName(child.name);
+                if (ct !== 'unknown') {
+                    componentType = ct;
                     found = true;
+                    return true;
                 }
-            }
-        });
+                if (child.type === 'INSTANCE') {
+                    const compName = (((_a = child.mainComponent) === null || _a === void 0 ? void 0 : _a.name) || '').toLowerCase();
+                    const ct2 = typeFromName(compName);
+                    if (ct2 !== 'unknown') {
+                        componentType = ct2;
+                        found = true;
+                        return true;
+                    }
+                }
+                return false;
+            });
+        }
         if (found)
             break;
     }
@@ -442,40 +485,16 @@ function detectTypeSync(nodes) {
 async function sendSelection() {
     const myVersion = ++selectionVersion;
     const selection = figma.currentPage.selection;
-    let componentType = 'unknown';
-    // Pass 1 — full tree walk, sync (node name + mainComponent.name if available)
-    let found = false;
-    for (const node of selection) {
-        walkTree(node, (child) => {
-            var _a;
-            if (found)
-                return;
-            const t = typeFromName(child.name);
-            if (t !== 'unknown') {
-                componentType = t;
-                found = true;
-                return;
-            }
-            if (child.type === 'INSTANCE') {
-                const compName = (((_a = child.mainComponent) === null || _a === void 0 ? void 0 : _a.name) || '').toLowerCase();
-                const t2 = typeFromName(compName);
-                if (t2 !== 'unknown') {
-                    componentType = t2;
-                    found = true;
-                }
-            }
-        });
-        if (found)
-            break;
-    }
+    let componentType = detectTypeSync(selection);
     // Pass 2 — full tree walk, async (getMainComponentAsync for remote/library instances)
     if (componentType === 'unknown') {
         const allInstances = [];
         for (const node of selection) {
-            walkTree(node, (child) => {
-                if (child.type === 'INSTANCE')
-                    allInstances.push(child);
-            });
+            if (node.type === 'INSTANCE')
+                allInstances.push(node);
+            if ('findAllWithCriteria' in node) {
+                allInstances.push(...node.findAllWithCriteria({ types: ['INSTANCE'] }));
+            }
         }
         for (const inst of allInstances) {
             const compName = await getComponentNameAsync(inst);
@@ -790,13 +809,13 @@ figma.ui.onmessage = async (msg) => {
             for (let i = 0; i < applyCount; i++) {
                 const chapterCard = chapterInstances[i];
                 const epData = episodesData[i];
-                // Find the cover node inside this specific card instance
                 let coverNode = null;
-                walkTree(chapterCard, (child) => {
-                    if (!coverNode && isCoverNode(child)) {
-                        coverNode = child;
-                    }
-                });
+                if (isCoverNode(chapterCard)) {
+                    coverNode = chapterCard;
+                }
+                else if ('findOne' in chapterCard) {
+                    coverNode = chapterCard.findOne(child => isCoverNode(child));
+                }
                 if (!coverNode)
                     continue; // Skip if no cover found in this card
                 // Apply still image
