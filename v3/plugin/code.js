@@ -34,7 +34,8 @@ function isCoverNode(node) {
 }
 // -- Check if a node is a valid "titleTreatment" target --
 function isTitleTreatmentNode(node) {
-    return node.name.trim().toLowerCase() === 'titletreatment' && 'fills' in node;
+    const name = node.name.trim().toLowerCase();
+    return (name === 'titletreatment' || name === 'title treatment' || name === 'title_treatment') && 'fills' in node;
 }
 // -- Find a text node by name inside a parent (including hidden) --
 function findTextNode(parent, name) {
@@ -71,10 +72,13 @@ function findInstanceNode(parent, name) {
 function extractProvider(contentId) {
     if (!contentId)
         return null;
-    // ContentId format: PREFIX_12345_... or PREFIX-12345-...
-    // Extract the part before first _ or -
-    const prefix = contentId.split(/[_-]/)[0].toUpperCase();
-    return PROVIDER_MAP[prefix] || null;
+    const idUpper = contentId.toUpperCase();
+    for (const key of Object.keys(PROVIDER_MAP)) {
+        if (idUpper.startsWith(key)) {
+            return PROVIDER_MAP[key];
+        }
+    }
+    return null;
 }
 // -- Check if node is a provider logo component --
 function isProviderLogoComponent(node) {
@@ -535,7 +539,7 @@ figma.on('selectionchange', () => {
     sendSelection();
 });
 figma.ui.onmessage = async (msg) => {
-    var _a;
+    var _a, _b;
     if (msg.type === 'get-selection') {
         sendSelection();
     }
@@ -750,6 +754,39 @@ figma.ui.onmessage = async (msg) => {
                 if (coverData.metadata) {
                     const scope = findMetadataScope(coverNode);
                     await fillMetadata([scope], coverData.metadata);
+                }
+                // Apply provider logo if contentId has known prefix
+                if ((_b = coverData.metadata) === null || _b === void 0 ? void 0 : _b.contentId) {
+                    const providerValue = extractProvider(coverData.metadata.contentId);
+                    if (providerValue) {
+                        const scope = findMetadataScope(coverNode);
+                        const providerLogos = findProviderLogoNodes([scope], cachedAllCardIds);
+                        for (const logo of providerLogos) {
+                            const props = logo.componentProperties;
+                            let providerKey = null;
+                            // Find the provider property key (handles variant names with #)
+                            for (const key of Object.keys(props)) {
+                                if (key === 'provider' || key.startsWith('provider#')) {
+                                    providerKey = key;
+                                    break;
+                                }
+                            }
+                            if (providerKey) {
+                                try {
+                                    const mainComponent = logo.mainComponent;
+                                    if (mainComponent)
+                                        logo.swapComponent(mainComponent);
+                                    logo.setProperties({ [providerKey]: providerValue });
+                                }
+                                catch (e) {
+                                    try {
+                                        logo.setProperties({ [providerKey]: providerValue });
+                                    }
+                                    catch (_) { }
+                                }
+                            }
+                        }
+                    }
                 }
             }
             figma.notify(`✅ ${applyCount} cover(s) aplicadas con contenido aleatorio.`);
