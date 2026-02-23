@@ -3,6 +3,15 @@ import { useSupabaseCatalog } from '../hooks/useSupabaseCatalog';
 import { useTMDBPersonSearch, useTMDBCredits } from '../hooks/useTMDB';
 import CoverCard, { CatalogItem } from './CoverCard';
 
+function shuffle<T>(arr: T[]): T[] {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+}
+
 interface CoverGridProps {
     apiKey: string;
     activeTab: string;
@@ -117,6 +126,8 @@ export default function CoverGrid({
                     }
                 } catch (e) {
                     console.error("TMDB metadata fetch error", e);
+                    Logger.add('TMDB fetch failed', String(e), ['warning']);
+                    parent.postMessage({ pluginMessage: { type: 'notify-warning', message: '⚠️ No se pudo cargar metadata de TMDB. Se aplicará solo la imagen.' } }, '*');
                 }
             }
 
@@ -186,7 +197,7 @@ export default function CoverGrid({
                     return item.genreIds?.includes(gId);
                 });
 
-                const shuffled = genreItems.sort(() => Math.random() - 0.5);
+                const shuffled = shuffle(genreItems);
                 for (const item of shuffled) {
                     if (selectedItems.length >= selectionInfo.coverCount) break;
                     selectedIds.add(item.contentId);
@@ -196,7 +207,7 @@ export default function CoverGrid({
 
             if (selectedItems.length < selectionInfo.coverCount) {
                 const remaining = allOTVItems.filter(item => !selectedIds.has(item.contentId));
-                const shuffledRemaining = remaining.sort(() => Math.random() - 0.5);
+                const shuffledRemaining = shuffle(remaining);
 
                 for (const item of shuffledRemaining) {
                     if (selectedItems.length >= selectionInfo.coverCount) break;
@@ -280,7 +291,7 @@ export default function CoverGrid({
 
         // Apply shuffle/randomness when reloadTrigger changes
         if (reloadTrigger && reloadTrigger > 0) {
-            results = [...results].sort(() => Math.random() - 0.5);
+            results = shuffle(results);
         }
 
         return results;
@@ -298,7 +309,7 @@ export default function CoverGrid({
         if (activeTab === 'person' && personSearchMode === 'by-content') {
             selectedItems = validItems.slice(0, totalTargetCards);
         } else {
-            const shuffled = [...validItems].sort(() => Math.random() - 0.5);
+            const shuffled = shuffle(validItems);
             selectedItems = shuffled.slice(0, totalTargetCards);
         }
 

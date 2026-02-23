@@ -1,84 +1,113 @@
-# OTV CoverOmatic - Plugin de Figma
+# CoverOmatic v3 — Plugin de Figma
 
-Plugin de Figma para aplicar imágenes y metadatos de películas, series y personas desde TMDB.
+Plugin de Figma para el equipo de diseño de **Orange TV / CitrusDLS**.
+Aplica carátulas, metadatos y personas a componentes del Design System directamente desde Figma.
 
-## Estructura del Proyecto
+---
 
-Este repositorio contiene múltiples versiones del plugin:
+## Qué hace
+
+- **Cine y Series** — busca y aplica imágenes (portrait, landscape, background + title treatment) y metadatos (título, año, rating, duración, clasificación, sinopsis, géneros) desde el catálogo de Orange TV
+- **Personas** — busca actores y directores por nombre o por reparto de una película/serie vía TMDB, y aplica su foto a componentes de personaje
+- **Aplicar Aleatorio** — rellena múltiples componentes seleccionados en un clic
+- **Capítulos** — selecciona temporada/episodio y aplica imágenes de capítulo
+- **VPS / Slideshow** — aplica background + title treatment a envolventes
+- **Log** — registro de todas las acciones del plugin para depuración
+
+---
+
+## Estructura del proyecto
 
 ```
-/covers
-├── v1/               # Versión 1.0 (Estable)
-│   ├── code.ts       # Código principal del plugin
-│   ├── code.js       # Código compilado
-│   ├── ui.html       # Interfaz de usuario
-│   ├── manifest.json # Configuración del plugin
-│   └── ...
-│
-├── v2/               # Versión 2.0 (En desarrollo)
-│   ├── code.ts       # Nueva versión con mejoras
-│   ├── code.js       # Código compilado
-│   ├── ui.html       # Interfaz actualizada
-│   ├── manifest.json # Configuración actualizada
-│   └── ...
-│
-└── node_modules/     # Dependencias compartidas
+covers/
+├── .claude/
+│   └── CLAUDE.md          ← contexto completo para Claude (credenciales, proceso, arquitectura)
+├── README.md
+├── TODO.md                ← tareas pendientes y próximos pasos
+├── v3/                    ← versión activa ✅
+│   ├── plugin/            ← distribución (no editar directamente)
+│   │   ├── manifest.json
+│   │   ├── code.js        ← build del backend
+│   │   └── ui.html        ← build del frontend (React compilado)
+│   ├── src/               ← código fuente
+│   │   ├── code.ts        ← backend del plugin (Figma sandbox)
+│   │   └── ui/            ← interfaz React + TypeScript
+│   │       ├── App.tsx
+│   │       ├── components/
+│   │       └── hooks/
+│   ├── catalog/           ← herramientas de catálogo
+│   │   ├── extract-catalog-v2.js  ← parsea OrangeCatalog.html → otv-catalog.json
+│   │   └── otv-catalog.json       ← catálogo local (merge point)
+│   ├── scripts/           ← CLI de gestión del catálogo en Supabase
+│   │   ├── sync-to-supabase.js   ← sincroniza catálogo local → Supabase
+│   │   ├── enrich-catalog.js     ← enriquece entradas sin TMDB ID
+│   │   ├── add-content.js        ← añade contenido individual
+│   │   ├── manage-content.js     ← activa/desactiva entradas
+│   │   └── .env.example
+│   ├── docs/
+│   │   ├── v3_handoff_context.md ← contexto técnico y decisiones arquitectónicas
+│   │   └── how-to-use-CoverOMatic.md
+│   └── supabase/
+│       └── schema.sql     ← esquema de la base de datos
+├── v1/                    ← versión 1 (archivo)
+└── v2/                    ← versión 2 (archivo)
 ```
 
-## Versiones
+---
 
-### v1.0 - Versión Estable
-- ✅ Aplicar imágenes de TMDB a componentes de Figma
-- ✅ Búsqueda de películas, series y personas
-- ✅ Filtros por género y orientación
-- ✅ Contenido aleatorio para múltiples componentes
-- ✅ Campos soportados: title, rating, year, duration, sinopsis, ageTag
+## Stack técnico
 
-📁 Ubicación: `/v1`
+| Capa | Tecnología |
+|------|-----------|
+| Plugin Figma | TypeScript → compilado con Vite (`vite-plugin-singlefile`) |
+| UI | React 18 + TypeScript + `@tanstack/react-query` |
+| Base de datos | Supabase (PostgreSQL) |
+| Metadatos | TMDB API |
+| Caché | `figma.clientStorage` (TTL 4h) |
 
-### v2.0 - En Desarrollo
-- 🚧 Nueva versión con enfoque mejorado
-- 🚧 Características por definir
+---
 
-📁 Ubicación: `/v2`
+## Cargar el plugin en Figma
+
+1. Abre Figma Desktop
+2. `Plugins` → `Development` → `Import plugin from manifest`
+3. Selecciona `v3/plugin/manifest.json`
+
+---
 
 ## Desarrollo
 
-### Compilar TypeScript
-
-Para compilar los cambios en cada versión:
-
 ```bash
-# Compilar v1
-cd v1
-npx tsc
-
-# Compilar v2
-cd v2
-npx tsc
-```
-
-### Instalar Dependencias
-
-```bash
+cd v3
 npm install
+npm run dev      # inicia Vite en modo watch
+npm run build    # compila a v3/plugin/ui.html + code.js
 ```
 
-## Configuración de Figma
+El backend (`code.ts`) se compila por separado:
+```bash
+cd v3/src
+npx tsc
+```
 
-1. Abre Figma Desktop
-2. Ve a Plugins → Development → Import plugin from manifest
-3. Selecciona el `manifest.json` de la versión que quieras usar:
-   - `/v1/manifest.json` para v1.0
-   - `/v2/manifest.json` para v2.0
+---
 
-## Contribuir
+## Gestión del catálogo
 
-Para trabajar en una nueva versión:
-1. Trabaja en la carpeta de la versión correspondiente
-2. Compila los cambios con TypeScript
-3. Prueba en Figma antes de hacer commit
+El catálogo VOD vive en **Supabase** y se actualiza con los scripts de `v3/scripts/`.
+El proceso completo (obtener HTML de OrangeTV → parsear → sincronizar → enriquecer) está documentado en `.claude/CLAUDE.md`.
+
+```bash
+# Añadir un contenido individual
+SUPABASE_URL=... SUPABASE_SERVICE_KEY=... TMDB_API_KEY=... \
+  node v3/scripts/add-content.js --title "Título" --contentId "SKYS_0001234"
+
+# Sincronizar catálogo completo desde otv-catalog.json
+SUPABASE_URL=... SUPABASE_SERVICE_KEY=... TMDB_API_KEY=... \
+  node v3/scripts/sync-to-supabase.js --file v3/catalog/otv-catalog.json
+```
 
 ---
 
 **Desarrollado para**: OrangeTV | CitrusDLS
+**Versión activa**: v3.0 (migrada a Supabase, febrero 2026)

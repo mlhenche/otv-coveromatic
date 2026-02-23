@@ -70,7 +70,7 @@ function findInstanceNode(parent, name) {
 }
 // -- Extract provider from contentId prefix --
 function extractProvider(contentId) {
-    if (!contentId)
+    if (!contentId || contentId.length < 2)
         return null;
     const idUpper = contentId.toUpperCase();
     for (const key of Object.keys(PROVIDER_MAP)) {
@@ -79,6 +79,40 @@ function extractProvider(contentId) {
         }
     }
     return null;
+}
+// -- Apply provider logo to matching instances in a scope --
+function applyProviderLogo(logos, providerValue) {
+    let applied = 0;
+    for (const logo of logos) {
+        const props = logo.componentProperties;
+        let providerKey = null;
+        for (const key of Object.keys(props)) {
+            if (key === 'provider' || key.startsWith('provider#')) {
+                providerKey = key;
+                break;
+            }
+        }
+        if (!providerKey)
+            continue;
+        try {
+            const mainComponent = logo.mainComponent;
+            if (mainComponent)
+                logo.swapComponent(mainComponent);
+            logo.setProperties({ [providerKey]: providerValue });
+            applied++;
+        }
+        catch (e) {
+            try {
+                logo.setProperties({ [providerKey]: providerValue });
+                applied++;
+            }
+            catch (err) {
+                console.warn(`Provider logo failed for "${providerValue}":`, err);
+                figma.notify(`⚠️ No se pudo aplicar logo de ${providerValue}`, { timeout: 2000 });
+            }
+        }
+    }
+    return applied;
 }
 // -- Check if node is a provider logo component --
 function isProviderLogoComponent(node) {
@@ -145,7 +179,9 @@ function refreshCardCacheSync(nodes) {
     }
 }
 // -- Async: extend card cache with remote/library components (getMainComponentAsync).
-// Called at selection time; sync pre-pass already handled by refreshCardCacheSync. --
+// Called at selection time; sync pre-pass already handled by refreshCardCacheSync.
+// Resolves in parallel batches of BATCH_SIZE to avoid blocking the Figma thread. --
+const CARD_CACHE_BATCH_SIZE = 10;
 async function refreshCardCache(nodes) {
     cachedAllCardIds = new Set();
     refreshCardCacheSync(nodes); // immediate sync pass first
@@ -163,10 +199,14 @@ async function refreshCardCache(nodes) {
             }
         }
     }
-    for (const inst of instances) {
-        const name = await getComponentNameAsync(inst);
-        if (isCardComponentName(name))
-            cachedAllCardIds.add(inst.id);
+    // Resolve in parallel batches
+    for (let i = 0; i < instances.length; i += CARD_CACHE_BATCH_SIZE) {
+        const batch = instances.slice(i, i + CARD_CACHE_BATCH_SIZE);
+        const names = await Promise.all(batch.map(inst => getComponentNameAsync(inst)));
+        for (let j = 0; j < batch.length; j++) {
+            if (isCardComponentName(names[j]))
+                cachedAllCardIds.add(batch[j].id);
+        }
     }
 }
 // -- Find cover nodes, skipping subtrees rooted at excluded IDs --
@@ -406,21 +446,30 @@ async function fillMetadata(nodes, metadata) {
         }
     }
 }
+// -- Known metadata text node names (used by findMetadataScope to validate scope) --
+const METADATA_NODE_NAMES = new Set(['title', 'rating', 'year', 'duration', 'sinopsis', 'genre', 'name', 'rol', 'chapter']);
 // -- Find the metadata scope for a cover node --
+// Walks up from the cover, preferring the nearest ancestor that contains
+// at least one text node with a known metadata name. Falls back to the
+// first ancestor with any text if no named match is found.
 function findMetadataScope(coverNode) {
+    let fallback = null;
     let current = coverNode.parent;
     while (current && current.type !== 'PAGE' && current.type !== 'DOCUMENT') {
         const sceneNode = current;
-        if (sceneNode.type === 'TEXT')
-            return sceneNode;
         if ('findAllWithCriteria' in sceneNode) {
             const texts = sceneNode.findAllWithCriteria({ types: ['TEXT'] });
-            if (texts.length > 0)
-                return sceneNode;
+            if (texts.length > 0) {
+                if (!fallback)
+                    fallback = sceneNode;
+                const hasMetadataNode = texts.some(t => METADATA_NODE_NAMES.has(t.name.trim().toLowerCase()));
+                if (hasMetadataNode)
+                    return sceneNode;
+            }
         }
         current = sceneNode.parent;
     }
-    return coverNode.parent || coverNode;
+    return fallback || coverNode.parent || coverNode;
 }
 // -- Detect component type from a node name --
 function typeFromName(name) {
@@ -532,16 +581,29 @@ async function sendSelection() {
     const chapterCardCount = chapterInstances.length;
     figma.ui.postMessage({ type: 'selection-info', count: selection.length, coverCount, titleTreatmentCount, componentType, chapterCardCount });
 }
+// -- Debounced selection handler: batches rapid selection changes --
+let selectionTimer = null;
+function debouncedSendSelection() {
+    if (selectionTimer)
+        clearTimeout(selectionTimer);
+    selectionTimer = setTimeout(() => {
+        selectionTimer = null;
+        sendSelection();
+    }, 120);
+}
 // -- Listen to selection changes --
 figma.on('selectionchange', () => {
     // Immediately notify UI to reset componentType (prevents stale type being used at apply time)
     figma.ui.postMessage({ type: 'selection-changed' });
-    sendSelection();
+    debouncedSendSelection();
 });
 figma.ui.onmessage = async (msg) => {
     var _a, _b;
     if (msg.type === 'get-selection') {
         sendSelection();
+    }
+    if (msg.type === 'notify-warning' && msg.message) {
+        figma.notify(msg.message, { timeout: 3000 });
     }
     if (msg.type === 'save-api-key' && msg.apiKey) {
         await figma.clientStorage.setAsync('tmdb_api_key', msg.apiKey);
@@ -678,36 +740,7 @@ figma.ui.onmessage = async (msg) => {
                 const providerValue = extractProvider(msg.metadata.contentId);
                 if (providerValue) {
                     const providerLogos = findProviderLogoNodes(selection, cachedAllCardIds);
-                    for (const logo of providerLogos) {
-                        const props = logo.componentProperties;
-                        let providerKey = null;
-                        // Find the provider property key (handles variant names with #)
-                        for (const key of Object.keys(props)) {
-                            if (key === 'provider' || key.startsWith('provider#')) {
-                                providerKey = key;
-                                break;
-                            }
-                        }
-                        if (providerKey) {
-                            try {
-                                // Swap to main component first (refreshes the component)
-                                const mainComponent = logo.mainComponent;
-                                if (mainComponent)
-                                    logo.swapComponent(mainComponent);
-                                // Set the provider variable value
-                                logo.setProperties({ [providerKey]: providerValue });
-                            }
-                            catch (e) {
-                                // Fallback: try without swapping
-                                try {
-                                    logo.setProperties({ [providerKey]: providerValue });
-                                }
-                                catch (_) {
-                                    // Silently fail if property value doesn't exist
-                                }
-                            }
-                        }
-                    }
+                    applyProviderLogo(providerLogos, providerValue);
                 }
             }
             const ttCount = msg.titleTreatmentUrl ? findTitleTreatmentNodes(selection, cachedAllCardIds).length : 0;
@@ -761,31 +794,7 @@ figma.ui.onmessage = async (msg) => {
                     if (providerValue) {
                         const scope = findMetadataScope(coverNode);
                         const providerLogos = findProviderLogoNodes([scope], cachedAllCardIds);
-                        for (const logo of providerLogos) {
-                            const props = logo.componentProperties;
-                            let providerKey = null;
-                            // Find the provider property key (handles variant names with #)
-                            for (const key of Object.keys(props)) {
-                                if (key === 'provider' || key.startsWith('provider#')) {
-                                    providerKey = key;
-                                    break;
-                                }
-                            }
-                            if (providerKey) {
-                                try {
-                                    const mainComponent = logo.mainComponent;
-                                    if (mainComponent)
-                                        logo.swapComponent(mainComponent);
-                                    logo.setProperties({ [providerKey]: providerValue });
-                                }
-                                catch (e) {
-                                    try {
-                                        logo.setProperties({ [providerKey]: providerValue });
-                                    }
-                                    catch (_) { }
-                                }
-                            }
-                        }
+                        applyProviderLogo(providerLogos, providerValue);
                     }
                 }
             }

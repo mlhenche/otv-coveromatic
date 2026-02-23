@@ -1,6 +1,18 @@
 # TODO — CoverOmatic v3
 
-> Última actualización: 2026-02-20
+> Última actualización: 2026-02-23
+
+---
+
+## Mejoras post-review v3 (completadas 2026-02-23)
+
+- [x] **Shuffle sesgado en "Aplicar Aleatorio"** — Fisher-Yates implementado en `CoverGrid.tsx`
+- [x] **Fallos silenciosos en Provider Logo** — Extraída `applyProviderLogo()` con `figma.notify()` en `code.ts`
+- [x] **Debounce en `sendSelection()`** — 120ms debounce en `code.ts`
+- [x] **TMDB fetch sin feedback** — Logger + `figma.notify()` en `CoverGrid.tsx`
+- [x] **`findMetadataScope()` mejorado** — Busca nodos con nombres de metadata conocidos en `code.ts`
+- [x] **Cache VPS paralelizado** — `Promise.all()` en batches de 10 en `code.ts`
+- [x] **Documentar Supabase anon key** — Sección añadida en `v3_handoff_context.md`
 
 ---
 

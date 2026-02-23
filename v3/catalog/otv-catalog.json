@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-02-18T09:05:55.106Z",
+  "generatedAt": "2026-02-23T13:56:00.941Z",
   "source": "OrangeCatalog.html (merged with previous)",
-  "totalContents": 321,
+  "totalContents": 530,
   "urlPatterns": {
     "coverArt": "https://pc.orangetv.orange.es/pc/api/rtv/v1/images/vod/COVER_ART/{contentId}_COVER_ART.jpg?width=3840&height=2160",
     "vertical": "https://pc.orangetv.orange.es/pc/api/rtv/v1/images/vod/VERTICAL/{contentId}_VERTICAL.jpg?width=3840&height=2160",
@@ -339,7 +339,7 @@
     },
     "maspalomas": {
       "title": "Maspalomas",
-      "contentId": "maspalomas",
+      "contentId": "FLMN10000000056158",
       "mediaType": "movie",
       "tmdbId": 1400214,
       "tmdbTitle": "Maspalomas",
@@ -419,7 +419,7 @@
     },
     "mision imposible sentencia final": {
       "title": "Misión: Imposible Sentencia final",
-      "contentId": "mision-imposible-sentencia-final",
+      "contentId": "SKYS_0002646057",
       "mediaType": "movie",
       "tmdbId": 575265,
       "tmdbTitle": "Misión: Imposible - Sentencia final",
@@ -940,7 +940,7 @@
     },
     "the rookie": {
       "title": "The Rookie",
-      "contentId": "DSN_298891399STAR",
+      "contentId": "MFO_298891399",
       "mediaType": "tv",
       "tmdbId": 79744,
       "tmdbTitle": "The Rookie",
@@ -3609,38 +3609,842 @@
       "tmdbId": null,
       "tmdbTitle": null,
       "genreIds": []
+    },
+    "asesinatos en reikiavik": {
+      "title": "Asesinatos en Reikiavik",
+      "contentId": "MFO_299853221AMCN"
+    },
+    "un simple accidente": {
+      "title": "Un simple accidente",
+      "contentId": "FLMN10000000057482"
+    },
+    "anaconda 2025": {
+      "title": "Anaconda (2025)",
+      "contentId": "anaconda-2025"
+    },
+    "song sung blue cancion para dos": {
+      "title": "Song Sung Blue - Canción para dos",
+      "contentId": "song-sung-blue-cancion-para-dos"
+    },
+    "tell me lies": {
+      "title": "Tell Me Lies",
+      "contentId": "DSN_299370329STAR"
+    },
+    "el caballero de los siete reinos": {
+      "title": "El caballero de los siete reinos",
+      "contentId": "MAX_299848011"
+    },
+    "tierra de mafiosos": {
+      "title": "Tierra de mafiosos",
+      "contentId": "SKYS_299735781"
+    },
+    "56 dias": {
+      "title": "56 días",
+      "contentId": "PRIME_299864994APVO"
+    },
+    "love story john f kennedy jr y carolyn bessette": {
+      "title": "Love Story: John F. Kennedy Jr. y Carolyn Bessette",
+      "contentId": "DSN_299861290STAR"
+    },
+    "me has robado el corazon": {
+      "title": "Me has robado el corazón",
+      "contentId": "PRIME_amzn1.dv.gti.b93400bc-635b-4865-96b1-e41eeebcc9a1:ES"
+    },
+    "crueles intenciones": {
+      "title": "Crueles intenciones",
+      "contentId": "MAX_318eca77-504a-4ba4-b9fc-3a61b2cdf2f5"
+    },
+    "agarralo como puedas": {
+      "title": "Agárralo como puedas",
+      "contentId": "SKYS_0002672675"
+    },
+    "will trent agente especial": {
+      "title": "Will Trent Agente Especial",
+      "contentId": "MFO_299414494"
+    },
+    "el principe andres destituido": {
+      "title": "El príncipe Andrés: Destituido",
+      "contentId": "MFO_0002655803"
+    },
+    "mientras duermes": {
+      "title": "Mientras duermes",
+      "contentId": "MFO_0002715554"
+    },
+    "cross": {
+      "title": "Cross",
+      "contentId": "PRIME_299645533APVO"
+    },
+    "caligula el legado oculto": {
+      "title": "Calígula: El legado oculto",
+      "contentId": "MFO_299850977"
+    },
+    "motive": {
+      "title": "Motive",
+      "contentId": "MFO_298249338"
+    },
+    "la guerra civil espanola el relato oculto": {
+      "title": "La Guerra Civil Española: el relato oculto",
+      "contentId": "MFO_299820210AMCN"
+    },
+    "rafaela y su loco mundo": {
+      "title": "Rafaela y su loco mundo",
+      "contentId": "APREM_299866723A3PP"
+    },
+    "greenland el ultimo refugio": {
+      "title": "Greenland: El último refugio",
+      "contentId": "PRIME_amzn1.dv.gti.ccbb0472-025a-8bf5-3151-79de0da82bcd:ES"
+    },
+    "sobrevivir al paraiso mas alla de los testigos de jehova": {
+      "title": "Sobrevivir al Paraíso. Más allá de los Testigos de Jehová",
+      "contentId": "MAX_299867943"
+    },
+    "la torre de hielo": {
+      "title": "La torre de hielo",
+      "contentId": "FLMN10000000054214"
+    },
+    "wicked parte ii": {
+      "title": "Wicked: Parte II",
+      "contentId": "wicked-parte-ii"
+    },
+    "codigo de silencio": {
+      "title": "Código de Silencio",
+      "contentId": "FLMN299863756"
+    },
+    "chicago pd": {
+      "title": "Chicago P.D.",
+      "contentId": "MFO_298248833"
+    },
+    "fallout": {
+      "title": "Fallout",
+      "contentId": "PRIME_299523450APVO"
+    },
+    "the beauty": {
+      "title": "The Beauty",
+      "contentId": "DSN_299845413STAR"
+    },
+    "the copenhagen test": {
+      "title": "The Copenhagen Test",
+      "contentId": "SKYS_299848728"
+    },
+    "brassic": {
+      "title": "Brassic",
+      "contentId": "FLMN299627604"
+    },
+    "fire country": {
+      "title": "Fire Country",
+      "contentId": "MFO_299658649NBCU"
+    },
+    "la gran boda sami": {
+      "title": "La gran boda sami",
+      "contentId": "MFO_299853220AMCN"
+    },
+    "the librarians el proximo capitulo": {
+      "title": "The Librarians: El Próximo Capítulo",
+      "contentId": "MFO_299779216"
+    },
+    "la conversacion": {
+      "title": "La Conversación",
+      "contentId": "FLMN10000000022243"
+    },
+    "the brutalist": {
+      "title": "The Brutalist",
+      "contentId": "SKYS_0002483059"
+    },
+    "a todo tren destino asturias": {
+      "title": "A todo tren. Destino Asturias",
+      "contentId": "MAX_410cfd55-fdbf-461c-98fe-25f42058f3eb"
+    },
+    "predator asesino de asesinos": {
+      "title": "Predator: Asesino de asesinos",
+      "contentId": "DSN_5ded19e6-73f5-4c65-a4f8-759bce8d1114"
+    },
+    "la tierra prometida": {
+      "title": "La tierra prometida",
+      "contentId": "FLMN10000000049420"
+    },
+    "la la land": {
+      "title": "La La Land",
+      "contentId": "SKYS_0002403484"
+    },
+    "regalo maldito vicious": {
+      "title": "Regalo maldito (Vicious)",
+      "contentId": "SKYS_0002551809"
+    },
+    "dracula": {
+      "title": "Drácula",
+      "contentId": "dracula-2025"
+    },
+    "icefall": {
+      "title": "Icefall",
+      "contentId": "icefall"
+    },
+    "five nights at freddys 2": {
+      "title": "Five Nights at Freddy's 2",
+      "contentId": "five-nights-at-freddy-s-2"
+    },
+    "cuerpos locos": {
+      "title": "Cuerpos locos",
+      "contentId": "cuerpos-locos"
+    },
+    "la hermanastra fea": {
+      "title": "La Hermanastra Fea",
+      "contentId": "la-hermanastra-fea"
+    },
+    "muerte en la nieve": {
+      "title": "Muerte en la nieve",
+      "contentId": "muerte-en-la-nieve-2025"
+    },
+    "hifive": {
+      "title": "Hi-Five",
+      "contentId": "hi-five"
+    },
+    "princesa lesbiana del espacio": {
+      "title": "Princesa lesbiana del espacio",
+      "contentId": "princesa-lesbiana-del-espacio"
+    },
+    "sisu camino a la venganza": {
+      "title": "Sisu: Camino a la Venganza",
+      "contentId": "sisu-camino-a-la-venganza"
+    },
+    "singular": {
+      "title": "Singular",
+      "contentId": "singular"
+    },
+    "bugonia": {
+      "title": "Bugonia",
+      "contentId": "bugonia"
+    },
+    "7 invierno": {
+      "title": "7. Invierno",
+      "contentId": "MFO_0002692924"
+    },
+    "la comida que cambio el mundo": {
+      "title": "La comida que cambió el mundo",
+      "contentId": "MFO_299064094"
+    },
+    "pon tu alma en la mano y anda": {
+      "title": "Pon tu alma en la mano y anda",
+      "contentId": "FLMN10000000055148"
+    },
+    "crimenes que cambiaron la historia": {
+      "title": "Crímenes que cambiaron la historia",
+      "contentId": "SKYS_298938685"
+    },
+    "el principe andres maxwell y epstein": {
+      "title": "El principe Andrés, Maxwell y Epstein",
+      "contentId": "MAX_c741eabe-eb5c-4c7e-9060-674006f27d95"
+    },
+    "gravedad cero": {
+      "title": "Gravedad cero",
+      "contentId": "PRIME_amzn1.dv.gti.1b0048f9-3289-479e-9793-e20e64a7bea8:ES"
+    },
+    "el cuento de silyan": {
+      "title": "El cuento de Silyan",
+      "contentId": "DSN_4d96123d-14e3-4806-92ec-dc38dcfa5c03"
+    },
+    "los manifestantes": {
+      "title": "Los manifestantes",
+      "contentId": "FLMN10000000056418"
+    },
+    "secretos del principe andres": {
+      "title": "Secretos del príncipe Andrés",
+      "contentId": "U7D_MFO_299484086CRIN"
+    },
+    "4 el coliseo y su cazador de bestias": {
+      "title": "4. El Coliseo y su cazador de bestias",
+      "contentId": "MFO_0002704686"
+    },
+    "crimenes en floribama": {
+      "title": "Crímenes en Floribama",
+      "contentId": "SKYS_299619408"
+    },
+    "boris johnson a faking it special": {
+      "title": "Boris Johnson: A Faking It Special",
+      "contentId": "MAX_00cae894-01f9-414e-ab8e-3009bec52349"
+    },
+    "elizabeth windsor": {
+      "title": "ELIZABETH WINDSOR",
+      "contentId": "PRIME_amzn1.dv.gti.c677cfb0-dda2-41cd-a6fa-052fc63db312:ES"
+    },
+    "acosando a samantha 13 anos de horror": {
+      "title": "Acosando a Samantha: 13 años de horror",
+      "contentId": "DSN_299783230STAR"
+    },
+    "este es pony": {
+      "title": "Este es Pony",
+      "contentId": "SKYS_299119647"
+    },
+    "little angel": {
+      "title": "Little Angel",
+      "contentId": "DSN_299455446STAR"
+    },
+    "la patrulla canina la pelicula": {
+      "title": "La Patrulla Canina: La Película",
+      "contentId": "MAX_24127842-a02b-4115-b5dd-1003eee4a7c3"
+    },
+    "airbender el ultimo guerrero": {
+      "title": "Airbender: El último guerrero",
+      "contentId": "SKYS_0002393829"
+    },
+    "el show de los muppets": {
+      "title": "El Show de los Muppets",
+      "contentId": "DSN_e7487044-477c-4a57-ae45-afc689f2a346"
+    },
+    "barbie grandes suenos en la gran ciudad": {
+      "title": "Barbie: Grandes sueños en la gran ciudad",
+      "contentId": "PRIME_amzn1.dv.gti.790448ec-a260-48ae-bdc5-65bc5de982dd:ES"
+    },
+    "home las aventuras de tip y oh": {
+      "title": "Home: Las aventuras de Tip y Oh",
+      "contentId": "MFO_298924726"
+    },
+    "historias de las tortugas ninja": {
+      "title": "Historias de las Tortugas Ninja",
+      "contentId": "SKYS_299650548"
+    },
+    "mikolo": {
+      "title": "Mikolo",
+      "contentId": "PRIME_amzn1.dv.gti.d2fa6fa8-9764-40b7-b092-5aa55a9f0bae:ES"
+    },
+    "teen titans go": {
+      "title": "Teen Titans Go!",
+      "contentId": "MAX_298554494"
+    },
+    "campamento newton": {
+      "title": "Campamento Newton",
+      "contentId": "DSN_299292107STAR"
+    },
+    "peaky blinders": {
+      "title": "Peaky Blinders",
+      "contentId": "PRIME_299337988APVI"
+    },
+    "californication": {
+      "title": "Californication",
+      "contentId": "SKYS_298248794"
+    },
+    "this is us la serie": {
+      "title": "This Is Us: La serie",
+      "contentId": "DSN_299303220STAR"
+    },
+    "las cronicas de spiderwick": {
+      "title": "Las crónicas de Spiderwick",
+      "contentId": "MFO_299658652NBCU"
+    },
+    "fringe": {
+      "title": "Fringe",
+      "contentId": "PRIME_299470474APVI"
+    },
+    "dos hombres y medio": {
+      "title": "Dos hombres y medio",
+      "contentId": "PRIME_299788258APVI"
+    },
+    "house": {
+      "title": "House",
+      "contentId": "PRIME_298249116APVI"
+    },
+    "suits": {
+      "title": "Suits",
+      "contentId": "PRIME_298249544APVI"
+    },
+    "el cuento de la criada": {
+      "title": "El cuento de la criada",
+      "contentId": "PRIME_299549121APVI"
+    },
+    "barbie": {
+      "title": "Barbie",
+      "contentId": "MAX_d6b9a9c4-f703-4208-b093-386f303b4044"
+    },
+    "oliver twist": {
+      "title": "Oliver Twist",
+      "contentId": "MFO_0002566433"
+    },
+    "industry": {
+      "title": "Industry",
+      "contentId": "MAX_299549658"
+    },
+    "breve encuentro": {
+      "title": "Breve encuentro",
+      "contentId": "FLMN10000000009208"
+    },
+    "doctor who": {
+      "title": "Doctor Who",
+      "contentId": "DSN_299535738DPLS"
+    },
+    "un escandalo muy britanico": {
+      "title": "Un escándalo muy británico",
+      "contentId": "MAX_299549823"
+    },
+    "downton abbey": {
+      "title": "Downton Abbey",
+      "contentId": "SKYS_298248946"
+    },
+    "el discurso del rey": {
+      "title": "El discurso del rey",
+      "contentId": "PRIME_amzn1.dv.gti.db9fa6d4-aa80-4845-9aff-3b3f63b4ceb8:ES"
+    },
+    "la teoria del todo": {
+      "title": "La teoría del todo",
+      "contentId": "U7D_298804123_SNDC"
+    },
+    "full monty": {
+      "title": "Full Monty",
+      "contentId": "DSN_0c6caaf1-203c-4c24-97a1-d41b3dcaf40d"
+    },
+    "bird": {
+      "title": "Bird",
+      "contentId": "FLMN10000000053076"
+    },
+    "orgullo y prejuicio": {
+      "title": "Orgullo y prejuicio",
+      "contentId": "U7D_298777859_TCM"
+    },
+    "paddington": {
+      "title": "Paddington",
+      "contentId": "paddington"
+    },
+    "the queen la reina": {
+      "title": "The Queen (La reina)",
+      "contentId": "MFO_0002697454"
+    },
+    "diana": {
+      "title": "Diana",
+      "contentId": "diana"
+    },
+    "los caballeros de la mesa cuadrada y sus locos seguidores": {
+      "title": "Los caballeros de la mesa cuadrada y sus locos seguidores",
+      "contentId": "RTVE_6767902_title"
+    },
+    "el instante mas oscuro": {
+      "title": "El instante más oscuro",
+      "contentId": "SKYS_0002403494"
+    },
+    "romeria": {
+      "title": "Romería",
+      "contentId": "romeria"
+    },
+    "la solucion al estilo de alabama": {
+      "title": "La solución al estilo de Alabama",
+      "contentId": "MAX_20f7ef1e-33d2-46c2-be8d-d7578414adf1"
+    },
+    "landman un negocio crudo": {
+      "title": "Landman: Un negocio crudo",
+      "contentId": "SKYS_299650144"
+    },
+    "los pecadores": {
+      "title": "Los pecadores",
+      "contentId": "MAX_d43bd66a-a83c-40eb-890f-5b14eb9ef7c9"
+    },
+    "blue moon": {
+      "title": "Blue Moon",
+      "contentId": "blue-moon"
+    },
+    "elio": {
+      "title": "Elio",
+      "contentId": "DSN_367ee1b6-1a50-413a-96f6-655175166f38"
+    },
+    "weapons": {
+      "title": "Weapons",
+      "contentId": "MAX_5b6aa3a2-93cd-4bbc-baf8-8689fb9d6224"
+    },
+    "sorda": {
+      "title": "Sorda",
+      "contentId": "sorda"
+    },
+    "enemigos": {
+      "title": "Enemigos",
+      "contentId": "PRIME_amzn1.dv.gti.f72c0771-08a1-4cb2-be49-dfbbc1971518:ES"
+    },
+    "estrany riu": {
+      "title": "Estrany riu",
+      "contentId": "FLMN10000000042883"
+    },
+    "belen": {
+      "title": "Belén",
+      "contentId": "PRIME_amzn1.dv.gti.bd8718e9-126a-4959-8def-a6b021968df7:ES"
+    },
+    "pubertat": {
+      "title": "Pubertat",
+      "contentId": "MAX_299797938"
+    },
+    "la suerte una serie de casualidades": {
+      "title": "La Suerte. Una serie de casualidades",
+      "contentId": "DSN_299801990STAR"
+    },
+    "f1": {
+      "title": "F1",
+      "contentId": "f1"
+    },
+    "gaua": {
+      "title": "Gaua",
+      "contentId": "PRIME_amzn1.dv.gti.4d94945b-8d23-43b1-b267-6f06ef95db46:ES"
+    },
+    "la chica de la aguja": {
+      "title": "La chica de la aguja",
+      "contentId": "FLMN10000000052727"
+    },
+    "su peor pesadilla": {
+      "title": "Su peor pesadilla",
+      "contentId": "SKYS_299827437"
+    },
+    "parque jurasico": {
+      "title": "Parque Jurásico",
+      "contentId": "SKYS_0002412788"
+    },
+    "parque jurasico iii": {
+      "title": "Parque Jurásico III",
+      "contentId": "SKYS_0002412797"
+    },
+    "jurassic world": {
+      "title": "Jurassic World",
+      "contentId": "SKYS_0002412838"
+    },
+    "jurassic world el reino caido": {
+      "title": "Jurassic World: El reino caído",
+      "contentId": "SKYS_0002413103"
+    },
+    "jurassic world dominion": {
+      "title": "Jurassic World: Dominion",
+      "contentId": "jurassic-world-dominion"
+    },
+    "gordon ramsay fuera de carta": {
+      "title": "Gordon Ramsay: Fuera de carta",
+      "contentId": "DSN_299011929NGEO"
+    },
+    "unbelievably vegan with chef charity": {
+      "title": "Unbelievably Vegan With Chef Charity",
+      "contentId": "MAX_f501646b-f63a-4436-9f7b-273e0d41e61c"
+    },
+    "road trip con gordon gino y fred": {
+      "title": "Road trip con Gordon, Gino y Fred",
+      "contentId": "MFO_299549175"
+    },
+    "nuestro propio castillo secretos de francia": {
+      "title": "Nuestro propio castillo: secretos de Francia",
+      "contentId": "MFO_299636893"
+    },
+    "sue perkins la gran aventura americana": {
+      "title": "Sue Perkins, la gran aventura americana",
+      "contentId": "MFO_299537155AMCN"
+    },
+    "viajando sin dejar huella": {
+      "title": "Viajando sin dejar huella",
+      "contentId": "MFO_299579232"
+    },
+    "te vendo tu mansion los angeles": {
+      "title": "Te vendo tu mansión: Los Ángeles",
+      "contentId": "SKYS_299660358"
+    },
+    "el viajero comprometido": {
+      "title": "El viajero comprometido",
+      "contentId": "MFO_299121754"
+    },
+    "cocino con mi abuela": {
+      "title": "Cocino con mi abuela",
+      "contentId": "MFO_299795741AMCN"
+    },
+    "terapia de parejas": {
+      "title": "Terapia de parejas",
+      "contentId": "SKYS_299682467"
+    },
+    "unidos por la comida": {
+      "title": "Unidos por la comida",
+      "contentId": "MFO_299757984"
+    },
+    "gentes del mar": {
+      "title": "Gentes del mar",
+      "contentId": "MFO_299779305"
+    },
+    "the wanderer una serie de viajes": {
+      "title": "The Wanderer: Una serie de viajes",
+      "contentId": "PRIME_299691408APVI"
+    },
+    "playgrounds of the rich and famous": {
+      "title": "Playgrounds of the rich and famous",
+      "contentId": "DSN_299620931DPLS"
+    },
+    "hacia la sostenibilidad": {
+      "title": "Hacia la sostenibilidad",
+      "contentId": "MAX_299719665"
+    },
+    "me voy a comer el mundo": {
+      "title": "Me voy a comer el mundo",
+      "contentId": "MFO_298249305"
+    },
+    "wear whatever the f you want": {
+      "title": "Wear Whatever The F You Want",
+      "contentId": "PRIME_299731713APVO"
+    },
+    "que comemos con zooey deschanel": {
+      "title": "¿Qué comemos? Con Zooey Deschanel",
+      "contentId": "MAX_299549235"
+    },
+    "restauraciones con jeremy renner": {
+      "title": "Restauraciones con Jeremy Renner",
+      "contentId": "DSN_299419954DPLS"
+    },
+    "jamie oliver recetas para air fryer": {
+      "title": "Jamie Oliver: recetas para Air Fryer",
+      "contentId": "MFO_299580799AMCN"
+    },
+    "espacio para mejorar": {
+      "title": "Espacio Para Mejorar",
+      "contentId": "PRIME_299341300APVI"
+    },
+    "la vida secreta de las esposas mormonas": {
+      "title": "La vida secreta de las esposas mormonas",
+      "contentId": "DSN_299604133DPLS"
+    },
+    "the challenge all stars": {
+      "title": "The Challenge: All Stars",
+      "contentId": "SKYS_299527862"
+    },
+    "la fiebre del oro": {
+      "title": "La fiebre del oro",
+      "contentId": "MAX_298882469"
+    },
+    "la mansion de lisa vanderpump": {
+      "title": "La mansión de Lisa Vanderpump",
+      "contentId": "DSN_299521523DPLS"
+    },
+    "los ferragnez": {
+      "title": "Los Ferragnez",
+      "contentId": "PRIME_299340202APVO"
+    },
+    "mujeres ricas de salt lake": {
+      "title": "Mujeres ricas de Salt Lake",
+      "contentId": "SKYS_299662069"
+    },
+    "90 dias antes de viaje": {
+      "title": "90 días: antes de viaje",
+      "contentId": "MAX_299548958"
+    },
+    "the hair tales": {
+      "title": "The Hair Tales",
+      "contentId": "DSN_299396734STAR"
+    },
+    "citas desbloqueadas": {
+      "title": "Citas Desbloqueadas",
+      "contentId": "PRIME_299774303APVI"
+    },
+    "50000 first dates a true story": {
+      "title": "50,000 First Dates: A True Story",
+      "contentId": "PRIME_299683716APVI"
+    },
+    "supertacanos": {
+      "title": "Supertacaños",
+      "contentId": "MAX_299247540"
+    },
+    "los chavez": {
+      "title": "Los Chávez",
+      "contentId": "DSN_299635240DPLS"
+    },
+    "forjado a fuego": {
+      "title": "Forjado a fuego",
+      "contentId": "MFO_298249057"
+    },
+    "mujeres ricas de beverly hills": {
+      "title": "Mujeres ricas de Beverly Hills",
+      "contentId": "SKYS_299660387"
+    },
+    "the graham norton show": {
+      "title": "The Graham Norton Show",
+      "contentId": "MFO_298249597"
+    },
+    "sobrevivir en lo salvaje": {
+      "title": "Sobrevivir en lo salvaje",
+      "contentId": "MAX_298900193"
+    },
+    "mujeres ricas de nueva york": {
+      "title": "Mujeres ricas de Nueva York",
+      "contentId": "SKYS_299661607"
+    },
+    "mountain men": {
+      "title": "Mountain Men",
+      "contentId": "MFO_298780883"
+    },
+    "mi primera vez": {
+      "title": "Mi primera vez",
+      "contentId": "DSN_299783238STAR"
+    },
+    "intercambio de villas de lujo": {
+      "title": "Intercambio de villas de lujo",
+      "contentId": "MFO_299439102"
+    },
+    "bajo cubierta mediterraneo": {
+      "title": "Bajo cubierta: Mediterráneo",
+      "contentId": "SKYS_299528725"
+    },
+    "las kardashian": {
+      "title": "Las Kardashian",
+      "contentId": "DSN_299303647STAR"
+    },
+    "furia al volante": {
+      "title": "Furia al volante",
+      "contentId": "MFO_299784597"
+    },
+    "dulceida al desnudo": {
+      "title": "Dulceida al desnudo",
+      "contentId": "PRIME_299375109APVI"
+    },
+    "pillados infieles": {
+      "title": "Pillados: infieles",
+      "contentId": "MFO_299454082"
+    },
+    "pombo": {
+      "title": "Pombo",
+      "contentId": "PRIME_299486441APVI"
+    },
+    "aventura en pelotas espana": {
+      "title": "Aventura En Pelotas España",
+      "contentId": "MAX_299667624"
+    },
+    "pillados doble vida": {
+      "title": "Pillados: Doble vida",
+      "contentId": "MFO_299789516"
+    },
+    "el gran tour": {
+      "title": "El Gran Tour",
+      "contentId": "PRIME_299339978APVO"
+    },
+    "the real csi miami": {
+      "title": "The Real Csi: Miami",
+      "contentId": "MFO_299820515"
+    },
+    "angela diniz asesinada y condenada": {
+      "title": "Angela Diniz: asesinada y condenada",
+      "contentId": "MAX_299818674"
+    },
+    "lo que la verdad esconde el caso asunta": {
+      "title": "Lo que la verdad esconde: El caso Asunta",
+      "contentId": "SKYS_299508849"
+    },
+    "disenador del mal": {
+      "title": "Diseñador del mal",
+      "contentId": "MFO_299810176CRIN"
+    },
+    "alerta asesinato": {
+      "title": "Alerta: Asesinato",
+      "contentId": "MFO_299810175"
+    },
+    "accidente suicidio o asesinato": {
+      "title": "Accidente, suicidio o asesinato",
+      "contentId": "MFO_299051371"
+    },
+    "crimenes en filadelfia": {
+      "title": "Crímenes en Filadelfia",
+      "contentId": "MFO_299851091"
+    },
+    "la saga de los hammer escandalo y perversion": {
+      "title": "La saga de los Hammer: Escándalo y perversión",
+      "contentId": "MAX_299549914"
+    },
+    "videos sexuales de los famosos": {
+      "title": "Vídeos sexuales de los famosos",
+      "contentId": "MFO_299851095CRIN"
+    },
+    "como crear un escandalo sexual": {
+      "title": "Cómo crear un escándalo sexual",
+      "contentId": "MAX_299551113"
+    },
+    "los secretos del bunny ranch": {
+      "title": "Los secretos del Bunny Ranch",
+      "contentId": "MFO_299851092"
+    },
+    "asesinato en el pueblo quien mato a la esposa del medico": {
+      "title": "Asesinato en el pueblo: ¿Quién mató a la esposa del médico?",
+      "contentId": "MFO_299851094"
+    },
+    "andrea yates la madre que mato a sus hijos": {
+      "title": "Andrea Yates, la madre que mató a sus hijos",
+      "contentId": "MAX_299838852"
+    },
+    "la historia de amber": {
+      "title": "La historia de Amber",
+      "contentId": "PRIME_amzn1.dv.gti.d8bbbf32-b70f-f7c8-1c68-69932aaf403d:ES"
+    },
+    "el poligrafo": {
+      "title": "El polígrafo",
+      "contentId": "MFO_299838251"
+    },
+    "incidente critico muerte en la frontera": {
+      "title": "Incidente crítico: muerte en la frontera",
+      "contentId": "MAX_b05e6f97-6295-45cb-91c4-48dbdf405864"
+    },
+    "asesinato en el motel": {
+      "title": "Asesinato En El Motel",
+      "contentId": "MFO_299838250"
+    },
+    "caroline flack en busca de la verdad": {
+      "title": "Caroline Flack: En busca de la verdad",
+      "contentId": "DSN_299823297STAR"
+    },
+    "court cam accion judicial especial": {
+      "title": "Court Cam, acción judicial Especial",
+      "contentId": "MFO_299268027CRIN"
+    },
+    "el asesino de las montanas rocosas": {
+      "title": "El asesino de las Montañas Rocosas",
+      "contentId": "MAX_299823713"
+    },
+    "ho ho homicidios": {
+      "title": "Ho, ho, homicidios",
+      "contentId": "MFO_299820514CRIN"
+    },
+    "el hombre equivocado 20 anos en prision": {
+      "title": "El hombre equivocado, 20 años en prisión",
+      "contentId": "MFO_0002604494"
+    },
+    "ciencia forense casos sin resolver": {
+      "title": "Ciencia forense, casos sin resolver",
+      "contentId": "MFO_299820578"
+    },
+    "receta para un asesinato": {
+      "title": "Receta para un asesinato",
+      "contentId": "SKYS_299689724"
+    },
+    "justicia final": {
+      "title": "Justicia final",
+      "contentId": "MFO_299820518"
+    },
+    "el cuerpo en el contenedor": {
+      "title": "El cuerpo en el contenedor",
+      "contentId": "MFO_0002604495"
+    },
+    "asesinos de america abuso de poder": {
+      "title": "Asesinos de América: abuso de poder",
+      "contentId": "MAX_299816634"
+    },
+    "las parejas de los asesinos": {
+      "title": "Las parejas de los asesinos",
+      "contentId": "MFO_299820517CRIN"
+    },
+    "caso": {
+      "title": "#Caso",
+      "contentId": "SKYS_299609144"
+    },
+    "la que se avecina": {
+      "title": "La que se avecina",
+      "contentId": "U7D_MFO_298249197FDF"
+    },
+    "asesinato en charente": {
+      "title": "Asesinato en Charente",
+      "contentId": "MFO_0002132124"
+    },
+    "asesinato en champana": {
+      "title": "Asesinato en Champaña",
+      "contentId": "MFO_0002132125"
+    },
+    "underworld la rebelion de los licantropos": {
+      "title": "Underworld: La rebelión de los licántropos",
+      "contentId": "underworld-la-rebelion-de-los-licantropos"
+    },
+    "espana la primera globalizacion": {
+      "title": "España, la primera globalización",
+      "contentId": "MFO_0002522938"
+    },
+    "robot salvaje": {
+      "title": "Robot salvaje",
+      "contentId": "SKYS_0002291919"
     }
-  },
-  "enrichedAt": "2026-02-18T09:06:33.635Z",
-  "genreNames": {
-    "12": "Aventura",
-    "14": "Fantasía",
-    "16": "Animación",
-    "18": "Drama",
-    "27": "Terror",
-    "28": "Acción",
-    "35": "Comedia",
-    "36": "Historia",
-    "37": "Western",
-    "53": "Suspense",
-    "80": "Crimen",
-    "99": "Documental",
-    "878": "Ciencia ficción",
-    "9648": "Misterio",
-    "10402": "Música",
-    "10749": "Romance",
-    "10751": "Familia",
-    "10752": "Bélica",
-    "10759": "Action & Adventure",
-    "10762": "Kids",
-    "10763": "News",
-    "10764": "Reality",
-    "10765": "Sci-Fi & Fantasy",
-    "10766": "Soap",
-    "10767": "Talk",
-    "10768": "War & Politics",
-    "10770": "Película de TV"
-  },
-  "genreEnrichedAt": "2026-02-18T09:07:03.155Z",
-  "cleanedAt": "2026-02-18T09:23:07.685Z"
+  }
 }

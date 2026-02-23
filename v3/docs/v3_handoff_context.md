@@ -61,7 +61,26 @@ Durante la migración y estabilización de la app de React han surgido y se han 
 
 ---
 
-## 4. Próximos Pasos (Next Steps)
+## 4. Nota sobre credenciales de Supabase
+
+El hook `useSupabaseCatalog.ts` contiene la `SUPABASE_ANON_KEY` directamente en el código. Esto es intencionado: la clave anon de Supabase es **pública y de solo lectura**. La seguridad real la proporcionan las **Row Level Security (RLS) policies** configuradas en Supabase, que restringen el acceso a la tabla `contents` (solo lectura de registros activos), `genres` (solo lectura) y `config` (solo lectura). La clave no otorga permisos de escritura ni acceso a datos no autorizados por las policies.
+
+---
+
+## 5. Mejoras post-review (2026-02-23)
+
+Correcciones y optimizaciones aplicadas tras la revisión del handoff:
+
+- **Fisher-Yates shuffle**: Reemplazado `sort(() => Math.random() - 0.5)` (distribución sesgada) por Fisher-Yates en todos los puntos de aleatorización de `CoverGrid.tsx`.
+- **Provider Logo con feedback**: Extraída función `applyProviderLogo()` en `code.ts`. Los fallos ahora se notifican al usuario vía `figma.notify()` en lugar de tragarse silenciosamente.
+- **Debounce en selección**: `sendSelection()` ahora se invoca con un debounce de 120ms para evitar resoluciones async innecesarias al cambiar rápidamente la selección.
+- **TMDB feedback**: Si la petición de metadata a TMDB falla, se notifica al usuario y se registra en el LogStore (antes se aplicaba la imagen sin metadata y sin aviso).
+- **`findMetadataScope()` mejorada**: Ahora busca preferentemente el ancestro más cercano que contenga nodos de texto con nombres de metadata conocidos (`title`, `rating`, `year`...), en lugar de detenerse en el primer ancestro con cualquier texto.
+- **Cache VPS paralelizado**: `refreshCardCache()` ahora resuelve `getMainComponentAsync()` en batches paralelos de 10, reduciendo significativamente el tiempo de resolución en VPS con muchas cards.
+
+---
+
+## 6. Próximos Pasos (Next Steps)
 Si el plugin es estable, las siguientes interacciones deberían centrarse en:
 1. Ampliación del catálogo automático que alimenta la cuenta de Supabase, o mejoras en la precisión de coincidencias (fuzzyness) si surgen títulos no emparejados.
 2. Añadir soporte para nuevos Componentes UI de Figma que surjan en el Design System 2026 de FrogTV que requieran lógicas de sustitución diferentes a "cover" y "titleTreatment".
