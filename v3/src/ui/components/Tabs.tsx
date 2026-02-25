@@ -10,6 +10,7 @@ export default function Tabs({ activeTab, onChangeTab }: TabsProps) {
         { id: 'movie', label: 'Cine' },
         { id: 'tv', label: 'Series' },
         { id: 'person', label: 'Personas' },
+        { id: 'html', label: 'HTML' },
         { id: 'log', label: 'Log' }
     ];
 

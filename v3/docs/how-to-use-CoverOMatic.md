@@ -2,6 +2,11 @@
 
 Plugin de Figma para aplicar imágenes y metadatos de películas, series, episodios y personas desde TMDB y el catálogo OrangeTV.
 
+**Novedades v3.1:**
+- 🌐 Nueva pestaña **HTML Paste** — aplica contenido de cualquier carrusel de Orange TV sin necesidad de catálogo
+- 🏷️ Soporte para EPG, emisiones en directo y canales (además del VOD habitual)
+- ✅ Título del carrusel aplicado automáticamente al nodo `Row_title` del componente
+
 **Novedades v3.0:**
 - 🚀 Catálogo cargado dinámicamente desde Supabase (sin necesidad de actualizar el plugin)
 - 📦 Plugin 49KB más ligero (sin JSON embebido)
@@ -216,7 +221,36 @@ En la pestaña **Personas**, puedes buscar de dos formas:
 4. Selecciona el contenido → Se muestra el elenco y equipo técnico en orden: directores, guionistas, actores
 5. Haz clic en la foto de la persona que quieras aplicar
 
-### 5. Contenido aleatorio
+### 5. Pestaña HTML — Contenido directo de Orange TV
+
+La pestaña **HTML** permite aplicar cualquier carrusel de la web de Orange TV a tus componentes Figma, sin necesidad de que el contenido esté en el catálogo. Funciona con VOD, EPG, emisiones en directo y canales.
+
+#### Cómo obtener el HTML
+
+1. Abre **orangetv.orange.es** en Chrome y navega a la página que quieras
+2. Haz clic derecho en cualquier parte de la página → **Inspeccionar**
+3. En el panel de DevTools, localiza la etiqueta `<app-root>` al inicio del código
+4. Haz clic derecho sobre `<app-root>` → **Edit as HTML**
+5. Selecciona todo el contenido (Ctrl+A), cópialo y pégalo en el campo de texto del plugin
+
+#### Aplicar contenido
+
+1. Una vez pegado el HTML, haz clic en **Parsear HTML**
+2. Aparece la lista de carruseles detectados. Haz clic en el que quieras
+3. Ves el grid de cards con sus imágenes
+   - **Clic en una card** → aplica esa card al componente seleccionado en Figma
+   - **Botón "Aplicar fila completa"** → aplica todas las cards en orden a los componentes seleccionados
+4. Si el componente tiene un nodo de texto de título de fila, se rellena automáticamente con el nombre del carrusel
+
+#### Notas
+
+- **Carruseles de canales** (`app-carousel-channel`): al aplicar la fila completa, las primeras 3 cards se saltan automáticamente (son cards fijas de cabecera del componente Figma `row_card_channel`)
+- Las imágenes se cargan directamente desde la CDN de Orange TV — necesitas conexión de red
+- Si alguna imagen no está disponible se salta esa card y continúa con las demás; al final se notifica cuántas se aplicaron y cuántas fallaron
+
+---
+
+### 6. Contenido aleatorio
 
 **Para películas/series:**
 1. Selecciona **2 o más componentes** en Figma (Shift + Click)
@@ -226,7 +260,7 @@ En la pestaña **Personas**, puedes buscar de dos formas:
 
 **Ejemplo:** Selecciona 6 cards vacías → Género: Comedia → Contenido Aleatorio → Las 6 se rellenan con películas de comedia diferentes.
 
-### 6. Filtros y búsqueda
+### 7. Filtros y búsqueda
 
 **Búsqueda normal:**
 - Escribe en el campo de búsqueda
@@ -240,7 +274,7 @@ En la pestaña **Personas**, puedes buscar de dos formas:
 - Icono 📱 = Portrait (poster vertical)
 - Icono 📺 = Landscape (backdrop horizontal)
 
-### 7. Provider Logo Automático
+### 8. Provider Logo Automático
 
 El plugin detecta **automáticamente el proveedor** del contenido desde el ID y actualiza el componente `providerLogoSquare` o `providerLogoRectangle` si lo tienes en tu diseño.
 
@@ -437,22 +471,20 @@ Para más detalles sobre los scripts de gestión:
 
 ## 📊 Estadísticas del catálogo
 
-**Estado actual (v3.0):**
-- 304 contenidos activos (100% con datos TMDB)
-- 27 géneros únicos
-- 185 películas | 119 series
+**Estado actual (v3.1 — febrero 2026):**
+- ~529 contenidos activos en Supabase
+- ~470 con TMDB ID (media_type, géneros) | ~59 sin TMDB ID (realities, programas)
 - 8 proveedores: Orange TV, SkyShowtime, Disney+, Max, Prime Video, RTVE Play, Filmin, A3 Premium
 
 ---
 
-**Versión**: 3.0
+**Versión**: 3.1
 **Desarrollado para**: OrangeTV | CitrusDLS
 **Última actualización**: Febrero 2026
 
-**Cambios en v3.0:**
-- Migración de catálogo embebido a Supabase
-- Sistema de caché local con TTL de 4 horas
-- Soporte offline con caché expirado
-- Plugin 49KB más ligero
-- Scripts CLI para gestión del catálogo
-- Actualizaciones en tiempo real sin republicar plugin
+**Cambios en v3.1:**
+- Nueva pestaña HTML Paste para contenido directo de orangetv.orange.es
+- Soporte para EPG, emisiones en directo y canales
+- Título del carrusel aplicado a nodo Row_title del componente
+- Offset automático para row_card_channel (salta las 3 primeras cards)
+- Instrucciones visuales paso a paso en la pestaña HTML

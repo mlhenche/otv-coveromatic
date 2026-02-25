@@ -2,7 +2,7 @@
 
 > Plugin de Figma para el equipo de diseño de Orange TV (FrogTV).
 > Aplica carátulas, metadatos y personas a componentes del Design System en Figma.
-> Última actualización de este documento: 2026-02-23
+> Última actualización de este documento: 2026-02-25
 
 ---
 
@@ -148,6 +148,47 @@ Title Treatment:  /TITLE_TREATMENT/{contentId}_title_treatment.png?width=1280&he
 
 La detección del tipo ocurre en `code.ts` inspeccionando las propiedades del componente seleccionado en Figma.
 
+### Comportamientos especiales
+
+**`row_card_channel`** — Si el nombre del componente seleccionado incluye "row" y "channel", se saltan los primeros **3** cover nodes antes de empezar a aplicar contenido. Esto preserva las cards fijas de cabecera del carrusel de canales.
+
+**`Row_title`** — Al aplicar una fila completa desde la pestaña HTML, el título del carrusel se escribe en la propiedad de texto del componente cuyo nombre base contenga "row" (ej. "título de la row"). Si no existe esa propiedad, busca un nodo de texto llamado `row_title`.
+
+---
+
+## Pestaña HTML — Pegar HTML de Orange TV
+
+Nueva pestaña que permite aplicar contenido directamente desde el HTML de `orangetv.orange.es`, sin necesidad de que los contenidos estén en el catálogo de Supabase. Útil para EPG, emisiones en directo y contenido puntual.
+
+### Flujo
+
+1. El diseñador abre `orangetv.orange.es` en Chrome, inspecciona `<app-root>` → Edit as HTML, copia todo y pega en la pestaña HTML del plugin
+2. El plugin parsea el HTML con `DOMParser` en el frontend (`HtmlPasteTab.tsx`) y extrae los carruseles
+3. El diseñador elige un carrusel y puede aplicar cards individuales o la fila completa
+
+### Tipos de carrusel soportados
+
+| Tag Angular | Tipo | Cards parseadas |
+|-------------|------|-----------------|
+| `app-carousel-slideshow` | Slideshows | `app-card-slideshow` |
+| `app-carousel-emission` | Emisiones/directo | `app-card-emission` |
+| `app-carousel-channel` | Canales/programación | `app-card-channel` |
+| `app-carousel-corner` | Corners | `app-card-corner` |
+| `app-carousel-generic` | Genérico (EPG, VOD) | `app-card-generic` |
+
+### Datos que extrae por card
+
+- `backgroundUrl` — imagen principal (extrae de `background-image: url(...)` en el CSS inline). El regex soporta nombres de fichero con paréntesis ej. `COVER_ART(1).jpg`
+- `titleTreatmentUrl` — title treatment (solo slideshow y corner)
+- `channelIconUrl` / `channelName` — icono del canal y nombre inferido de la URL
+- `schedule`, `live`, `duration` — horario, indicador en directo, duración (emisiones)
+- `title`, `year`, `ageRating` — datos de la card (genérico)
+
+### Archivos clave
+
+- `v3/src/ui/components/HtmlPasteTab.tsx` — parser + componente React de la pestaña
+- `v3/src/code.ts` — handler `apply-multiple-covers-url` (aplica URLs a cover frames)
+
 ---
 
 ## Proceso para añadir más contenidos al catálogo
@@ -228,11 +269,7 @@ Todos los scripts de `v3/scripts/` requieren las vars `SUPABASE_URL`, `SUPABASE_
 
 ## Próximas tareas (ver TODO.md para detalle)
 
-1. **EPG + Emisiones** — soporte para contenidos que NO son VOD:
-   - Shows de TDT (EPG): componente `app-card-generic` con URLs `/epg/`
-   - Emisiones en directo: componente `app-card-emission`
-   - Propuesta: pestaña "HTML Paste" en el plugin con `DOMParser`
-   - Nuevo componente Figma necesario: `card_emission`
+1. **Componente `card_emission` en Figma** — el DS aún no tiene un componente específico para emisiones en directo. La pestaña HTML ya parsea las emissions cards (`backgroundUrl`, `channelIconUrl`, `schedule`, `live`, `duration`), pero necesita un componente Figma con esas capas para aplicar los datos completos.
 
 2. **Nuevos componentes del DS 2026** — si el Design System evoluciona y aparecen nuevos tipos de card, hay que actualizar la detección en `code.ts` y los `switch` de URLs en `CoverGrid.tsx`
 

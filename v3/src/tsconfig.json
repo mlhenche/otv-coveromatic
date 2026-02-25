@@ -7,7 +7,7 @@
         "strict": true,
         "outDir": "../plugin",
         "typeRoots": [
-            "../../node_modules/@figma"
+            "../node_modules/@figma"
         ]
     },
     "files": [

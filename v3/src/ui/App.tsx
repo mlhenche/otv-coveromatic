@@ -4,6 +4,7 @@ import Header from './components/Header';
 import Tabs from './components/Tabs';
 import ControlsBar from './components/ControlsBar';
 import CoverGrid from './components/CoverGrid';
+import HtmlPasteTab from './components/HtmlPasteTab';
 import FooterLog from './components/FooterLog';
 import SeasonPicker from './components/SeasonPicker';
 import Overlays from './components/Overlays';
@@ -90,32 +91,41 @@ export default function App() {
             <div className="plugin">
                 <Header apiKey={apiKey} onSaveApiKey={handleSaveApiKey} />
                 <Tabs activeTab={activeTab} onChangeTab={handleTabChange} />
-                <ControlsBar
-                    apiKey={apiKey}
-                    activeTab={activeTab}
-                    searchTerm={searchTerm}
-                    onSearchChange={setSearchTerm}
-                    genreId={genreId}
-                    onGenreChange={setGenreId}
-                    personSearchMode={personSearchMode}
-                    onPersonSearchModeChange={setPersonSearchMode}
-                    selectedContentData={selectedContentData}
-                    onSelectedContentDataChange={setSelectedContentData}
-                />
-                <CoverGrid
-                    apiKey={apiKey}
-                    activeTab={activeTab}
-                    searchTerm={searchTerm}
-                    genreId={genreId}
-                    personSearchMode={personSearchMode}
-                    selectedContentData={selectedContentData}
-                    onOpenSeasons={(entry) => setSeasonPickerEntry(entry)}
-                    onGoToPersonas={handleGoToPersonas}
-                    selectionInfo={selectionInfo}
-                    setApplying={setApplying}
-                    setTypePickerCallback={(cb) => setTypePickerCallback(() => cb)}
-                    reloadTrigger={reloadTrigger}
-                />
+                {activeTab !== 'html' && (
+                    <ControlsBar
+                        apiKey={apiKey}
+                        activeTab={activeTab}
+                        searchTerm={searchTerm}
+                        onSearchChange={setSearchTerm}
+                        genreId={genreId}
+                        onGenreChange={setGenreId}
+                        personSearchMode={personSearchMode}
+                        onPersonSearchModeChange={setPersonSearchMode}
+                        selectedContentData={selectedContentData}
+                        onSelectedContentDataChange={setSelectedContentData}
+                    />
+                )}
+                {activeTab === 'html' ? (
+                    <HtmlPasteTab
+                        selectionInfo={selectionInfo}
+                        setApplying={setApplying}
+                    />
+                ) : (
+                    <CoverGrid
+                        apiKey={apiKey}
+                        activeTab={activeTab}
+                        searchTerm={searchTerm}
+                        genreId={genreId}
+                        personSearchMode={personSearchMode}
+                        selectedContentData={selectedContentData}
+                        onOpenSeasons={(entry) => setSeasonPickerEntry(entry)}
+                        onGoToPersonas={handleGoToPersonas}
+                        selectionInfo={selectionInfo}
+                        setApplying={setApplying}
+                        setTypePickerCallback={(cb) => setTypePickerCallback(() => cb)}
+                        reloadTrigger={reloadTrigger}
+                    />
+                )}
                 <FooterLog
                     selectionInfo={selectionInfo}
                     onReload={() => setReloadTrigger(r => r + 1)}

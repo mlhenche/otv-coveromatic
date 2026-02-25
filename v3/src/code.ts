@@ -332,8 +332,17 @@ async function findChapterCardInstancesAsync(nodes: readonly SceneNode[]): Promi
 async function setTextContent(parent: SceneNode, name: string, value: string) {
     const textNode = findTextNode(parent, name);
     if (textNode) {
-        for (const segment of textNode.getStyledTextSegments(['fontName'])) {
-            await figma.loadFontAsync(segment.fontName);
+        const segments = textNode.getStyledTextSegments(['fontName']);
+        if (segments.length > 0) {
+            for (const segment of segments) {
+                await figma.loadFontAsync(segment.fontName);
+            }
+        } else {
+            // Empty text node: no segments, load font from fontName property directly
+            const fn = textNode.fontName;
+            if (fn !== figma.mixed) {
+                await figma.loadFontAsync(fn as FontName);
+            }
         }
         textNode.characters = value;
     }
@@ -371,6 +380,8 @@ async function fillMetadata(nodes: readonly SceneNode[], metadata: Metadata) {
                 { name: 'year', value: metadata.year },
                 { name: 'duration', value: metadata.duration },
                 { name: 'sinopsis', value: metadata.sinopsis },
+                { name: 'schedule', value: metadata.schedule },
+                { name: 'live', value: metadata.live },
             ];
             for (const field of fields) {
                 if (field.value) await setTextContent(node, field.name, field.value);
@@ -574,6 +585,9 @@ interface MovieTvMetadata {
     sinopsis: string;
     genres?: string[];
     contentId?: string;
+    schedule?: string;
+    live?: string;
+    channelName?: string;
 }
 
 interface PersonMetadata {
@@ -618,6 +632,7 @@ interface PluginMessage {
     coversData?: CoverData[];
     coversUrlData?: CoverUrlData[];
     episodesData?: EpisodeCoverData[];
+    carouselTitle?: string;
 }
 
 figma.ui.onmessage = async (msg: PluginMessage) => {
@@ -771,11 +786,13 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
                 }
             }
 
-            // Apply provider logo if contentId has known prefix
-            if (msg.metadata?.contentId) {
-                const providerValue = extractProvider(msg.metadata.contentId);
+            // Apply provider logo: prefer channelName from HTML paste, fallback to contentId prefix
+            const providerLogos = findProviderLogoNodes(selection, cachedAllCardIds);
+            if (providerLogos.length > 0) {
+                const channelName = (msg.metadata as MovieTvMetadata)?.channelName;
+                const providerFromId = msg.metadata?.contentId ? extractProvider(msg.metadata.contentId) : null;
+                const providerValue = channelName || providerFromId;
                 if (providerValue) {
-                    const providerLogos = findProviderLogoNodes(selection, cachedAllCardIds);
                     applyProviderLogo(providerLogos, providerValue);
                 }
             }
@@ -791,6 +808,15 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
         }
     }
 
+    // -- Detect if selection is a channel row (skip first 3 covers) --
+    function getChannelRowOffset(nodes: readonly SceneNode[]): number {
+        for (const node of nodes) {
+            const n = node.name.trim().toLowerCase().replace(/[\s_-]+/g, '');
+            if (n.includes('row') && n.includes('channel')) return 3;
+        }
+        return 0;
+    }
+
     // -- Apply multiple covers via URL (OTV CDN) --
     if (msg.type === 'apply-multiple-covers-url' && msg.coversUrlData) {
         const selection = figma.currentPage.selection;
@@ -803,51 +829,88 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
         }
 
         const coversUrlData = msg.coversUrlData;
-        const applyCount = Math.min(coverNodes.length, coversUrlData.length);
+        const cardOffset = getChannelRowOffset(selection);
+        const targetCoverNodes = coverNodes.slice(cardOffset);
+        const applyCount = Math.min(targetCoverNodes.length, coversUrlData.length);
 
-        try {
-            for (let i = 0; i < applyCount; i++) {
-                const coverNode = coverNodes[i];
-                const coverData = coversUrlData[i];
+        let successCount = 0;
+        for (let i = 0; i < applyCount; i++) {
+            const coverNode = targetCoverNodes[i];
+            const coverData = coversUrlData[i];
 
+            try {
                 const image = await figma.createImageAsync(coverData.coverUrl);
                 if ('fills' in coverNode) {
                     (coverNode as GeometryMixin & SceneNode).fills = [{ type: 'IMAGE', imageHash: image.hash, scaleMode: 'FILL' }];
                 }
+                successCount++;
+            } catch (_) { /* imagen no disponible, se salta esta card */ }
 
-                if (coverData.titleTreatmentUrl) {
-                    try {
-                        const ttImage = await figma.createImageAsync(coverData.titleTreatmentUrl);
-                        const scope = findMetadataScope(coverNode);
-                        const ttNodes = findTitleTreatmentNodes([scope]);
-                        if (ttNodes.length > 0 && 'fills' in ttNodes[0]) {
-                            (ttNodes[0] as GeometryMixin & SceneNode).fills = [{ type: 'IMAGE', imageHash: ttImage.hash, scaleMode: 'FIT' }];
-                        }
-                    } catch (_) { }
-                }
-
-                if (coverData.metadata) {
+            if (coverData.titleTreatmentUrl) {
+                try {
+                    const ttImage = await figma.createImageAsync(coverData.titleTreatmentUrl);
                     const scope = findMetadataScope(coverNode);
-                    await fillMetadata([scope], coverData.metadata);
-                }
-
-                // Apply provider logo if contentId has known prefix
-                if (coverData.metadata?.contentId) {
-                    const providerValue = extractProvider(coverData.metadata.contentId);
-                    if (providerValue) {
-                        const scope = findMetadataScope(coverNode);
-                        const providerLogos = findProviderLogoNodes([scope], cachedAllCardIds);
-                        applyProviderLogo(providerLogos, providerValue);
+                    const ttNodes = findTitleTreatmentNodes([scope]);
+                    if (ttNodes.length > 0 && 'fills' in ttNodes[0]) {
+                        (ttNodes[0] as GeometryMixin & SceneNode).fills = [{ type: 'IMAGE', imageHash: ttImage.hash, scaleMode: 'FIT' }];
                     }
-                }
+                } catch (_) { }
             }
 
-            figma.notify(`✅ ${applyCount} cover(s) aplicadas con contenido aleatorio.`);
-            figma.ui.postMessage({ type: 'apply-done', success: true });
-        } catch (e) {
-            figma.notify('⚠️ Error al cargar imágenes.', { error: true });
-            figma.ui.postMessage({ type: 'apply-done', success: false, error: (e as Error).message });
+            if (coverData.metadata) {
+                const scope = findMetadataScope(coverNode);
+                await fillMetadata([scope], coverData.metadata);
+            }
+
+            // Apply provider logo: prefer channelName from HTML paste, fallback to contentId prefix
+            const scope2 = findMetadataScope(coverNode);
+            const logos = findProviderLogoNodes([scope2], cachedAllCardIds);
+            if (logos.length > 0) {
+                const channelName = (coverData.metadata as MovieTvMetadata)?.channelName;
+                const providerFromId = coverData.metadata?.contentId ? extractProvider(coverData.metadata.contentId) : null;
+                const providerValue = channelName || providerFromId;
+                if (providerValue) {
+                    applyProviderLogo(logos, providerValue);
+                }
+            }
         }
+
+        // Apply carousel title to Row_title node if present
+        if (msg.carouselTitle) {
+            for (const node of selection) {
+                let applied = false;
+                // Try component text property first (e.g. "título de la row", "row_title")
+                if (node.type === 'INSTANCE') {
+                    const props = node.componentProperties;
+                    for (const [key, prop] of Object.entries(props)) {
+                        if (prop.type === 'TEXT') {
+                            const baseName = key.split('#')[0].trim().toLowerCase();
+                            if (baseName.includes('row')) {
+                                try {
+                                    node.setProperties({ [key]: msg.carouselTitle });
+                                    applied = true;
+                                } catch (_) { }
+                                break;
+                            }
+                        }
+                    }
+                }
+                // Fallback: find a text node named row_title
+                if (!applied) {
+                    try {
+                        await setTextContent(node, 'row_title', msg.carouselTitle);
+                    } catch (_) { }
+                }
+            }
+        }
+
+        const skipped = applyCount - successCount;
+        if (skipped > 0) {
+            figma.notify(`✅ ${successCount} cover(s) aplicadas. ⚠️ ${skipped} no disponibles.`);
+        } else {
+            figma.notify(`✅ ${successCount} cover(s) aplicadas.`);
+        }
+        figma.ui.postMessage({ type: 'apply-done', success: true });
     }
 
     if (msg.type === 'apply-multiple-covers' && msg.coversData) {

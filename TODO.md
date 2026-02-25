@@ -1,32 +1,5 @@
 # TODO — CoverOmatic v3
 
-> Última actualización: 2026-02-23
-
----
-
-## Mejoras post-review v3 (completadas 2026-02-23)
-
-- [x] **Shuffle sesgado en "Aplicar Aleatorio"** — Fisher-Yates implementado en `CoverGrid.tsx`
-- [x] **Fallos silenciosos en Provider Logo** — Extraída `applyProviderLogo()` con `figma.notify()` en `code.ts`
-- [x] **Debounce en `sendSelection()`** — 120ms debounce en `code.ts`
-- [x] **TMDB fetch sin feedback** — Logger + `figma.notify()` en `CoverGrid.tsx`
-- [x] **`findMetadataScope()` mejorado** — Busca nodos con nombres de metadata conocidos en `code.ts`
-- [x] **Cache VPS paralelizado** — `Promise.all()` en batches de 10 en `code.ts`
-- [x] **Documentar Supabase anon key** — Sección añadida en `v3_handoff_context.md`
-
----
-
-## Estado actual
-
-CoverOmatic v3.0 migrado a Supabase (completado 2026-02-19):
-- 304 contenidos VOD activos (100% con TMDB ID)
-- Catálogo cargado dinámicamente desde Supabase (sin JSON embebido)
-- Sistema de caché local (4h TTL) con fallback offline
-- Scripts CLI para gestión del catálogo
-- Plugin 49KB más ligero (165K → 116K)
-
----
-
 ## Próxima tarea: Soporte para contenidos EPG y emisiones
 
 ### Contexto

@@ -80,7 +80,34 @@ Correcciones y optimizaciones aplicadas tras la revisión del handoff:
 
 ---
 
-## 6. Próximos Pasos (Next Steps)
-Si el plugin es estable, las siguientes interacciones deberían centrarse en:
-1. Ampliación del catálogo automático que alimenta la cuenta de Supabase, o mejoras en la precisión de coincidencias (fuzzyness) si surgen títulos no emparejados.
-2. Añadir soporte para nuevos Componentes UI de Figma que surjan en el Design System 2026 de FrogTV que requieran lógicas de sustitución diferentes a "cover" y "titleTreatment".
+## 6. Pestaña HTML Paste (v3.1 — 2026-02-25)
+
+Nueva funcionalidad para aplicar contenido directamente desde el HTML de `orangetv.orange.es`, sin depender del catálogo Supabase.
+
+### Arquitectura
+
+- **Parser**: `HtmlPasteTab.tsx` — contiene `parseHtml()` que usa `DOMParser` del navegador. Detecta todos los elementos `app-carousel-*` y extrae sus cards según el tipo (slideshow, emission, channel, corner, generic). Extrae `backgroundUrl` del CSS inline con un regex robusto que soporta nombres de fichero con paréntesis (`COVER_ART(1).jpg`).
+- **Backend**: handler `apply-multiple-covers-url` en `code.ts` — ya existía para la aplicación masiva con URLs; se extendió para recibir `carouselTitle` y aplicarlo al nodo de texto `Row_title` del componente via `setProperties` (component text property) o `setTextContent` como fallback.
+
+### Comportamientos especiales implementados
+
+- **Row_title**: tras aplicar todas las cards, busca en la selección una propiedad de texto de componente cuyo nombre base contenga "row" y la rellena con el título del carrusel. Si no hay component property, busca un text node llamado `row_title`.
+- **row_card_channel offset**: si el componente Figma tiene "row" y "channel" en el nombre, salta los primeros 3 cover nodes para respetar las cards fijas de cabecera del componente.
+- **Resilencia de imágenes**: cada imagen se carga en su propio try/catch. Una imagen no disponible no aborta las demás. Al final se notifica `X cover(s) aplicadas. Y no disponibles.`
+
+### Archivos modificados en v3.1
+
+| Archivo | Cambio |
+|---------|--------|
+| `src/ui/components/HtmlPasteTab.tsx` | Nuevo componente completo (parser + UI). Regex `extractBgUrl` robusto. Instrucciones paso a paso |
+| `src/ui/components/Tabs.tsx` | Orden de tabs: Cine, Series, Personas, HTML, Log |
+| `src/ui/index.css` | Estilos para `.html-paste-steps` y `.html-paste-step-num` |
+| `src/code.ts` | Handler `apply-multiple-covers-url` ampliado: offset channel, Row_title via setProperties, error isolation por card. `setTextContent` mejorado para nodos de texto vacíos |
+
+---
+
+## 7. Próximos Pasos (Next Steps)
+
+1. **Componente `card_emission` en Figma** — el DS aún no tiene un componente específico para emisiones. La pestaña HTML ya parsea `backgroundUrl`, `channelIconUrl`, `schedule`, `live`, `duration` de las emission cards; necesita el componente Figma para aplicarlos.
+2. **Nuevos componentes DS 2026** — si surgen nuevos tipos de card en el Design System, actualizar la detección en `code.ts` y los switch de URLs en `CoverGrid.tsx`.
+3. **Enriquecimiento con TheTVDB** (opcional) — para EPG shows con temporadas, TheTVDB ($12/año) daría sinopsis y episodios que TMDB no tiene.

@@ -9,6 +9,7 @@ Aplica carátulas, metadatos y personas a componentes del Design System directam
 
 - **Cine y Series** — busca y aplica imágenes (portrait, landscape, background + title treatment) y metadatos (título, año, rating, duración, clasificación, sinopsis, géneros) desde el catálogo de Orange TV
 - **Personas** — busca actores y directores por nombre o por reparto de una película/serie vía TMDB, y aplica su foto a componentes de personaje
+- **HTML Paste** — pega el HTML de orangetv.orange.es y aplica directamente cualquier carrusel (EPG, emisiones, canales, VOD) a los componentes seleccionados. Sin necesidad de que el contenido esté en el catálogo
 - **Aplicar Aleatorio** — rellena múltiples componentes seleccionados en un clic
 - **Capítulos** — selecciona temporada/episodio y aplica imágenes de capítulo
 - **VPS / Slideshow** — aplica background + title treatment a envolventes
@@ -110,4 +111,4 @@ SUPABASE_URL=... SUPABASE_SERVICE_KEY=... TMDB_API_KEY=... \
 ---
 
 **Desarrollado para**: OrangeTV | CitrusDLS
-**Versión activa**: v3.0 (migrada a Supabase, febrero 2026)
+**Versión activa**: v3.1 (pestaña HTML Paste, febrero 2026)
