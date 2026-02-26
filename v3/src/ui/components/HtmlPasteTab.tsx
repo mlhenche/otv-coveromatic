@@ -1,9 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { Logger } from './LogStore';
 
 // ── Types ──────────────────────────────────────────────
 
-interface ParsedCard {
+export interface ParsedCard {
     type: 'emission' | 'channel' | 'generic' | 'slideshow' | 'corner';
     title: string;
     backgroundUrl: string | null;
@@ -16,18 +16,27 @@ interface ParsedCard {
     description: string | null;
     year: string | null;
     ageRating: string | null;
+    imageFormat: 'portrait' | 'landscape';
 }
 
-interface ParsedCarousel {
+export interface ParsedCarousel {
     tagName: string;
     label: string;
     title: string | null;
     cards: ParsedCard[];
 }
 
+export interface HtmlPasteState {
+    rawHtml: string;
+    carousels: ParsedCarousel[] | null;
+    selectedIdx: number | null;
+}
+
 interface HtmlPasteTabProps {
     selectionInfo: any;
     setApplying: (val: boolean) => void;
+    htmlState: HtmlPasteState;
+    onHtmlStateChange: (state: HtmlPasteState) => void;
 }
 
 // ── HTML Parser ────────────────────────────────────────
@@ -41,6 +50,13 @@ function extractBgUrl(el: Element): string | null {
     const unquotedMatch = style.match(/background-image:\s*url\(([^)]+)\)/);
     if (unquotedMatch) return unquotedMatch[1].replace(/&amp;/g, '&');
     return null;
+}
+
+// Read format from CSS class on the card__image element (Orange TV HTML uses .portrait / .landscape)
+function detectImageFormat(imageEl: Element | null): 'portrait' | 'landscape' {
+    if (!imageEl) return 'landscape';
+    if (imageEl.classList.contains('portrait')) return 'portrait';
+    return 'landscape';
 }
 
 function extractChannelName(url: string): string | null {
@@ -57,13 +73,15 @@ function textContent(el: Element | null, selector: string): string | null {
 
 function parseCardEmission(card: Element): ParsedCard {
     const imageEl = card.querySelector('.card__image');
+    const rawBg = imageEl ? extractBgUrl(imageEl) : null;
     const channelEl = card.querySelector('.card__channel-icon');
     const channelUrl = channelEl ? extractBgUrl(channelEl) : null;
 
+    const validBg = rawBg?.startsWith('http') ? rawBg : null;
     return {
         type: 'emission',
         title: textContent(card, '.card__name') || 'Sin título',
-        backgroundUrl: imageEl ? extractBgUrl(imageEl) : null,
+        backgroundUrl: validBg,
         titleTreatmentUrl: null,
         channelIconUrl: channelUrl,
         channelName: channelUrl ? extractChannelName(channelUrl) : null,
@@ -73,18 +91,23 @@ function parseCardEmission(card: Element): ParsedCard {
         description: null,
         year: null,
         ageRating: null,
+        imageFormat: detectImageFormat(imageEl),
     };
 }
 
 function parseCardChannel(card: Element): ParsedCard {
-    const imageEl = card.querySelector('.card__image.landscape');
+    const imageEl = card.querySelector('.card__image');
+    const rawBg = imageEl ? extractBgUrl(imageEl) : null;
     const channelEl = card.querySelector('.card__channel-icon');
     const channelUrl = channelEl ? extractBgUrl(channelEl) : null;
 
+    const validBg = rawBg?.startsWith('http') ? rawBg : null;
+
+    const finalBg = validBg || channelUrl;
     return {
         type: 'channel',
         title: textContent(card, '.card__name') || 'Sin título',
-        backgroundUrl: imageEl ? extractBgUrl(imageEl) : null,
+        backgroundUrl: finalBg,
         titleTreatmentUrl: null,
         channelIconUrl: channelUrl,
         channelName: channelUrl ? extractChannelName(channelUrl) : null,
@@ -94,6 +117,7 @@ function parseCardChannel(card: Element): ParsedCard {
         description: null,
         year: null,
         ageRating: null,
+        imageFormat: detectImageFormat(imageEl),
     };
 }
 
@@ -101,10 +125,11 @@ function parseCardSlideshow(card: Element): ParsedCard {
     const imageEl = card.querySelector('.card__image');
     const ttEl = card.querySelector('.card__title-image');
 
+    const bgUrl = imageEl ? extractBgUrl(imageEl) : null;
     return {
         type: 'slideshow',
         title: textContent(card, '.card__name') || 'Sin título',
-        backgroundUrl: imageEl ? extractBgUrl(imageEl) : null,
+        backgroundUrl: bgUrl,
         titleTreatmentUrl: ttEl ? extractBgUrl(ttEl) : null,
         channelIconUrl: null,
         channelName: null,
@@ -114,6 +139,7 @@ function parseCardSlideshow(card: Element): ParsedCard {
         description: textContent(card, '.card__description'),
         year: null,
         ageRating: null,
+        imageFormat: detectImageFormat(imageEl),
     };
 }
 
@@ -132,10 +158,11 @@ function parseCardGeneric(card: Element): ParsedCard {
         if (span.classList.contains('card__metadata__parental-rating')) ageRating = text;
     });
 
+    const bgUrl = imageEl ? extractBgUrl(imageEl) : null;
     return {
         type: 'generic',
         title: textContent(card, '.card__name') || 'Sin título',
-        backgroundUrl: imageEl ? extractBgUrl(imageEl) : null,
+        backgroundUrl: bgUrl,
         titleTreatmentUrl: null,
         channelIconUrl: channelUrl,
         channelName: channelUrl ? extractChannelName(channelUrl) : null,
@@ -145,6 +172,7 @@ function parseCardGeneric(card: Element): ParsedCard {
         description: null,
         year,
         ageRating,
+        imageFormat: detectImageFormat(imageEl),
     };
 }
 
@@ -152,10 +180,11 @@ function parseCardCorner(card: Element): ParsedCard {
     const bgEl = card.querySelector('.card__background-image');
     const logoEl = card.querySelector('.card__logo-image');
 
+    const bgUrl = bgEl ? extractBgUrl(bgEl) : null;
     return {
         type: 'corner',
         title: 'Corner',
-        backgroundUrl: bgEl ? extractBgUrl(bgEl) : null,
+        backgroundUrl: bgUrl,
         titleTreatmentUrl: logoEl ? extractBgUrl(logoEl) : null,
         channelIconUrl: null,
         channelName: null,
@@ -165,6 +194,7 @@ function parseCardCorner(card: Element): ParsedCard {
         description: null,
         year: null,
         ageRating: null,
+        imageFormat: detectImageFormat(bgEl),
     };
 }
 
@@ -209,6 +239,8 @@ function parseHtml(html: string): ParsedCarousel[] {
 
         if (cards.length > 0) {
             const label = title || `${tag} (${cards.length})`;
+            const pCount = cards.filter(c => c.imageFormat === 'portrait').length;
+            Logger.add('Parse', `${label} → portrait=${pCount} landscape=${cards.length - pCount}`);
             carousels.push({ tagName: tag, label, title, cards });
         }
     });
@@ -233,11 +265,11 @@ function carouselTypeTag(tagName: string): string {
 
 // ── Component ──────────────────────────────────────────
 
-export default function HtmlPasteTab({ selectionInfo, setApplying }: HtmlPasteTabProps) {
-    const [rawHtml, setRawHtml] = useState('');
-    const [carousels, setCarousels] = useState<ParsedCarousel[] | null>(null);
-    const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
+export default function HtmlPasteTab({ selectionInfo, setApplying, htmlState, onHtmlStateChange }: HtmlPasteTabProps) {
+    const { rawHtml, carousels, selectedIdx } = htmlState;
     const [parsing, setParsing] = useState(false);
+
+    const update = (patch: Partial<HtmlPasteState>) => onHtmlStateChange({ ...htmlState, ...patch });
 
     const handleParse = () => {
         if (!rawHtml.trim()) return;
@@ -245,21 +277,18 @@ export default function HtmlPasteTab({ selectionInfo, setApplying }: HtmlPasteTa
         // Use setTimeout to let the UI update with the loading state
         setTimeout(() => {
             const result = parseHtml(rawHtml);
-            setCarousels(result);
-            setSelectedIdx(null);
+            update({ carousels: result, selectedIdx: null });
             setParsing(false);
             Logger.add('HTML Parse', `${result.length} carruseles, ${result.reduce((s, c) => s + c.cards.length, 0)} cards`);
         }, 50);
     };
 
     const handleClear = () => {
-        setRawHtml('');
-        setCarousels(null);
-        setSelectedIdx(null);
+        update({ rawHtml: '', carousels: null, selectedIdx: null });
     };
 
     const handleBack = () => {
-        setSelectedIdx(null);
+        update({ selectedIdx: null });
     };
 
     const selectedCarousel = selectedIdx !== null && carousels ? carousels[selectedIdx] : null;
@@ -351,7 +380,7 @@ export default function HtmlPasteTab({ selectionInfo, setApplying }: HtmlPasteTa
                         className="html-paste-textarea"
                         placeholder="Pega aquí el HTML del inspector del navegador..."
                         value={rawHtml}
-                        onChange={e => setRawHtml(e.target.value)}
+                        onChange={e => update({ rawHtml: e.target.value })}
                     />
                     <div className="html-paste-actions">
                         <button
@@ -399,7 +428,7 @@ export default function HtmlPasteTab({ selectionInfo, setApplying }: HtmlPasteTa
                             <button
                                 key={idx}
                                 className="html-carousel-item"
-                                onClick={() => setSelectedIdx(idx)}
+                                onClick={() => update({ selectedIdx: idx })}
                             >
                                 <span className={`carousel-type-tag tag-${carousel.tagName.replace('app-carousel-', '')}`}>
                                     {carouselTypeTag(carousel.tagName)}
@@ -426,6 +455,11 @@ export default function HtmlPasteTab({ selectionInfo, setApplying }: HtmlPasteTa
     const totalTargetCards = Math.max(selectionInfo.coverCount || 0, 0);
     const canApplyAll = totalTargetCards > 1 && validCards.length > 0;
 
+    // Grid columns driven by the majority format across all cards.
+    const portraitCount = selectedCarousel.cards.filter(c => c.imageFormat === 'portrait').length;
+    const carouselFormat: 'portrait' | 'landscape' = portraitCount > selectedCarousel.cards.length / 2 ? 'portrait' : 'landscape';
+    Logger.add('Grid', `${selectedCarousel.label} → format=${carouselFormat} (portrait=${portraitCount}/${selectedCarousel.cards.length})`);
+
     return (
         <>
             <div className="html-carousel-header">
@@ -444,11 +478,13 @@ export default function HtmlPasteTab({ selectionInfo, setApplying }: HtmlPasteTa
             )}
 
             <div className="grid-container">
-                <div className="grid landscape">
+                <div className={`grid ${carouselFormat === 'portrait' ? '' : 'landscape'}`.trim()}>
                     {selectedCarousel.cards.map((card, idx) => {
+                        const aspectRatio = card.imageFormat === 'portrait' ? '2/3' : '16/9';
+
                         if (!card.backgroundUrl) {
                             return (
-                                <div key={idx} className="grid-item no-image">
+                                <div key={idx} className="grid-item no-image" style={{ aspectRatio }}>
                                     <span>{card.title}</span>
                                 </div>
                             );
@@ -458,12 +494,15 @@ export default function HtmlPasteTab({ selectionInfo, setApplying }: HtmlPasteTa
                             <div
                                 key={idx}
                                 className="grid-item"
+                                style={{ aspectRatio }}
                                 onClick={() => handleApplySingle(card)}
                             >
                                 <img
                                     src={card.backgroundUrl}
                                     alt={card.title}
-                                    onLoad={e => (e.target as HTMLImageElement).classList.add('loaded')}
+                                    onLoad={e => {
+                                        (e.target as HTMLImageElement).classList.add('loaded');
+                                    }}
                                     onError={e => {
                                         (e.target as HTMLImageElement).parentElement!.classList.add('no-image');
                                         (e.target as HTMLImageElement).style.display = 'none';

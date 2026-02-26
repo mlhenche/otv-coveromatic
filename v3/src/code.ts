@@ -98,9 +98,21 @@ function applyProviderLogo(logos: InstanceNode[], providerValue: string): number
             }
         }
         if (!providerKey) continue;
+
+        // Check if providerValue is a valid variant option before applying
+        const mainComp = logo.mainComponent;
+        const compSet = mainComp?.parent;
+        if (compSet && compSet.type === 'COMPONENT_SET') {
+            const baseKey = providerKey.split('#')[0];
+            const propDef = (compSet as ComponentSetNode).componentPropertyDefinitions[baseKey];
+            if (propDef?.type === 'VARIANT' && propDef.variantOptions
+                && !propDef.variantOptions.includes(providerValue)) {
+                continue;
+            }
+        }
+
         try {
-            const mainComponent = logo.mainComponent;
-            if (mainComponent) logo.swapComponent(mainComponent);
+            if (mainComp) logo.swapComponent(mainComp);
             logo.setProperties({ [providerKey]: providerValue });
             applied++;
         } catch (e) {

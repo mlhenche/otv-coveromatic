@@ -94,10 +94,20 @@ function applyProviderLogo(logos, providerValue) {
         }
         if (!providerKey)
             continue;
+        // Check if providerValue is a valid variant option before applying
+        const mainComp = logo.mainComponent;
+        const compSet = mainComp === null || mainComp === void 0 ? void 0 : mainComp.parent;
+        if (compSet && compSet.type === 'COMPONENT_SET') {
+            const baseKey = providerKey.split('#')[0];
+            const propDef = compSet.componentPropertyDefinitions[baseKey];
+            if ((propDef === null || propDef === void 0 ? void 0 : propDef.type) === 'VARIANT' && propDef.variantOptions
+                && !propDef.variantOptions.includes(providerValue)) {
+                continue;
+            }
+        }
         try {
-            const mainComponent = logo.mainComponent;
-            if (mainComponent)
-                logo.swapComponent(mainComponent);
+            if (mainComp)
+                logo.swapComponent(mainComp);
             logo.setProperties({ [providerKey]: providerValue });
             applied++;
         }

@@ -486,6 +486,15 @@
       aspect-ratio: 16/9;
     }
 
+    /* Per-item format overrides for mixed carousels */
+    .grid .grid-item.portrait {
+      aspect-ratio: 2/3;
+    }
+
+    .grid .grid-item.landscape-item {
+      aspect-ratio: 16/9;
+    }
+
     .grid-item:hover {
       transform: translateY(-4px) scale(1.02);
       box-shadow: 0 8px 24px rgba(255, 121, 0, 0.25), 0 0 0 1px var(--accent);

@@ -4,7 +4,7 @@ import Header from './components/Header';
 import Tabs from './components/Tabs';
 import ControlsBar from './components/ControlsBar';
 import CoverGrid from './components/CoverGrid';
-import HtmlPasteTab from './components/HtmlPasteTab';
+import HtmlPasteTab, { HtmlPasteState } from './components/HtmlPasteTab';
 import FooterLog from './components/FooterLog';
 import SeasonPicker from './components/SeasonPicker';
 import Overlays from './components/Overlays';
@@ -20,6 +20,11 @@ export default function App() {
     // Personas Tab states
     const [personSearchMode, setPersonSearchMode] = useState<'by-name' | 'by-content'>('by-name');
     const [selectedContentData, setSelectedContentData] = useState<any>(null);
+
+    // HTML Paste Tab persisted state
+    const [htmlState, setHtmlState] = useState<HtmlPasteState>({
+        rawHtml: '', carousels: null, selectedIdx: null,
+    });
 
     // Modals & Overlays
     const [seasonPickerEntry, setSeasonPickerEntry] = useState<any>(null);
@@ -109,6 +114,8 @@ export default function App() {
                     <HtmlPasteTab
                         selectionInfo={selectionInfo}
                         setApplying={setApplying}
+                        htmlState={htmlState}
+                        onHtmlStateChange={setHtmlState}
                     />
                 ) : (
                     <CoverGrid
