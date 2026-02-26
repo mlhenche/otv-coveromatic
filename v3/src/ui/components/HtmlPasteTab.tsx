@@ -96,18 +96,20 @@ function parseCardEmission(card: Element): ParsedCard {
 }
 
 function parseCardChannel(card: Element): ParsedCard {
-    const imageEl = card.querySelector('.card__image');
+    // app-card-channel has two .card__image elements: one hidden square (channel icon wrapper)
+    // and one with landscape/portrait class that holds the actual program image.
+    const imageEl = card.querySelector<Element>('.card__image.landscape, .card__image.portrait')
+        ?? card.querySelector('.card__image:not(.square)');
     const rawBg = imageEl ? extractBgUrl(imageEl) : null;
     const channelEl = card.querySelector('.card__channel-icon');
     const channelUrl = channelEl ? extractBgUrl(channelEl) : null;
 
     const validBg = rawBg?.startsWith('http') ? rawBg : null;
 
-    const finalBg = validBg || channelUrl;
     return {
         type: 'channel',
         title: textContent(card, '.card__name') || 'Sin título',
-        backgroundUrl: finalBg,
+        backgroundUrl: validBg,
         titleTreatmentUrl: null,
         channelIconUrl: channelUrl,
         channelName: channelUrl ? extractChannelName(channelUrl) : null,
