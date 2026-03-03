@@ -200,43 +200,31 @@ function parseCardCorner(card: Element): ParsedCard {
     };
 }
 
+const CARD_PARSERS: Record<string, { selector: string; parse: (el: Element) => ParsedCard }> = {
+    slideshow: { selector: 'app-card-slideshow', parse: parseCardSlideshow },
+    emission:  { selector: 'app-card-emission',  parse: parseCardEmission },
+    channel:   { selector: 'app-card-channel',   parse: parseCardChannel },
+    corner:    { selector: 'app-card-corner',     parse: parseCardCorner },
+    generic:   { selector: 'app-card-generic',    parse: parseCardGeneric },
+};
+
+const CAROUSEL_SELECTOR = Object.keys(CARD_PARSERS).map(t => `app-carousel-${t}`).join(', ');
+
 function parseHtml(html: string): ParsedCarousel[] {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
     const carousels: ParsedCarousel[] = [];
 
-    // Find all app-carousel-* elements
-    const allElements = doc.querySelectorAll('*');
-    allElements.forEach(el => {
+    doc.querySelectorAll(CAROUSEL_SELECTOR).forEach(el => {
         const tag = el.tagName.toLowerCase();
-        if (!tag.startsWith('app-carousel-')) return;
-
         const carouselType = tag.replace('app-carousel-', '');
         const titleEl = el.querySelector('.carousel-title');
         const title = titleEl?.textContent?.trim().replace(/\s+/g, ' ') || null;
 
         const cards: ParsedCard[] = [];
-
-        if (carouselType === 'slideshow') {
-            el.querySelectorAll('app-card-slideshow').forEach(card => {
-                cards.push(parseCardSlideshow(card));
-            });
-        } else if (carouselType === 'emission') {
-            el.querySelectorAll('app-card-emission').forEach(card => {
-                cards.push(parseCardEmission(card));
-            });
-        } else if (carouselType === 'channel') {
-            el.querySelectorAll('app-card-channel').forEach(card => {
-                cards.push(parseCardChannel(card));
-            });
-        } else if (carouselType === 'corner') {
-            el.querySelectorAll('app-card-corner').forEach(card => {
-                cards.push(parseCardCorner(card));
-            });
-        } else if (carouselType === 'generic') {
-            el.querySelectorAll('app-card-generic').forEach(card => {
-                cards.push(parseCardGeneric(card));
-            });
+        const p = CARD_PARSERS[carouselType];
+        if (p) {
+            el.querySelectorAll(p.selector).forEach(card => cards.push(p.parse(card)));
         }
 
         if (cards.length > 0) {
@@ -263,6 +251,18 @@ const CAROUSEL_ICONS: Record<string, string> = {
 function carouselTypeTag(tagName: string): string {
     const type = tagName.replace('app-carousel-', '');
     return CAROUSEL_ICONS[type] || '?';
+}
+
+function buildCardMetadata(card: ParsedCard): Record<string, string> {
+    const m: Record<string, string> = { title: card.title };
+    if (card.schedule) m.schedule = card.schedule;
+    if (card.live) m.live = card.live;
+    if (card.duration) m.duration = card.duration;
+    if (card.description) m.sinopsis = card.description;
+    if (card.year) m.year = card.year;
+    if (card.ageRating) m.ageRating = card.ageRating;
+    if (card.channelName) m.channelName = card.channelName;
+    return m;
 }
 
 // ── Component ──────────────────────────────────────────
@@ -299,21 +299,12 @@ export default function HtmlPasteTab({ selectionInfo, setApplying, htmlState, on
         if (!card.backgroundUrl) return;
         setApplying(true);
 
-        const metadata: any = { title: card.title };
-        if (card.schedule) metadata.schedule = card.schedule;
-        if (card.live) metadata.live = card.live;
-        if (card.duration) metadata.duration = card.duration;
-        if (card.description) metadata.sinopsis = card.description;
-        if (card.year) metadata.year = card.year;
-        if (card.ageRating) metadata.ageRating = card.ageRating;
-        if (card.channelName) metadata.channelName = card.channelName;
-
         parent.postMessage({
             pluginMessage: {
                 type: 'apply-cover-url',
                 coverUrl: card.backgroundUrl,
                 titleTreatmentUrl: card.titleTreatmentUrl,
-                metadata,
+                metadata: buildCardMetadata(card),
             }
         }, '*');
 
@@ -328,22 +319,11 @@ export default function HtmlPasteTab({ selectionInfo, setApplying, htmlState, on
 
         setApplying(true);
 
-        const coversUrlData = validCards.map(card => {
-            const metadata: any = { title: card.title };
-            if (card.schedule) metadata.schedule = card.schedule;
-            if (card.live) metadata.live = card.live;
-            if (card.duration) metadata.duration = card.duration;
-            if (card.description) metadata.sinopsis = card.description;
-            if (card.year) metadata.year = card.year;
-            if (card.ageRating) metadata.ageRating = card.ageRating;
-            if (card.channelName) metadata.channelName = card.channelName;
-
-            return {
-                coverUrl: card.backgroundUrl!,
-                titleTreatmentUrl: card.titleTreatmentUrl,
-                metadata,
-            };
-        });
+        const coversUrlData = validCards.map(card => ({
+            coverUrl: card.backgroundUrl!,
+            titleTreatmentUrl: card.titleTreatmentUrl,
+            metadata: buildCardMetadata(card),
+        }));
 
         parent.postMessage({
             pluginMessage: {

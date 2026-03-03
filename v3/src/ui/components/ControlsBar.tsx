@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useSupabaseCatalog } from '../hooks/useSupabaseCatalog';
 import { useTMDBMultiSearch } from '../hooks/useTMDB';
 
@@ -30,19 +30,18 @@ export default function ControlsBar({
     const shouldSearchMulti = activeTab === 'person' && personSearchMode === 'by-content';
     const { data: autocompleteResults, isLoading: autocompleteLoading } = useTMDBMultiSearch(apiKey, shouldSearchMulti ? searchTerm : '');
 
-    if (activeTab === 'log') return null;
-
-    let genres: { id: number, name: string }[] = [];
-    if (catalogData && (activeTab === 'movie' || activeTab === 'tv')) {
+    const genres = useMemo(() => {
+        if (!catalogData || (activeTab !== 'movie' && activeTab !== 'tv')) return [];
         const source = activeTab === 'movie' ? catalogData.movies : catalogData.series;
         const genreSet = new Set<number>();
         source.forEach(e => { (e.genreIds || []).forEach(id => genreSet.add(id)); });
-
-        genres = Array.from(genreSet)
+        return Array.from(genreSet)
             .map(id => ({ id, name: catalogData.genreNames[id] }))
             .filter(g => g.name)
             .sort((a, b) => a.name.localeCompare(b.name));
-    }
+    }, [catalogData, activeTab]);
+
+    if (activeTab === 'log') return null;
 
     const currentGenreName = genreId && catalogData ? catalogData.genreNames[genreId] : 'Género';
 

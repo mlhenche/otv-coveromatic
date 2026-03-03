@@ -12,6 +12,25 @@ function shuffle<T>(arr: T[]): T[] {
     return a;
 }
 
+const OTV_BASE = 'https://pc.orangetv.orange.es/pc/api/rtv/v1/images/vod';
+
+function buildOTVUrls(contentId: string, typeToUse: string): { coverUrl: string; titleTreatmentUrl: string | null } {
+    switch (typeToUse) {
+        case 'card-portrait':
+            return { coverUrl: `${OTV_BASE}/VERTICAL/${contentId}_VERTICAL.jpg?width=3840&height=2160`, titleTreatmentUrl: null };
+        case 'card-landscape':
+            return { coverUrl: `${OTV_BASE}/COVER_ART/${contentId}_COVER_ART.jpg?width=3840&height=2160`, titleTreatmentUrl: null };
+        case 'vps':
+        case 'slideshow':
+            return {
+                coverUrl: `${OTV_BASE}/BACKGROUND/${contentId}_BACKGROUND.jpg?width=3840&height=2160`,
+                titleTreatmentUrl: `${OTV_BASE}/TITLE_TREATMENT/${contentId}_title_treatment.png?width=1280&height=720`,
+            };
+        default:
+            return { coverUrl: `${OTV_BASE}/VERTICAL/${contentId}_VERTICAL.jpg?width=3840&height=2160`, titleTreatmentUrl: null };
+    }
+}
+
 interface CoverGridProps {
     apiKey: string;
     activeTab: string;
@@ -71,24 +90,7 @@ export default function CoverGrid({
     const applyOTVContent = async (item: any, typeToUse: string) => {
         setApplying(true);
         try {
-            const OTV_BASE = 'https://pc.orangetv.orange.es/pc/api/rtv/v1/images/vod';
-            let coverUrl, titleTreatmentUrl = null;
-
-            switch (typeToUse) {
-                case 'card-portrait':
-                    coverUrl = `${OTV_BASE}/VERTICAL/${item.contentId}_VERTICAL.jpg?width=3840&height=2160`;
-                    break;
-                case 'card-landscape':
-                    coverUrl = `${OTV_BASE}/COVER_ART/${item.contentId}_COVER_ART.jpg?width=3840&height=2160`;
-                    break;
-                case 'vps':
-                case 'slideshow':
-                    coverUrl = `${OTV_BASE}/BACKGROUND/${item.contentId}_BACKGROUND.jpg?width=3840&height=2160`;
-                    titleTreatmentUrl = `${OTV_BASE}/TITLE_TREATMENT/${item.contentId}_title_treatment.png?width=1280&height=720`;
-                    break;
-                default:
-                    coverUrl = `${OTV_BASE}/VERTICAL/${item.contentId}_VERTICAL.jpg?width=3840&height=2160`;
-            }
+            const { coverUrl, titleTreatmentUrl } = buildOTVUrls(item.contentId, typeToUse);
 
             let duration = '';
             let ageRating = '';
@@ -367,25 +369,8 @@ export default function CoverGrid({
 
     const sendRandomOTVMessage = (items: any[], typeToUse: string) => {
         setApplying(true);
-        const OTV_BASE = 'https://pc.orangetv.orange.es/pc/api/rtv/v1/images/vod';
         const coversUrlData = items.map(item => {
-            let coverUrl, titleTreatmentUrl = null;
-            switch (typeToUse) {
-                case 'card-portrait':
-                    coverUrl = `${OTV_BASE}/VERTICAL/${item.contentId}_VERTICAL.jpg?width=3840&height=2160`;
-                    break;
-                case 'card-landscape':
-                    coverUrl = `${OTV_BASE}/COVER_ART/${item.contentId}_COVER_ART.jpg?width=3840&height=2160`;
-                    break;
-                case 'vps':
-                case 'slideshow':
-                    coverUrl = `${OTV_BASE}/BACKGROUND/${item.contentId}_BACKGROUND.jpg?width=3840&height=2160`;
-                    titleTreatmentUrl = `${OTV_BASE}/TITLE_TREATMENT/${item.contentId}_title_treatment.png?width=1280&height=720`;
-                    break;
-                default:
-                    coverUrl = `${OTV_BASE}/VERTICAL/${item.contentId}_VERTICAL.jpg?width=3840&height=2160`;
-            }
-
+            const { coverUrl, titleTreatmentUrl } = buildOTVUrls(item.contentId, typeToUse);
             return {
                 coverUrl,
                 titleTreatmentUrl,
