@@ -2,7 +2,7 @@
 
 > Plugin de Figma para el equipo de diseño de Orange TV (FrogTV).
 > Aplica carátulas, metadatos y personas a componentes del Design System en Figma.
-> Última actualización de este documento: 2026-02-25
+> Última actualización de este documento: 2026-03-06
 
 ---
 
@@ -178,16 +178,26 @@ Nueva pestaña que permite aplicar contenido directamente desde el HTML de `oran
 
 ### Datos que extrae por card
 
-- `backgroundUrl` — imagen principal (extrae de `background-image: url(...)` en el CSS inline). El regex soporta nombres de fichero con paréntesis ej. `COVER_ART(1).jpg`
+- `backgroundUrl` — imagen principal (extrae de `background-image: url(...)` en el CSS inline). El regex soporta nombres de fichero con paréntesis ej. `COVER_ART(1).jpg`. Cards sin imagen (url vacía o ausente) quedan ocultas en el grid.
 - `titleTreatmentUrl` — title treatment (solo slideshow y corner)
 - `channelIconUrl` / `channelName` — icono del canal y nombre inferido de la URL
 - `schedule`, `live`, `duration` — horario, indicador en directo, duración (emisiones)
 - `title`, `year`, `ageRating` — datos de la card (genérico)
 
+### Carga de imágenes EPG
+
+Las imágenes EPG de OTV (`/epg/COVER/...`) no pueden cargarse con `figma.createImageAsync()` desde el sandbox de Figma. El plugin las descarga primero en la UI (iframe del navegador, con acceso permitido por `networkAccess.allowedDomains` en el manifest) y envía los bytes al backend con `figma.createImage(bytes)`. Si el fetch en la UI falla, cae al fallback de `createImageAsync`.
+
+### Provider logo en cards de canal
+
+- `extractChannelName()` extrae el nombre del canal desde la URL del icono (dos patrones: `/attachments_new/{NAME}_{NNNxNNN}.ext` y `/attachments/{name}.ext`)
+- `CHANNEL_TO_PROVIDER` en `code.ts` mapea nombres de URL a variantes del componente `providerLogoSquare` en Figma
+- `findBestVariantMatch()` intenta en orden: **exact match** (si las variantes en Figma se renombran para coincidir con los nombres de URL, esto resuelve directamente — TODO: eliminar la tabla cuando se complete el renombrado), tabla explícita, case-insensitive, fuzzy normalizado
+
 ### Archivos clave
 
 - `v3/src/ui/components/HtmlPasteTab.tsx` — parser + componente React de la pestaña
-- `v3/src/code.ts` — handler `apply-multiple-covers-url` (aplica URLs a cover frames)
+- `v3/src/code.ts` — handlers `apply-cover-url` y `apply-multiple-covers-url`, `CHANNEL_TO_PROVIDER`, `findBestVariantMatch`, `applyProviderLogo`
 
 ---
 
@@ -269,9 +279,11 @@ Todos los scripts de `v3/scripts/` requieren las vars `SUPABASE_URL`, `SUPABASE_
 
 ## Próximas tareas (ver TODO.md para detalle)
 
-1. **Componente `card_emission` en Figma** — el DS aún no tiene un componente específico para emisiones en directo. La pestaña HTML ya parsea las emissions cards (`backgroundUrl`, `channelIconUrl`, `schedule`, `live`, `duration`), pero necesita un componente Figma con esas capas para aplicar los datos completos.
+1. **Completar tabla `CHANNEL_TO_PROVIDER`** — renombrar las variantes del componente `providerLogoSquare` en Figma para que coincidan exactamente con los nombres de canal extraídos de las URLs de OTV (ej. `LA_SEXTA`, `ANTENA3`). Cuando se haga, el exact match en `findBestVariantMatch` resolverá directamente y la tabla podrá eliminarse.
 
-2. **Nuevos componentes del DS 2026** — si el Design System evoluciona y aparecen nuevos tipos de card, hay que actualizar la detección en `code.ts` y los `switch` de URLs en `CoverGrid.tsx`
+2. **Componente `card_emission` en Figma** — el DS aún no tiene un componente específico para emisiones en directo. La pestaña HTML ya parsea las emissions cards (`backgroundUrl`, `channelIconUrl`, `schedule`, `live`, `duration`), pero necesita un componente Figma con esas capas para aplicar los datos completos.
+
+3. **Nuevos componentes del DS 2026** — si el Design System evoluciona y aparecen nuevos tipos de card, hay que actualizar la detección en `code.ts` y los `switch` de URLs en `CoverGrid.tsx`
 
 ---
 

@@ -164,13 +164,15 @@ function normalizeChannel(name) {
         .trim();
 }
 function findBestVariantMatch(providerValue, variantOptions) {
-    // 0. Hardcoded mapping table (URL channel name → Figma variant)
+    // 0. Exact match — cuando las variantes de Figma se renombren para coincidir con los nombres
+    // de URL de OTV (ej. "LA_SEXTA", "ANTENA3"), esto resolverá directamente sin necesitar la tabla.
+    // TODO: Una vez completado ese renombrado, CHANNEL_TO_PROVIDER puede eliminarse.
+    if (variantOptions.includes(providerValue))
+        return providerValue;
+    // 1. Hardcoded mapping table (URL channel name → Figma variant name actual)
     const mapped = CHANNEL_TO_PROVIDER[providerValue];
     if (mapped && variantOptions.includes(mapped))
         return mapped;
-    // 1. Exact match
-    if (variantOptions.includes(providerValue))
-        return providerValue;
     // 2. Case-insensitive exact
     const lower = providerValue.toLowerCase();
     const ciMatch = variantOptions.find(o => o.toLowerCase() === lower);
@@ -880,9 +882,15 @@ figma.ui.onmessage = async (msg) => {
             return;
         }
         // 1. Cargar imagen principal (único punto de fallo que muestra error al usuario)
+        // Preferimos imageBytes (pre-fetched en la UI con cookies de sesión OTV, necesario para EPG)
         let image;
         try {
-            image = await figma.createImageAsync(coverUrl);
+            if (msg.imageBytes) {
+                image = figma.createImage(new Uint8Array(msg.imageBytes));
+            }
+            else {
+                image = await figma.createImageAsync(coverUrl);
+            }
         }
         catch (e) {
             figma.notify('⚠️ Error al cargar la imagen.', { error: true });
@@ -976,7 +984,10 @@ figma.ui.onmessage = async (msg) => {
             const coverNode = targetCoverNodes[i];
             const coverData = coversUrlData[i];
             try {
-                const image = await figma.createImageAsync(coverData.coverUrl);
+                // Preferimos imageBytes (pre-fetched en la UI con cookies de sesión OTV, necesario para EPG)
+                const image = coverData.imageBytes
+                    ? figma.createImage(new Uint8Array(coverData.imageBytes))
+                    : await figma.createImageAsync(coverData.coverUrl);
                 if ('fills' in coverNode) {
                     coverNode.fills = [{ type: 'IMAGE', imageHash: image.hash, scaleMode: 'FILL' }];
                 }

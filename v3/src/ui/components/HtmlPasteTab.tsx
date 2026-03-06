@@ -52,8 +52,8 @@ function extractBgUrl(el: Element): string | null {
     // Quoted URL first — handles filenames with parentheses like COVER_ART(1).jpg
     const quotedMatch = style.match(/background-image:\s*url\(["']([^"']+)["']\)/);
     if (quotedMatch) return quotedMatch[1].replace(/&amp;/g, '&');
-    // Fallback: unquoted URL
-    const unquotedMatch = style.match(/background-image:\s*url\(([^)]+)\)/);
+    // Fallback: unquoted URL (exclude quotes to avoid capturing url("") as '""')
+    const unquotedMatch = style.match(/background-image:\s*url\(([^)"']+)\)/);
     if (unquotedMatch) return unquotedMatch[1].replace(/&amp;/g, '&');
     return null;
 }
@@ -314,14 +314,23 @@ export default function HtmlPasteTab({ selectionInfo, setApplying, htmlState, on
 
     const selectedCarousel = selectedIdx !== null && carousels ? carousels[selectedIdx] : null;
 
-    const handleApplySingle = (card: ParsedCard) => {
+    const handleApplySingle = async (card: ParsedCard) => {
         if (!card.backgroundUrl) return;
         setApplying(true);
+
+        // Fetch image in UI context (browser iframe allows cross-origin fetches to pc.orangetv.orange.es,
+        // necesario para EPG: figma.createImageAsync falla en el sandbox de Figma para URLs de OTV)
+        let imageBytes: number[] | undefined;
+        try {
+            const res = await fetch(card.backgroundUrl);
+            if (res.ok) imageBytes = Array.from(new Uint8Array(await res.arrayBuffer()));
+        } catch (_) {}
 
         parent.postMessage({
             pluginMessage: {
                 type: 'apply-cover-url',
                 coverUrl: card.backgroundUrl,
+                imageBytes,
                 titleTreatmentUrl: card.titleTreatmentUrl,
                 metadata: buildCardMetadata(card),
             }
@@ -331,18 +340,28 @@ export default function HtmlPasteTab({ selectionInfo, setApplying, htmlState, on
         setTimeout(() => setApplying(false), 800);
     };
 
-    const handleApplyAll = () => {
+    const handleApplyAll = async () => {
         if (!selectedCarousel) return;
         const validCards = selectedCarousel.cards.filter(c => c.backgroundUrl);
         if (validCards.length === 0) return;
 
         setApplying(true);
 
-        const coversUrlData = validCards.map(card => ({
-            coverUrl: card.backgroundUrl!,
-            titleTreatmentUrl: card.titleTreatmentUrl,
-            metadata: buildCardMetadata(card),
-        }));
+        // Fetch all images in UI context (browser iframe has OTV session cookies, needed for EPG images)
+        const coversUrlData = await Promise.all(
+            validCards.map(async card => {
+                const data: { coverUrl: string; imageBytes?: number[]; titleTreatmentUrl: string | null; metadata: Record<string, string> } = {
+                    coverUrl: card.backgroundUrl!,
+                    titleTreatmentUrl: card.titleTreatmentUrl,
+                    metadata: buildCardMetadata(card),
+                };
+                try {
+                    const res = await fetch(card.backgroundUrl!);
+                    if (res.ok) data.imageBytes = Array.from(new Uint8Array(await res.arrayBuffer()));
+                } catch (_) {}
+                return data;
+            })
+        );
 
         parent.postMessage({
             pluginMessage: {
@@ -483,13 +502,7 @@ export default function HtmlPasteTab({ selectionInfo, setApplying, htmlState, on
                     {selectedCarousel.cards.map((card, idx) => {
                         const aspectRatio = card.imageFormat === 'portrait' ? '2/3' : '16/9';
 
-                        if (!card.backgroundUrl) {
-                            return (
-                                <div key={idx} className="grid-item no-image" style={{ aspectRatio }}>
-                                    <span>{card.title}</span>
-                                </div>
-                            );
-                        }
+                        if (!card.backgroundUrl) return null;
 
                         return (
                             <div

@@ -111,4 +111,4 @@ SUPABASE_URL=... SUPABASE_SERVICE_KEY=... TMDB_API_KEY=... \
 ---
 
 **Desarrollado para**: OrangeTV | CitrusDLS
-**Versión activa**: v3.1 (pestaña HTML Paste, febrero 2026)
+**Versión activa**: v3.2 (provider logos en carruseles de canal, marzo 2026)
