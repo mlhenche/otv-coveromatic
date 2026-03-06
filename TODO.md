@@ -1,163 +1,76 @@
 # TODO — CoverOmatic v3
 
-## Próxima tarea: Soporte para contenidos EPG y emisiones
+## EN CURSO: Fix provider + imágenes en pestaña HTML (card_channel)
 
-### Contexto
+### Estado (2026-03-06)
 
-Además del catálogo VOD (películas/series de streaming), Orange TV tiene contenidos de tipo **EPG** (programas de TV de la TDT y canales de pago) y **emisiones** (retransmisiones en directo/programadas). Estos contenidos NO están en TMDB.
+Los cambios aplicados (`upgradeImageUrl`, estrategia 3 `findProviderLogoAncestor`, logging básico) no han resuelto los bugs. Próximo paso: fix case-insensitive + logging diagnóstico.
 
-### 3 tipos de contenido a soportar
+### Bugs activos
 
-#### Tipo 1: EPG Shows (programas de TV)
+1. **Provider no cambia en card_channel** — `providerLogoSquare` no se actualiza al aplicar fila de canal
+2. **Algunas cards sin imagen** — slots quedan en blanco tras aplicar desde la pestaña HTML
 
-Programas de televisión con temporadas, como series pero de la TDT. Componente Angular: `app-card-generic` con URLs `/epg/`.
+### Análisis (code.ts)
 
-**Datos disponibles en el HTML:**
-- Título (ej: "Got Talent España", "El Hormiguero", "Pasapalabra")
-- Rating (algunos tienen, otros no)
-- Año
-- Temporadas (ej: "5 temporadas")
-- Clasificación por edad (TP, 7, 12, 16, 18)
-- Cover landscape: `https://pc.orangetv.orange.es/pc/api/rtv/v1/images/epg/COVER_ART/COVER_ART_{epgId}.jpg`
-- Variante con prefijo ED: `.../epg/COVER_ART/ED_COVER_ART_{epgId}.jpg`
-
-**Datos que FALTAN:**
-- Género (Entretenimiento, Informativo, Serie, Programa, Deportes...)
-- Episodios / últimas emisiones
-- Sinopsis
-
-**EPG IDs encontrados de ejemplo:**
-| Título | EPG ID | Rating | Año | Temp | Edad |
-|--------|--------|--------|-----|------|------|
-| Got Talent España | 3994826 | 6.4 | 2025 | 5 | 12 |
-| Sueños de libertad | 4415297 | 7.9 | 2023 | 3 | 12 |
-| Renacer | 3994471 | 6.1 | 2024 | 2 | 12 |
-| Viajeros Cuatro | 3997024 | - | 2025 | 8 | 12 |
-| El Hormiguero | 4261075 | 4.8 | 2006 | 1 | 7 |
-| El capitán en Japón | 4998737 | - | 2026 | 1 | 12 |
-| Horizonte | 4029287 | - | 2021 | 4 | 16 |
-| Pasapalabra | 4261095 | - | 2025 | 3 | TP |
-| First Dates | 3996973 | - | 2025 | 5 | 12 |
-| Los Gipsy Kings | 4092620 | 7.5 | 2016 | 2 | 12 |
-| Código 10 | 3996977 | - | 2025 | 3 | 18 |
-| Universo Calleja | 5002081 | - | 2025 | 2 | 12 |
-
-**Nota:** Hay un caso mixto — "La que se avecina" tiene URL `/vod/` con prefijo U7D: `.../vod/COVER_ART/U7D_MFO_298249197FDF_COVER_ART.jpg`
-
-#### Tipo 2: Emisiones (retransmisiones en directo/programadas)
-
-Eventos programados con fecha/hora, típicamente deportes pero también otros contenidos. Componente Angular: `app-card-emission`.
-
-**Datos disponibles en el HTML:**
-- Título emisión (ej: "Avilés Industrial - Real Madrid Castilla")
-- Background: `https://pc.orangetv.orange.es/pc/api/rtv/v1/images/epg/BACKGROUND/BACKGROUND_{epgId}.jpg` (3840x2160)
-- Logo del canal: `https://pc.orangetv.orange.es/pc/api/rtv/v1/images/attachments_new/PRIMERA_FEDERACION_176x122.png` (3840x2160)
-- Fecha (ej: "Sáb 21 feb")
-- Horario (ej: "21:00 - 23:05")
-- Duración (ej: "2h 5m")
-- Estado "En directo" (badge rojo, clase `emission-info__status`)
-- Título de sección/carousel (ej: "Primera Federación: En directo y próximamente")
-
-**Datos que FALTAN:**
-- Nombre del canal en texto (se infiere del logo)
-- Categoría (Deportes, Cine, etc.)
-
-**Componente Figma sugerido (`card_emission`):**
+**Jerarquía Figma confirmada:**
 ```
-📦 card_emission
-  ├─ 🖼️ cover           ← Background de la emisión
-  ├─ 🖼️ channelLogo     ← Logo del canal
-  ├─ 📝 title           ← "Avilés Industrial - Real Madrid Castilla"
-  ├─ 📝 date            ← "Sáb 21 feb"
-  ├─ 📝 time            ← "21:00 - 23:05"
-  ├─ 📝 duration        ← "2h 5m"
-  └─ 🔴 liveIndicator   ← Badge "En directo" (show/hide)
+cover(FRAME) → wrapper(FRAME) → epg(INSTANCE) → cardsRow(FRAME) → row_card_channel(FRAME)
+```
+`providerLogoSquare` es hijo de `epg`, con propiedad `provider` tipo VARIANT.
+
+`cachedAllCardIds` NO es el problema — para selecciones no-VPS se resetea a `new Set()`.
+
+**Flujo de búsqueda provider:**
+- S1: dentro de `wrapper` → no lo encuentra (providerLogoSquare es hermano de wrapper)
+- S2: dentro de `epg` → debería funcionar pero falla
+- S3: `findProviderLogoAncestor` → falla si `epg` no expone `provider` a su nivel
+
+**Causa raíz probable:** checks `key === 'provider' || key.startsWith('provider#')` son **case-sensitive** en `isProviderLogoComponent`, `applyProviderLogo` y `findProviderLogoAncestor`. Si Figma usa `"Provider"` con mayúscula, falla silenciosamente.
+
+**Causa raíz imágenes:** URLs de canal/EPG ya tienen `width=3840` (upgradeImageUrl no ayuda). Si `createImageAsync` falla, el `console.warn` añadido lo mostrará. Si `backgroundUrl` es null, la card se filtra y el slot queda sin actualizar.
+
+### Próximos pasos
+
+**1. `isProviderLogoComponent` (~L246)** — check case-insensitive:
+```typescript
+return Object.keys(props).some(k => {
+    const kl = k.toLowerCase();
+    return kl === 'provider' || kl.startsWith('provider#');
+});
 ```
 
-#### Tipo 3: Programación EPG de canales
+**2. `applyProviderLogo` (~L202)** — lookup case-insensitive + log:
+```typescript
+for (const key of Object.keys(props)) {
+    const kl = key.toLowerCase();
+    if (kl === 'provider' || kl.startsWith('provider#')) { providerKey = key; break; }
+}
+console.log(`[applyProvider] logo="${logo.name}" key="${providerKey}" value="${providerValue}"`);
+```
 
-La programación completa de canales TDT (La 1, Antena 3, Telecinco...) y de pago (Canal Cocina, Eurosport, Movistar La Liga...). Necesita:
-- Cover landscape por programa
-- Datos de la emisión (horario, duración)
-- Canal
-- Género del programa
+**3. `findProviderLogoAncestor` (~L270)** — mismo fix.
+
+**4. Logging en `apply-multiple-covers-url`** tras cada estrategia para ver dónde falla.
+
+**Verificar:** Figma → Plugins → Development → Open Console → aplicar fila de canal.
 
 ---
 
-### Propuesta de implementación: HTML Paste
+## Pendiente: tabla `CHANNEL_TO_PROVIDER` incompleta
 
-**Opción más pragmática** — añadir al plugin un textarea donde el diseñador pegue directamente el HTML de una fila/carousel de Orange TV. El plugin parsea el HTML y extrae los datos automáticamente.
+Tabla en `code.ts` (~L89), ~65 entradas. Necesita validarse contra variantes reales.
 
-**Ventajas:**
-- Cero APIs externas, cero coste
-- Datos siempre actualizados (son los de la web en ese momento)
-- Funciona con CUALQUIER tipo de card de Orange TV
-- No necesita base de datos ni mantenimiento
-- El diseñador elige exactamente qué fila usar
-- Cubre los 3 tipos de contenido de golpe
+Enlace: https://www.figma.com/design/8DlABzc0EynixwUG0GEG6p/Citrus-recap?node-id=165-43521
 
-**Flujo:**
-```
-1. Diseñador abre orangetv.orange.es
-2. Inspecciona elemento → copia el HTML del carousel/fila
-3. En el plugin: pestaña "HTML Paste" → pega el HTML
-4. El plugin detecta el tipo de card (generic vs emission)
-5. Parsea con DOMParser y extrae datos
-6. Muestra preview de las cards extraídas
-7. El diseñador selecciona y aplica a sus componentes
-```
+Canales sin mapeo: `CMM`, `BBC_*`, `SQUIRREL*`, `BOM`, `SANGRE_FRIA_V2`, `HISTORIA_Y_VIDA`, `NATURE_TIME`, `LOVE_*`, `VIVIR_CON_*`, `INGLES_TOTAL`, `DISNEY_JR`, `NICK_JR`, `BABYTV_WHITE`, `TOON_GOOGLES`, `POCOYO_WHITE`, `ANIME_VISION_*`, `GOL*`, `TOP_BARCA_WHITE`, `MOTORVISION`, `BBC_TOP_GEAR_WHITE`, `TRACE_SPORT_STARS`, `UBEAT`, `GAME_TOON_White`, `MMATV_WHITE`, `FIGHT_BOX_White`, `QUELLO_CONCERTS_WHITE`, `SOL`, `FLAMENCO_AUDITORIO`, `QWEST_TV`, `eitb`, `1+1_WHITE`, `BBOriginals_*`, `NEGOCIOS_TV`, `TV5MONDE`, `FRANCE2`, `FRANCE5`, `SOMOS`
 
-**Detección automática del tipo de card:**
-```javascript
-const cardTypes = {
-  'app-card-generic + /epg/':  parseEPGCard,      // EPG shows
-  'app-card-emission':         parseEmissionCard,  // Emisiones/directo
-  'app-card-generic + /vod/':  parseVodCard        // VOD (ya soportado)
-};
-```
-
-**Datos extraídos por tipo:**
-
-EPG Show → `{ title, rating, year, seasons, ageRating, coverUrl, epgId, type: "epg" }`
-
-Emisión → `{ title, backgroundUrl, channelLogoUrl, date, time, duration, isLive, section, type: "emission" }`
-
-**Categorización automática (sin API):** El título del carousel (`carousel-title`) ya indica el género:
-- "Lo más visto de la TDT" → Mixto
-- "Primera Federación: En directo" → Deportes
-- "Series que no te puedes perder" → Serie
-- "Informativos" → Informativo
+Para completar: abrir Desktop Bridge en Figma → Claude lee variantes via MCP.
 
 ---
 
-### APIs externas para enriquecimiento (opcional, futuro)
+## Notas
 
-Si se necesitan datos que no están en el HTML (sinopsis, episodios detallados, programación completa):
-
-| API | Cobertura TV ES | Precio | Mejor para |
-|-----|-----------------|--------|------------|
-| **TheTVDB** | ⭐⭐⭐⭐ | $12/año | Shows de TV con temporadas |
-| **Gracenote/TMS** | ⭐⭐⭐⭐⭐ | $$$ | Programación EPG completa |
-| **OMDb** | ⭐⭐ | Gratis | Datos básicos IMDB |
-
-**TheTVDB** sería la mejor opción calidad/precio para enriquecer EPG shows con sinopsis, géneros y episodios. Requiere API key ($12/año).
-
----
-
-### Pasos para implementar
-
-1. **Diseñar el componente `card_emission` en Figma** (cover, channelLogo, title, date, time, duration, liveIndicator)
-2. **Añadir pestaña "HTML Paste" al plugin** con textarea + parser
-3. **Implementar parsers** para `app-card-generic` (EPG) y `app-card-emission`
-4. **Conectar con los componentes Figma** existentes (card_landscape para EPG, card_emission para emisiones)
-5. **Opcional:** Tabla `epg_contents` en Supabase para guardar shows de TV recurrentes
-6. **Opcional:** Integración con TheTVDB para sinopsis/episodios
-
----
-
-### Notas adicionales
-
-- Los URLs de imágenes EPG usan `/epg/` en lugar de `/vod/` pero el dominio base es el mismo (`pc.orangetv.orange.es`)
-- Los BACKGROUND de emisiones vienen en 3840x2160 (alta resolución)
-- Los logos de canales están en `/attachments_new/` con formato `{NOMBRE_CANAL}_{ancho}x{alto}.png`
-- Algunos shows EPG que también son VOD (ej: "La que se avecina") tienen URLs mixtas con prefijo `U7D_`
+- URLs EPG usan `/epg/` en lugar de `/vod/`, mismo dominio base
+- Logos de canales en `/attachments_new/{NOMBRE}_{ancho}x{alto}.png`
+- Tabla completa de ~130 canales con URL names en `channels.html`

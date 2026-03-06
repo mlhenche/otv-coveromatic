@@ -86,42 +86,154 @@ function extractProvider(contentId: string | undefined): string | null {
 }
 
 // -- Apply provider logo to matching instances in a scope --
+// Map from URL channel name (extracted from icon URL) → Figma provider variant name.
+// Only needed for cases where normalization can't resolve the match.
+const CHANNEL_TO_PROVIDER: Record<string, string> = {
+    // Numeric channel IDs
+    '1': 'TVE - 1',
+    '2': 'La 2 - 2',
+    // TDT principales
+    'ANTENA_3': 'Antena 3 - 3',
+    'CUATRO': 'Cuatro - 4',
+    'TELECINCO': 'Telecinco - 5',
+    'LA_SEXTA': 'La sexta -6',
+    // Canales temáticos con nombre diferente
+    'XTRM': 'xtreme - 17',
+    'NAT_GEO': 'nationalgeographic - 61',
+    'CLAN': 'clanHD - 91',
+    'CANAL_HOLLYWOOD': 'hollywood',
+    'CANAL_HISTORIA_LOGO': 'historia - 60',
+    'CANAL_COCINA_4K': 'Canal Cocina - 68',
+    'discovery_logo': 'discovery - 64',
+    'ODISEA_4K': 'odisea - 63',
+    'WARNER_TV_B': 'warner tv - 13',
+    'STAR_CHANNEL': 'StarChannel',
+    'VIN_TV': 'verditv - 48',
+    '24H': 'tdp - 103',
+    // Deportes — MOVISTAR_ → M
+    'MOVISTAR_LALIGA': 'MLaLiga - 110',
+    'MOVISTAR_LALIGA_HDR': 'MLaLiga - 110',
+    'MOVISTAR_LALIGA_2': 'MLaLiga2 - 112',
+    'MOVISTAR_LALIGA_2_HDR': 'MLaLiga2 - 112',
+    'MOVISTAR_LALIGA_3': 'MLaLiga+ - 122',
+    'MOVISTAR_LIGA_DE_CAMPEONES': 'MLiga de Campeones - 115',
+    'MOVISTAR_LIGA_DE_CAMPEONES_2': 'MLiga de Campeones 2 - 116',
+    'MOVISTAR_LIGA_DE_CAMPEONES_3': 'MLiga de Campeones - 117',
+    'LALIGA_HYPERMOTION': 'MLaLigaHyper - 119',
+    'LALIGA_HYPERMOTION_2': 'MLaLigaHyper 2 - 120',
+    'LALIGA_INSIDE': 'laLigaLiveTvInside',
+    'DAZN_F1': 'DAZNF1',
+    'DAZN_LALIGA': 'DAZN1',
+    'DAZN_LALIGA_2': 'DAZN2',
+    'DAZN_BALONCESTO': 'DAZN3',
+    'DAZN_BALONCESTO_2': 'DAZN4',
+    'DAZN_MOTOGP': 'DAZN Motor',
+    'PRIMERA_FEDERACION': 'TodoFutbol',
+    // Runtime → RT (Spanish translations)
+    'RUNTIME_ACTION_WHITE': 'RT_Acción - 43',
+    'RUNTIME_CINE_Y_SERIES_WHITE': 'RT_Cine y series - 41',
+    'RUNTIME_THRILLER_HORROR_WHITE': 'RT_Thriller - 42',
+    'RUNTIME_COMEDY_WHITE': 'RT_Comedia - 44',
+    'RUNTIME_CRIME_WHITE': 'RT_Crimen - 45',
+    'RUNTIME_ROMANCE_WHITE': 'RT_Romance - 46',
+    'RUNTIME_CLASSICS_WHITE': 'RT_Clásicos - 47',
+    'RUNTIME_FAMILIA': 'enfamilia - 20',
+    'RUNTIME_SERIES_WHITE': 'RT_Cine y series - 41',
+    // AMC
+    'AMC_BREAK': 'amcBreak',
+    'AMC_CRIME': 'amcCrime',
+    'AMC_WESTERN': 'amc western',
+    'AMC_LIVING': 'amc living',
+    // Eurosport
+    'EUROSPORT_1_WHITE': 'eurosport1',
+    'EUROSPORT_2_WHITE': 'eurosport2',
+    // Deportes misc
+    'RUGBY_SPAIN_WHITE': 'rugbySpain',
+    'TENNIS_CHANNEL': 'tennisChannel',
+    'MY_PADEL_TV': 'myPadelTv',
+    'HORSE_TV': 'horseTV',
+    'NAUTICAL_CHANNEL': 'nauticalChannel',
+    // Sky
+    'SKYSHOWTIME_1': 'SkyShowtime1',
+};
+
+// Normalize a channel name for fuzzy matching: lowercase, strip suffixes, underscores → spaces → collapsed
+function normalizeChannel(name: string): string {
+    return name
+        .toLowerCase()
+        .replace(/_/g, ' ')
+        .replace(/\b(logo|4k|white|hd|b|v2|color)\b/g, '')  // common URL suffixes
+        .replace(/\s*-\s*\d+\s*$/, '')                        // Figma " - N" channel number
+        .replace(/^canal\s+/i, '')                             // CANAL_ prefix
+        .replace(/^movistar\s+/i, 'm')                         // MOVISTAR_ → M
+        .replace(/\s+/g, '')                                    // collapse spaces
+        .trim();
+}
+
+function findBestVariantMatch(providerValue: string, variantOptions: string[]): string | null {
+    // 0. Hardcoded mapping table (URL channel name → Figma variant)
+    const mapped = CHANNEL_TO_PROVIDER[providerValue];
+    if (mapped && variantOptions.includes(mapped)) return mapped;
+    // 1. Exact match
+    if (variantOptions.includes(providerValue)) return providerValue;
+    // 2. Case-insensitive exact
+    const lower = providerValue.toLowerCase();
+    const ciMatch = variantOptions.find(o => o.toLowerCase() === lower);
+    if (ciMatch) return ciMatch;
+    // 3. Normalized match
+    const norm = normalizeChannel(providerValue);
+    if (!norm) return null;
+    const match = variantOptions.find(o => normalizeChannel(o) === norm);
+    if (match) return match;
+    // 4. Substring match (normalized name contained in variant or vice versa)
+    const subMatch = variantOptions.find(o => {
+        const normOpt = normalizeChannel(o);
+        return normOpt.length >= 3 && (normOpt.includes(norm) || norm.includes(normOpt));
+    });
+    return subMatch || null;
+}
+
 function applyProviderLogo(logos: InstanceNode[], providerValue: string): number {
     let applied = 0;
     for (const logo of logos) {
         const props = logo.componentProperties;
         let providerKey: string | null = null;
         for (const key of Object.keys(props)) {
-            if (key === 'provider' || key.startsWith('provider#')) {
+            const kl = key.toLowerCase();
+            if (kl === 'provider' || kl.startsWith('provider#')) {
                 providerKey = key;
                 break;
             }
         }
+        console.log(`[applyProvider] logo="${logo.name}" key="${providerKey}" value="${providerValue}"`);
         if (!providerKey) continue;
 
-        // Check if providerValue is a valid variant option before applying
+        // Resolve the actual variant value to use (exact or fuzzy match)
+        let resolvedValue: string | null = providerValue;
         const mainComp = logo.mainComponent;
         const compSet = mainComp?.parent;
         if (compSet && compSet.type === 'COMPONENT_SET') {
             const baseKey = providerKey.split('#')[0];
             const propDef = (compSet as ComponentSetNode).componentPropertyDefinitions[baseKey];
-            if (propDef?.type === 'VARIANT' && propDef.variantOptions
-                && !propDef.variantOptions.includes(providerValue)) {
-                continue;
+            if (propDef?.type === 'VARIANT' && propDef.variantOptions) {
+                resolvedValue = findBestVariantMatch(providerValue, propDef.variantOptions);
+                if (!resolvedValue) {
+                    console.warn(`[provider] No match for "${providerValue}"`);
+                    continue;
+                }
             }
         }
 
         try {
             if (mainComp) logo.swapComponent(mainComp);
-            logo.setProperties({ [providerKey]: providerValue });
+            logo.setProperties({ [providerKey]: resolvedValue });
             applied++;
         } catch (e) {
             try {
-                logo.setProperties({ [providerKey]: providerValue });
+                logo.setProperties({ [providerKey]: resolvedValue });
                 applied++;
-            } catch (err) {
-                console.warn(`Provider logo failed for "${providerValue}":`, err);
-                figma.notify(`⚠️ No se pudo aplicar logo de ${providerValue}`, { timeout: 2000 });
+            } catch (_) {
+                // Valor no válido para este componente — se ignora silenciosamente
             }
         }
     }
@@ -132,7 +244,42 @@ function applyProviderLogo(logos: InstanceNode[], providerValue: string): number
 function isProviderLogoComponent(node: SceneNode): boolean {
     if (node.type !== 'INSTANCE') return false;
     const name = node.name.trim().toLowerCase();
-    return name === 'providerlogosquare' || name === 'providerlogorectangle';
+    if (name === 'providerlogosquare' || name === 'providerlogorectangle') return true;
+    // Detecta también por presencia de la propiedad 'provider' (cubre card_channel, card_emission y futuros componentes)
+    try {
+        const props = (node as InstanceNode).componentProperties;
+        return Object.keys(props).some(k => { const kl = k.toLowerCase(); return kl === 'provider' || kl.startsWith('provider#'); });
+    } catch (_) {
+        return false;
+    }
+}
+
+// -- Walk up to find the nearest INSTANCE ancestor (any instance, not just provider ones) --
+function findNearestInstanceAncestor(node: SceneNode): InstanceNode | null {
+    let current: BaseNode | null = node.parent;
+    while (current && current.type !== 'PAGE' && current.type !== 'DOCUMENT') {
+        if (current.type === 'INSTANCE') return current as InstanceNode;
+        current = current.parent;
+    }
+    return null;
+}
+
+// -- Walk up ancestors from a node to find the nearest INSTANCE with a 'provider' componentProperty --
+// Used for card_channel / card_emission where the provider variant is on the card itself, not a child.
+function findProviderLogoAncestor(node: SceneNode): InstanceNode | null {
+    let current: BaseNode | null = node.parent;
+    while (current && current.type !== 'PAGE' && current.type !== 'DOCUMENT') {
+        if (current.type === 'INSTANCE') {
+            try {
+                const props = (current as InstanceNode).componentProperties;
+                if (Object.keys(props).some(k => { const kl = k.toLowerCase(); return kl === 'provider' || kl.startsWith('provider#'); })) {
+                    return current as InstanceNode;
+                }
+            } catch (_) { }
+        }
+        current = current.parent;
+    }
+    return null;
 }
 
 // -- Find all provider logo components in selection --
@@ -767,27 +914,37 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
             return;
         }
 
+        // 1. Cargar imagen principal (único punto de fallo que muestra error al usuario)
+        let image: Image;
         try {
-            const image = await figma.createImageAsync(coverUrl);
-            for (const cover of coverNodes) {
-                if ('fills' in cover) {
-                    (cover as GeometryMixin & SceneNode).fills = [{ type: 'IMAGE', imageHash: image.hash, scaleMode: 'FILL' }];
-                }
+            image = await figma.createImageAsync(coverUrl);
+        } catch (e) {
+            figma.notify('⚠️ Error al cargar la imagen.', { error: true });
+            figma.ui.postMessage({ type: 'apply-done', success: false, error: (e as Error).message });
+            return;
+        }
+        for (const cover of coverNodes) {
+            if ('fills' in cover) {
+                (cover as GeometryMixin & SceneNode).fills = [{ type: 'IMAGE', imageHash: image.hash, scaleMode: 'FILL' }];
             }
+        }
 
-            if (msg.titleTreatmentUrl) {
-                try {
-                    const ttImage = await figma.createImageAsync(msg.titleTreatmentUrl);
-                    const ttNodes = findTitleTreatmentNodes(selection, cachedAllCardIds);
-                    for (const ttNode of ttNodes) {
-                        if ('fills' in ttNode) {
-                            (ttNode as GeometryMixin & SceneNode).fills = [{ type: 'IMAGE', imageHash: ttImage.hash, scaleMode: 'FIT' }];
-                        }
+        // 2. Title treatment (opcional, falla silenciosamente)
+        if (msg.titleTreatmentUrl) {
+            try {
+                const ttImage = await figma.createImageAsync(msg.titleTreatmentUrl);
+                const ttNodes = findTitleTreatmentNodes(selection, cachedAllCardIds);
+                for (const ttNode of ttNodes) {
+                    if ('fills' in ttNode) {
+                        (ttNode as GeometryMixin & SceneNode).fills = [{ type: 'IMAGE', imageHash: ttImage.hash, scaleMode: 'FIT' }];
                     }
-                } catch (_) { }
-            }
+                }
+            } catch (_) { }
+        }
 
-            if (msg.metadata) {
+        // 3. Metadata (falla silenciosamente)
+        if (msg.metadata) {
+            try {
                 const scopesDone = new Set<string>();
                 for (const cover of coverNodes) {
                     const scope = findMetadataScope(cover);
@@ -796,28 +953,32 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
                         await fillMetadata([scope], msg.metadata);
                     }
                 }
-            }
+            } catch (_) { }
+        }
 
-            // Apply provider logo: prefer channelName from HTML paste, fallback to contentId prefix
-            const providerLogos = findProviderLogoNodes(selection, cachedAllCardIds);
+        // 4. Provider logo (falla silenciosamente)
+        try {
+            let providerLogos = findProviderLogoNodes(selection, cachedAllCardIds);
+            if (providerLogos.length === 0) {
+                // Fallback: walk up from each cover looking for an INSTANCE with 'provider' property
+                for (const cn of coverNodes) {
+                    const pa = findProviderLogoAncestor(cn);
+                    if (pa) { providerLogos = [pa]; break; }
+                }
+            }
             if (providerLogos.length > 0) {
                 const channelName = (msg.metadata as MovieTvMetadata)?.channelName;
                 const providerFromId = msg.metadata?.contentId ? extractProvider(msg.metadata.contentId) : null;
                 const providerValue = channelName || providerFromId;
-                if (providerValue) {
-                    applyProviderLogo(providerLogos, providerValue);
-                }
+                if (providerValue) applyProviderLogo(providerLogos, providerValue);
             }
+        } catch (_) { }
 
-            const ttCount = msg.titleTreatmentUrl ? findTitleTreatmentNodes(selection, cachedAllCardIds).length : 0;
-            figma.notify(ttCount > 0
-                ? `✅ Cover y título aplicados a ${coverNodes.length} elemento(s).`
-                : `✅ Cover aplicada a ${coverNodes.length} elemento(s).`);
-            figma.ui.postMessage({ type: 'apply-done', success: true });
-        } catch (e) {
-            figma.notify('⚠️ Error al cargar la imagen.', { error: true });
-            figma.ui.postMessage({ type: 'apply-done', success: false, error: (e as Error).message });
-        }
+        const ttCount = msg.titleTreatmentUrl ? findTitleTreatmentNodes(selection, cachedAllCardIds).length : 0;
+        figma.notify(ttCount > 0
+            ? `✅ Cover y título aplicados a ${coverNodes.length} elemento(s).`
+            : `✅ Cover aplicada a ${coverNodes.length} elemento(s).`);
+        figma.ui.postMessage({ type: 'apply-done', success: true });
     }
 
     // -- Detect if selection is a channel row (skip first 3 covers) --
@@ -856,7 +1017,7 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
                     (coverNode as GeometryMixin & SceneNode).fills = [{ type: 'IMAGE', imageHash: image.hash, scaleMode: 'FILL' }];
                 }
                 successCount++;
-            } catch (_) { /* imagen no disponible, se salta esta card */ }
+            } catch (e) { console.warn(`[cover ${i}] Image failed: ${coverData.coverUrl.substring(0, 100)}`); }
 
             if (coverData.titleTreatmentUrl) {
                 try {
@@ -875,15 +1036,32 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
             }
 
             // Apply provider logo: prefer channelName from HTML paste, fallback to contentId prefix
+            // Search strategy: metadata scope first, then nearest INSTANCE ancestor (covers card_channel where
+            // providerLogoSquare is a sibling of wrapper inside the card instance, not inside metadata scope)
             const scope2 = findMetadataScope(coverNode);
-            const logos = findProviderLogoNodes([scope2], cachedAllCardIds);
-            if (logos.length > 0) {
-                const channelName = (coverData.metadata as MovieTvMetadata)?.channelName;
-                const providerFromId = coverData.metadata?.contentId ? extractProvider(coverData.metadata.contentId) : null;
-                const providerValue = channelName || providerFromId;
-                if (providerValue) {
-                    applyProviderLogo(logos, providerValue);
-                }
+            let logos = findProviderLogoNodes([scope2], cachedAllCardIds);
+            console.log(`[provider S1] cover="${coverNode.name}" scope="${scope2.name}" logos=${logos.length}`);
+            if (logos.length === 0) {
+                // Expand search to nearest INSTANCE ancestor of cover
+                const instAncestor = findNearestInstanceAncestor(coverNode);
+                console.log(`[provider S2] ancestor="${instAncestor?.name ?? 'null'}"`);
+                if (instAncestor) logos = findProviderLogoNodes([instAncestor], cachedAllCardIds);
+                console.log(`[provider S2] logos=${logos.length}`);
+            }
+            if (logos.length === 0) {
+                // Last resort: walk up ancestors looking for an INSTANCE with a 'provider' property
+                const providerAncestor = findProviderLogoAncestor(coverNode);
+                console.log(`[provider S3] providerAncestor="${providerAncestor?.name ?? 'null'}"`);
+                if (providerAncestor) logos = [providerAncestor];
+            }
+
+            const metaRaw = coverData.metadata as unknown as Record<string, string> | null;
+            const channelName = metaRaw?.channelName;
+            const providerFromId = metaRaw?.contentId ? extractProvider(metaRaw.contentId) : null;
+            const providerValue = channelName || providerFromId;
+            console.log(`[provider] channelName="${channelName}" providerValue="${providerValue}" logos=${logos.length}`);
+            if (logos.length > 0 && providerValue) {
+                applyProviderLogo(logos, providerValue);
             }
         }
 

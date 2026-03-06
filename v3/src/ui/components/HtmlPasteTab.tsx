@@ -41,6 +41,12 @@ interface HtmlPasteTabProps {
 
 // ── HTML Parser ────────────────────────────────────────
 
+function upgradeImageUrl(url: string): string {
+    return url
+        .replace(/([?&]width=)\d+/, '$13840')
+        .replace(/([?&]height=)\d+/, '$12160');
+}
+
 function extractBgUrl(el: Element): string | null {
     const style = el.getAttribute('style') || '';
     // Quoted URL first — handles filenames with parentheses like COVER_ART(1).jpg
@@ -60,9 +66,22 @@ function detectImageFormat(imageEl: Element | null): 'portrait' | 'landscape' {
 }
 
 function extractChannelName(url: string): string | null {
-    // Extract from pattern: /attachments_new/{CHANNEL_NAME}_{NNNxNNN}.ext
+    // Pattern 1: /attachments_new/{CHANNEL_NAME}_{NNNxNNN}.ext (e.g. LA_SEXTA_176x122.png)
     const match = url.match(/\/([^/]+?)_\d+x\d+\.\w+/);
-    return match ? match[1] : null;
+    if (match) return match[1];
+    // Pattern 2: /attachments/{name}.ext (e.g. discovery_logo.png) — extract filename without ext
+    const match2 = url.match(/\/([^/?]+)\.\w+(?:\?|$)/);
+    return match2 ? match2[1] : null;
+}
+
+function extractChannelIconUrl(el: Element | null): string | null {
+    if (!el) return null;
+    // Try CSS background-image first
+    const fromBg = extractBgUrl(el);
+    if (fromBg) return fromBg;
+    // Fallback: look for <img src="..."> inside the element
+    const img = el.querySelector('img');
+    return img?.getAttribute('src') || null;
 }
 
 function textContent(el: Element | null, selector: string): string | null {
@@ -75,9 +94,9 @@ function parseCardEmission(card: Element): ParsedCard {
     const imageEl = card.querySelector('.card__image');
     const rawBg = imageEl ? extractBgUrl(imageEl) : null;
     const channelEl = card.querySelector('.card__channel-icon');
-    const channelUrl = channelEl ? extractBgUrl(channelEl) : null;
+    const channelUrl = extractChannelIconUrl(channelEl);
 
-    const validBg = rawBg?.startsWith('http') ? rawBg : null;
+    const validBg = rawBg?.startsWith('http') ? upgradeImageUrl(rawBg) : null;
     return {
         type: 'emission',
         title: textContent(card, '.card__name') || 'Sin título',
@@ -102,9 +121,9 @@ function parseCardChannel(card: Element): ParsedCard {
         ?? card.querySelector('.card__image:not(.square)');
     const rawBg = imageEl ? extractBgUrl(imageEl) : null;
     const channelEl = card.querySelector('.card__channel-icon');
-    const channelUrl = channelEl ? extractBgUrl(channelEl) : null;
+    const channelUrl = extractChannelIconUrl(channelEl);
 
-    const validBg = rawBg?.startsWith('http') ? rawBg : null;
+    const validBg = rawBg?.startsWith('http') ? upgradeImageUrl(rawBg) : null;
 
     return {
         type: 'channel',
@@ -131,7 +150,7 @@ function parseCardSlideshow(card: Element): ParsedCard {
     return {
         type: 'slideshow',
         title: textContent(card, '.card__name') || 'Sin título',
-        backgroundUrl: bgUrl,
+        backgroundUrl: bgUrl ? upgradeImageUrl(bgUrl) : null,
         titleTreatmentUrl: ttEl ? extractBgUrl(ttEl) : null,
         channelIconUrl: null,
         channelName: null,
@@ -164,7 +183,7 @@ function parseCardGeneric(card: Element): ParsedCard {
     return {
         type: 'generic',
         title: textContent(card, '.card__name') || 'Sin título',
-        backgroundUrl: bgUrl,
+        backgroundUrl: bgUrl ? upgradeImageUrl(bgUrl) : null,
         titleTreatmentUrl: null,
         channelIconUrl: channelUrl,
         channelName: channelUrl ? extractChannelName(channelUrl) : null,
@@ -186,7 +205,7 @@ function parseCardCorner(card: Element): ParsedCard {
     return {
         type: 'corner',
         title: 'Corner',
-        backgroundUrl: bgUrl,
+        backgroundUrl: bgUrl ? upgradeImageUrl(bgUrl) : null,
         titleTreatmentUrl: logoEl ? extractBgUrl(logoEl) : null,
         channelIconUrl: null,
         channelName: null,
