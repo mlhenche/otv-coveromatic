@@ -1,5 +1,20 @@
 {
-
+  "permissions": {
+    "allow": [
+      "Bash(npm run build)",
+      "Bash(crontab -l)",
+      "Bash(grep -r \"supabase\\\\|ping\\\\|keep\\\\|cron\\\\|schedule\" '/Users/mlopezhe/Documents/Trabajo/frog/00_Proyectos/OrangeTV/05_CitrusDLS/plan 2026/plugin/covers' --include=*.js --include=*.ts --include=*.json --include=*.md)",
+      "Bash(sudo launchctl:*)",
+      "Bash(grep -r supabase '/Users/mlopezhe/Documents/Trabajo/frog/00_Proyectos/OrangeTV/05_CitrusDLS/plan 2026/plugin/covers/v3' --include=*.js --include=*.ts)",
+      "Bash(chmod +x ~/Library/Scripts/supabase-keepalive.sh)",
+      "Bash(launchctl load:*)",
+      "Bash(launchctl list:*)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "figma"
+  ],
   "mcpServers": {
     "supabase": {
       "type": "http",

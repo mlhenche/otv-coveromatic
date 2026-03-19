@@ -2,7 +2,7 @@
 
 > Plugin de Figma para el equipo de diseño de Orange TV (FrogTV).
 > Aplica carátulas, metadatos y personas a componentes del Design System en Figma.
-> Última actualización de este documento: 2026-03-06
+> Última actualización de este documento: 2026-03-19
 
 ---
 
@@ -265,6 +265,27 @@ node "v3/scripts/add-content.js" --file nuevos.json
 node "v3/scripts/enrich-catalog.js" --contentId "MFO_123456"
 ```
 Todos los scripts de `v3/scripts/` requieren las vars `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`. Los que llaman a TMDB también `TMDB_API_KEY`.
+
+---
+
+## Supabase — Keep-alive automático
+
+Para evitar que Supabase pause la base de datos por inactividad (umbral: 7 días), hay un **macOS LaunchAgent** que hace un ping cada 5 días:
+
+- **Script**: `~/Library/Scripts/supabase-keepalive.sh` — `curl` a `/rest/v1/contents?select=id&limit=1` con la anon key
+- **LaunchAgent**: `~/Library/LaunchAgents/com.frogtv.supabase-keepalive.plist` — `StartInterval: 432000` (5 días), `RunAtLoad: true`
+- **Log**: `~/Library/Logs/supabase-keepalive.log`
+
+Si hay que reinstalarlo (nuevo Mac o usuario):
+```bash
+launchctl load ~/Library/LaunchAgents/com.frogtv.supabase-keepalive.plist
+```
+
+Para verificar que está activo:
+```bash
+launchctl list | grep supabase
+cat ~/Library/Logs/supabase-keepalive.log
+```
 
 ---
 
