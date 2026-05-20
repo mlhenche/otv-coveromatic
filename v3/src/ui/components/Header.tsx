@@ -30,7 +30,7 @@ export default function Header({ apiKey, onSaveApiKey }: HeaderProps) {
                         </svg>
                     </div>
                     <div className="brand-name">
-                        <span>CoverOmatic</span> <small style={{ opacity: 0.5, fontWeight: 400, fontSize: '11px' }}>v3.0</small>
+                        <span>CoverOmatic</span> <small style={{ opacity: 0.5, fontWeight: 400, fontSize: '11px' }}>v3.1.1</small>
                     </div>
                 </div>
                 <button
