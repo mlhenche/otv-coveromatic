@@ -2,7 +2,7 @@
 
 > Plugin de Figma para el equipo de diseño de Orange TV (FrogTV).
 > Aplica carátulas, metadatos y personas a componentes del Design System en Figma.
-> Última actualización de este documento: 2026-03-19
+> Última actualización de este documento: 2026-05-20
 
 ---
 
@@ -43,8 +43,9 @@ covers/
 │   │   ├── extract-catalog.js      ← parser v1
 │   │   └── extract-catalog-v2.js  ← parser v2 (el que se usa, hace merge)
 │   ├── scripts/
-│   │   ├── sync-to-supabase.js    ← sincroniza otv-catalog.json → Supabase
-│   │   ├── enrich-catalog.js      ← enriquece entradas sin TMDB ID
+│   │   ├── export-static-catalog.js ← añade géneros al JSON para GitHub (USAR ANTES DE GIT PUSH)
+│   │   ├── sync-to-supabase.js    ← [OBSOLETO] sincronizaba otv-catalog.json → Supabase
+│   │   ├── enrich-catalog.js      ← enriquece entradas sin TMDB ID (aún útil localmente)
 │   │   ├── add-content.js         ← añade una entrada individual
 │   │   └── manage-content.js      ← activa/desactiva entradas (soft delete)
 │   └── docs/
@@ -203,6 +204,9 @@ Las imágenes EPG de OTV (`/epg/COVER/...`) no pueden cargarse con `figma.create
 
 ## Proceso para añadir más contenidos al catálogo
 
+> El plugin ya NO usa Supabase. El catálogo se sirve como JSON estático desde GitHub raw.
+> Flujo: editar JSON local → git push → el plugin carga el nuevo JSON en la próxima apertura (cache 4h).
+
 ### Paso 1 — Obtener el HTML de Orange TV
 1. Ir a `orangetv.orange.es` en el navegador
 2. Inspeccionar elemento → copiar el HTML de la página completa (o de la sección deseada)
@@ -218,20 +222,7 @@ node extract-catalog-v2.js
 - Mergea con `otv-catalog.json` existente (preserva datos TMDB de entradas previas)
 - Informa: nuevas entradas, actualizadas, total
 
-### Paso 3 — Sincronizar con Supabase (inserta nuevos, actualiza cambios)
-```bash
-SUPABASE_URL="https://zmzehngquxtqirpjxyhn.supabase.co" \
-SUPABASE_SERVICE_KEY="<service key arriba>" \
-TMDB_API_KEY="505c512e8ca4921b7296e4a2ca254fd7" \
-node "v3/scripts/sync-to-supabase.js" \
-  --file "v3/catalog/otv-catalog.json"
-```
-- Compara con lo que hay en Supabase
-- Inserta los nuevos enriqueciéndolos con TMDB (media_type, genre_ids, tmdb_id)
-- Actualiza títulos que hayan cambiado
-- Desactiva los que ya no aparecen en el HTML (soft delete)
-
-### Paso 4 — Enriquecer los que TMDB no encontró en la primera pasada
+### Paso 3 — Enriquecer con TMDB (opcional, para entradas nuevas sin metadata)
 ```bash
 SUPABASE_URL="https://zmzehngquxtqirpjxyhn.supabase.co" \
 SUPABASE_SERVICE_KEY="<service key arriba>" \
@@ -239,8 +230,24 @@ TMDB_API_KEY="505c512e8ca4921b7296e4a2ca254fd7" \
 node "v3/scripts/enrich-catalog.js" --only-missing
 ```
 
+### Paso 4 — Añadir géneros al JSON y publicar
+```bash
+NODE_TLS_REJECT_UNAUTHORIZED=0 \
+SUPABASE_URL="https://zmzehngquxtqirpjxyhn.supabase.co" \
+SUPABASE_ANON_KEY="<anon key arriba>" \
+node "v3/scripts/export-static-catalog.js"
+```
+- Añade el objeto `genres` (mapa id→nombre) al JSON
+- A continuación, hacer commit y push:
+```bash
+git add v3/catalog/otv-catalog.json
+git commit -m "chore(catalog): actualizar catálogo"
+git push
+```
+El plugin cargará el JSON actualizado en la próxima apertura (o al cabo de 4h de cache).
+
 ### Paso 5 — Revisar entradas con contentId sospechoso
-El parser a veces captura slugs de URL en lugar de IDs reales (ej: `anaconda-2025` en vez de `SKYS_...`). Señales de alerta: contentId sin prefijo de proveedor en mayúsculas, o contentId que parece un slug. Desactivarlos:
+El parser a veces captura slugs de URL en lugar de IDs reales (ej: `anaconda-2025` en vez de `SKYS_...`). Señales de alerta: contentId sin prefijo de proveedor en mayúsculas, o contentId que parece un slug. Editarlos directamente en `otv-catalog.json` o desactivarlos con:
 ```bash
 SUPABASE_URL="https://zmzehngquxtqirpjxyhn.supabase.co" \
 SUPABASE_SERVICE_KEY="<service key arriba>" \
@@ -264,37 +271,27 @@ node "v3/scripts/add-content.js" --file nuevos.json
 # Re-enriquecer un contenido específico
 node "v3/scripts/enrich-catalog.js" --contentId "MFO_123456"
 ```
-Todos los scripts de `v3/scripts/` requieren las vars `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`. Los que llaman a TMDB también `TMDB_API_KEY`.
+Los scripts de enrichment (`enrich-catalog.js`, `manage-content.js`, `add-content.js`) requieren `SUPABASE_URL` y `SUPABASE_SERVICE_KEY` si se usan para escribir en Supabase. Para el flujo normal (solo actualizar el JSON para GitHub), solo se necesita `SUPABASE_ANON_KEY` en `export-static-catalog.js` (lectura de géneros).
 
 ---
 
-## Supabase — Keep-alive automático
+## Supabase — Estado (OBSOLETO para el plugin)
 
-Para evitar que Supabase pause la base de datos por inactividad (umbral: 7 días), hay un **macOS LaunchAgent** que hace un ping cada 5 días:
+> El plugin ya no usa Supabase. Los scripts CLI (`enrich-catalog.js`, `manage-content.js`, etc.) todavía pueden usarlo para enrichment local, pero el plugin carga el catálogo desde GitHub raw.
+> El LaunchAgent de keep-alive (`com.frogtv.supabase-keepalive`) puede desactivarse si ya no se necesita Supabase para los scripts.
 
-- **Script**: `~/Library/Scripts/supabase-keepalive.sh` — `curl` a `/rest/v1/contents?select=id&limit=1` con la anon key
-- **LaunchAgent**: `~/Library/LaunchAgents/com.frogtv.supabase-keepalive.plist` — `StartInterval: 432000` (5 días), `RunAtLoad: true`
-- **Log**: `~/Library/Logs/supabase-keepalive.log`
-
-Si hay que reinstalarlo (nuevo Mac o usuario):
 ```bash
-launchctl load ~/Library/LaunchAgents/com.frogtv.supabase-keepalive.plist
-```
-
-Para verificar que está activo:
-```bash
-launchctl list | grep supabase
-cat ~/Library/Logs/supabase-keepalive.log
+# Desactivar el keep-alive si ya no se necesita Supabase
+launchctl unload ~/Library/LaunchAgents/com.frogtv.supabase-keepalive.plist
 ```
 
 ---
 
-## Estado del catálogo (2026-02-23)
+## Estado del catálogo (2026-05-20)
 
-- **529 contenidos activos** en Supabase
-- ~470 con TMDB ID (media_type, géneros)
-- ~59 sin TMDB ID (reality shows, programas de canal, dobles episodios — quedan activos pero sin género)
-- Última sync desde `OrangeCatalog.html` del 2026-02-23
+- **699 contenidos** en `otv-catalog.json` (GitHub raw)
+- 27 géneros incluidos en el JSON
+- El plugin carga desde `https://raw.githubusercontent.com/mlhenche/otv-coveromatic/main/v3/catalog/otv-catalog.json`
 
 ---
 

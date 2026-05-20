@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-03-02T08:52:07.998Z",
+  "generatedAt": "2026-05-20T07:49:09.840Z",
   "source": "OrangeCatalog.html (merged with previous)",
-  "totalContents": 599,
+  "totalContents": 699,
   "urlPatterns": {
     "coverArt": "https://pc.orangetv.orange.es/pc/api/rtv/v1/images/vod/COVER_ART/{contentId}_COVER_ART.jpg?width=3840&height=2160",
     "vertical": "https://pc.orangetv.orange.es/pc/api/rtv/v1/images/vod/VERTICAL/{contentId}_VERTICAL.jpg?width=3840&height=2160",
@@ -179,8 +179,8 @@
       "genreIds": []
     },
     "cumbres borrascosas": {
-      "title": "Cumbres borrascosas",
-      "contentId": "SKYS_0002686015",
+      "title": "\"Cumbres Borrascosas\"",
+      "contentId": "cumbres-borrascosas",
       "mediaType": "tv",
       "tmdbId": 74198,
       "tmdbTitle": "Cumbres borrascosas",
@@ -303,7 +303,7 @@
     },
     "zootropolis 2": {
       "title": "Zootrópolis 2",
-      "contentId": "zootropolis-2",
+      "contentId": "DSN_0818ff05-d4fd-4419-92ed-4f907f09bacb",
       "mediaType": "movie",
       "tmdbId": 1084242,
       "tmdbTitle": "Zootrópolis 2",
@@ -740,7 +740,7 @@
     },
     "deadpool y lobezno": {
       "title": "Deadpool y Lobezno",
-      "contentId": "DSN_a6c50865-0df4-401e-9b3f-9fa900ca21ad",
+      "contentId": "deadpool-y-lobezno",
       "mediaType": "movie",
       "tmdbId": 533535,
       "tmdbTitle": "Deadpool y Lobezno",
@@ -4696,7 +4696,7 @@
     },
     "minicasas sorprendentes": {
       "title": "Minicasas sorprendentes",
-      "contentId": "MFO_299421251"
+      "contentId": "MFO_299421251AMLI"
     },
     "los gemelos reforman de nuevo": {
       "title": "Los gemelos reforman de nuevo",
@@ -4721,6 +4721,435 @@
     "lucy": {
       "title": "Lucy",
       "contentId": "lucy"
+    },
+    "atrapadas en bolivia": {
+      "title": "Atrapadas en Bolivia",
+      "contentId": "MFO_299864493AMCN"
+    },
+    "daredevil born again": {
+      "title": "Daredevil: Born Again",
+      "contentId": "DSN_299689672MRVL"
+    },
+    "reversion": {
+      "title": "Reversión",
+      "contentId": "MAX_eb1259e7-ffe8-412f-a228-efb44155db01"
+    },
+    "mike amp nick amp nick amp alice": {
+      "title": "Mike &amp; Nick &amp; Nick &amp; Alice",
+      "contentId": "DSN_dda7510f-0b80-422c-94d8-50a12502427e"
+    },
+    "zeta": {
+      "title": "Zeta",
+      "contentId": "PRIME_amzn1.dv.gti.e4bbe525-c7f5-4e4a-b267-4ebdb3578053:ES"
+    },
+    "rooster": {
+      "title": "Rooster",
+      "contentId": "MAX_299875126"
+    },
+    "hannah montana especial 20 aniversario": {
+      "title": "Hannah Montana: Especial 20 aniversario",
+      "contentId": "DSN_0737c890-b6b2-44ed-bd90-e651d8e670ee"
+    },
+    "day one": {
+      "title": "Day One",
+      "contentId": "PRIME_299871261APVI"
+    },
+    "fbi": {
+      "title": "FBI",
+      "contentId": "MFO_298907482"
+    },
+    "phineas y ferb": {
+      "title": "Phineas y Ferb",
+      "contentId": "MFO_299884155"
+    },
+    "ruta de escape": {
+      "title": "Ruta de escape",
+      "contentId": "PRIME_amzn1.dv.gti.b1f68c99-5fbf-4c13-aaea-90fca60db187:ES"
+    },
+    "principio y final": {
+      "title": "Principio y final",
+      "contentId": "MAX_299885196"
+    },
+    "destino a la luna": {
+      "title": "Destino a la luna",
+      "contentId": "MFO_299808446"
+    },
+    "benhur": {
+      "title": "Ben-Hur",
+      "contentId": "MFO_0002739716"
+    },
+    "dulces tipicos de semana santa": {
+      "title": "Dulces típicos de Semana Santa",
+      "contentId": "MFO_0002725735"
+    },
+    "dtf st louis": {
+      "title": "Dtf St. Louis",
+      "contentId": "MAX_299871780"
+    },
+    "lucky luke": {
+      "title": "Lucky Luke",
+      "contentId": "DSN_299884034STAR"
+    },
+    "vida perra": {
+      "title": "Vida Perra",
+      "contentId": "PRIME_299885637APVI"
+    },
+    "privilegios": {
+      "title": "Privilegios",
+      "contentId": "MAX_299884008"
+    },
+    "nurses": {
+      "title": "Nurses",
+      "contentId": "MFO_299175446"
+    },
+    "noche de bodas": {
+      "title": "Noche de bodas",
+      "contentId": "DSN_49292bb0-819c-4234-8831-90c2144610da"
+    },
+    "la casa gucci": {
+      "title": "La casa gucci",
+      "contentId": "PRIME_amzn1.dv.gti.4d28c1dd-fd5b-4720-a9ef-eb6999feeb97:ES"
+    },
+    "el exorcista del papa": {
+      "title": "El exorcista del papa",
+      "contentId": "MAX_104da39e-e492-43db-bd26-031007e2841b"
+    },
+    "parthenope": {
+      "title": "Parthenope",
+      "contentId": "FLMN10000000053184"
+    },
+    "triangulo de la tristeza": {
+      "title": "Triángulo de la Tristeza",
+      "contentId": "MFO_0002779374"
+    },
+    "episodio 1": {
+      "title": "Episodio 1",
+      "contentId": "MFO_299580799AMCN"
+    },
+    "episodio 7": {
+      "title": "Episodio 7",
+      "contentId": "MFO_299473625AMCN"
+    },
+    "28 anos despues el templo de los huesos": {
+      "title": "28 Años Después: El Templo De Los Huesos",
+      "contentId": "28-anos-despues-el-templo-de-los-huesos"
+    },
+    "jamie cocina en georgia": {
+      "title": "Jamie cocina en Georgia",
+      "contentId": "MFO_0002568669"
+    },
+    "cuando harry conocio a fergus": {
+      "title": "Cuando Harry conoció a Fergus",
+      "contentId": "MFO_299376277NBCU"
+    },
+    "viento del oeste": {
+      "title": "Viento del oeste",
+      "contentId": "MFO_299232049"
+    },
+    "el medico ii": {
+      "title": "El Médico II",
+      "contentId": "el-medico-ii"
+    },
+    "avatar fuego y ceniza": {
+      "title": "Avatar: Fuego y ceniza",
+      "contentId": "avatar-fuego-y-ceniza"
+    },
+    "ajuste de cuentas la ciudad de los lobos": {
+      "title": "Ajuste de cuentas: La ciudad de los lobos",
+      "contentId": "ajuste-de-cuentas-la-ciudad-de-los-lobos"
+    },
+    "coartadas": {
+      "title": "Coartadas",
+      "contentId": "coartadas"
+    },
+    "send help enviad ayuda": {
+      "title": "Send Help (Enviad ayuda)",
+      "contentId": "send-help-enviad-ayuda"
+    },
+    "200 wolf pequeno gran lobo": {
+      "title": "200% Wolf: Pequeño gran lobo",
+      "contentId": "200-wolf-pequeno-gran-lobo"
+    },
+    "el bebe jefazo": {
+      "title": "El bebé jefazo",
+      "contentId": "PRIME_amzn1.dv.gti.06b0a9c9-a247-4a3e-82ed-e3263ade9162:ES"
+    },
+    "doraemon y el reino perruno": {
+      "title": "Doraemon y el reino perruno",
+      "contentId": "MAX_af5415eb-2523-4050-903c-a7ab414cc880"
+    },
+    "una pelicula de minecraft": {
+      "title": "Una película de Minecraft",
+      "contentId": "MAX_47e66970-72ef-4a75-95ec-665ca69ef66e"
+    },
+    "olivia y el terremoto invisible": {
+      "title": "Olivia y el terremoto invisible",
+      "contentId": "olivia-y-el-terremoto-invisible"
+    },
+    "spiderman cruzando el multiverso": {
+      "title": "Spider-Man: Cruzando el multiverso",
+      "contentId": "PRIME_amzn1.dv.gti.08bf002f-a5e6-4c0d-9288-6e83a129e2d4:ES"
+    },
+    "9 guardacostas del caribe 16": {
+      "title": "9. Guardacostas del Caribe 1,6",
+      "contentId": "MFO_0002650353"
+    },
+    "mision artemis regreso a la luna": {
+      "title": "Misión Artemis: regreso a la Luna",
+      "contentId": "MFO_0002565831"
+    },
+    "el teatro apollo": {
+      "title": "El Teatro Apollo",
+      "contentId": "MAX_ae7f67f6-a3ee-4057-aaa8-9eae4aff79fd"
+    },
+    "not a pretty picture": {
+      "title": "Not A Pretty Picture",
+      "contentId": "FLMN10000000053489"
+    },
+    "revolucion 304 lamine yamal": {
+      "title": "Revolución 304 - Lamine Yamal",
+      "contentId": "PRIME_amzn1.dv.gti.c615aaa9-e463-4d66-aa74-ec324c95b6b9:ES"
+    },
+    "vampirina un insti de miedo": {
+      "title": "Vampirina: Un insti de Miedo",
+      "contentId": "MFO_299804757DSCH"
+    },
+    "la lego pelicula 2": {
+      "title": "La LEGO Película 2",
+      "contentId": "MAX_9ca54c97-7575-4e7b-8a31-20931ff0e908"
+    },
+    "kung fu panda 2": {
+      "title": "Kung Fu Panda 2",
+      "contentId": "PRIME_amzn1.dv.gti.e4ba6579-5d5f-935a-6972-e02d1792022a:ES"
+    },
+    "futurama": {
+      "title": "Futurama",
+      "contentId": "U7D_MFO_299155682CMDY"
+    },
+    "hook el capitan garfio": {
+      "title": "Hook (El Capitán Garfio)",
+      "contentId": "hook-el-capitan-garfio"
+    },
+    "creepshow": {
+      "title": "Creepshow",
+      "contentId": "ATRES_299361776A3PL"
+    },
+    "madame web": {
+      "title": "Madame Web",
+      "contentId": "madame-web"
+    },
+    "relax vengo del futuro": {
+      "title": "Relax, vengo del futuro",
+      "contentId": "relax-vengo-del-futuro"
+    },
+    "silicon valley": {
+      "title": "Silicon Valley",
+      "contentId": "MAX_298249512"
+    },
+    "suits la clave del exito": {
+      "title": "Suits: La clave del éxito",
+      "contentId": "PRIME_298249544APVI"
+    },
+    "friday night lights": {
+      "title": "Friday Night Lights",
+      "contentId": "FLMN299834709"
+    },
+    "mr amp mrs smith": {
+      "title": "Mr. &amp; Mrs. Smith",
+      "contentId": "PRIME_299505251APVO"
+    },
+    "star wars el despertar de la fuerza": {
+      "title": "Star Wars: El despertar de la fuerza",
+      "contentId": "DSN_baaa1caf-0fd5-4341-8b26-af6c092eb280"
+    },
+    "elysium": {
+      "title": "Elysium",
+      "contentId": "MFO_0002728689"
+    },
+    "tomb raider": {
+      "title": "Tomb Raider",
+      "contentId": "PRIME_amzn1.dv.gti.98b11801-5fde-d322-77b2-70b9d6c0b58d:ES"
+    },
+    "parasitos": {
+      "title": "Parásitos",
+      "contentId": "FLMN10000000027181"
+    },
+    "la mascara": {
+      "title": "La máscara",
+      "contentId": "MAX_5a4ed0de-4a32-4c7b-8258-659314470875"
+    },
+    "la mujer de tchaiskovsky": {
+      "title": "La mujer de Tchaiskovsky",
+      "contentId": "MFO_0002340986"
+    },
+    "cold war": {
+      "title": "Cold War",
+      "contentId": "PRIME_amzn1.dv.gti.c02172aa-0f9f-49c6-bea2-e1a284cd5d38:ES"
+    },
+    "mi prima rachel": {
+      "title": "Mi prima Rachel",
+      "contentId": "DSN_8ab291cf-8807-4840-9153-8d1e99797e4e"
+    },
+    "brokeback mountain": {
+      "title": "Brokeback Mountain",
+      "contentId": "FLMN10000000054544"
+    },
+    "hemingway amp gellhorn": {
+      "title": "Hemingway &amp; Gellhorn",
+      "contentId": "MAX_8bec7994-d808-4ce1-bc53-896c9b744efe"
+    },
+    "passages": {
+      "title": "Passages",
+      "contentId": "MFO_0002340988"
+    },
+    "match point": {
+      "title": "Match Point",
+      "contentId": "MFO_0002566438"
+    },
+    "vengadores infinity war": {
+      "title": "Vengadores: Infinity War",
+      "contentId": "vengadores-infinity-war"
+    },
+    "capitan america civil war": {
+      "title": "Capitán América: Civil War",
+      "contentId": "capitan-america-civil-war"
+    },
+    "spiderman no way home": {
+      "title": "Spider-Man: No Way Home",
+      "contentId": "spider-man-no-way-home"
+    },
+    "spiderman lejos de casa": {
+      "title": "Spider-Man: Lejos de casa",
+      "contentId": "spider-man-lejos-de-casa"
+    },
+    "spiderman homecoming": {
+      "title": "Spider-Man: Homecoming",
+      "contentId": "spider-man-homecoming"
+    },
+    "the amazing spiderman 2": {
+      "title": "The Amazing Spider-Man™ 2",
+      "contentId": "the-amazing-spider-man-2-el-poder-de-electro"
+    },
+    "the amazing spiderman": {
+      "title": "The Amazing Spider-Man™",
+      "contentId": "the-amazing-spider-man"
+    },
+    "spiderman 3": {
+      "title": "Spider-Man™ 3",
+      "contentId": "spider-man-3"
+    },
+    "spiderman 2": {
+      "title": "Spider-Man 2",
+      "contentId": "spider-man-2--2"
+    },
+    "wild yellowstone": {
+      "title": "Wild Yellowstone",
+      "contentId": "DSN_299306960NGEO"
+    },
+    "productos espanoles": {
+      "title": "Productos españoles",
+      "contentId": "MFO_299863837"
+    },
+    "reforma sin obra": {
+      "title": "Reforma sin obra",
+      "contentId": "U7D_MFO_299462979AMLI"
+    },
+    "hoteles gastronomicos": {
+      "title": "Hoteles gastronómicos",
+      "contentId": "MFO_299851005AMCN"
+    },
+    "la recicladora de muebles": {
+      "title": "La recicladora de muebles",
+      "contentId": "U7D_MFO_299091539AMLI"
+    },
+    "el club de las ceo": {
+      "title": "El club de las CEO",
+      "contentId": "PRIME_299867221APVO"
+    },
+    "fortuna en la basura": {
+      "title": "Fortuna en la basura",
+      "contentId": "MAX_299802341"
+    },
+    "batalla de adivinos": {
+      "title": "Batalla de adivinos",
+      "contentId": "DSN_299858241STAR"
+    },
+    "vecinos": {
+      "title": "Vecinos",
+      "contentId": "MAX_299872616"
+    },
+    "el asesinato de la conejita de playboy": {
+      "title": "El asesinato de la conejita de Playboy",
+      "contentId": "MFO_299851093CRIN"
+    },
+    "adolescentes asesinos de gran bretana": {
+      "title": "Adolescentes asesinos de Gran Bretaña",
+      "contentId": "MFO_299863794CRIN"
+    },
+    "el castrador en serie": {
+      "title": "El castrador en serie",
+      "contentId": "MFO_0002725403"
+    },
+    "guardianes de la galaxia vol2": {
+      "title": "Guardianes de la galaxia vol.2",
+      "contentId": "DSN_a2eedd10-4408-48ce-bda6-97cf3b54d986"
+    },
+    "donkey xote": {
+      "title": "Donkey Xote",
+      "contentId": "PRIME_amzn1.dv.gti.882029a2-137c-422c-9c23-472ee6fdb924:ES"
+    },
+    "avatar el sentido del agua": {
+      "title": "Avatar: El sentido del agua",
+      "contentId": "avatar-the-way-of-water-2022"
+    },
+    "tadeo jones 2 el secreto del rey midas": {
+      "title": "Tadeo Jones 2. El secreto del rey Midas",
+      "contentId": "PRIME_amzn1.dv.gti.36b157fd-b18a-b750-2ecd-2d15bcb9ecf9:ES"
+    },
+    "la chica salvaje": {
+      "title": "La chica salvaje",
+      "contentId": "MFO_0002768406"
+    },
+    "las aventuras de tadeo jones": {
+      "title": "Las aventuras de Tadeo Jones",
+      "contentId": "PRIME_amzn1.dv.gti.ba4924e4-b775-40d1-8b6e-86ea9bab5c78:ES"
+    },
+    "pearl harbor": {
+      "title": "Pearl Harbor",
+      "contentId": "DSN_9997648c-9034-4ead-bb32-f6dd93de9490"
+    },
+    "momias": {
+      "title": "Momias",
+      "contentId": "MAX_be195a85-4fa8-435b-b83a-b3c47b322c8e"
     }
+  },
+  "genres": {
+    "12": "Aventura",
+    "14": "Fantasía",
+    "16": "Animación",
+    "18": "Drama",
+    "27": "Terror",
+    "28": "Acción",
+    "35": "Comedia",
+    "36": "Historia",
+    "37": "Western",
+    "53": "Suspense",
+    "80": "Crimen",
+    "99": "Documental",
+    "878": "Ciencia ficción",
+    "9648": "Misterio",
+    "10402": "Música",
+    "10749": "Romance",
+    "10751": "Familia",
+    "10752": "Bélica",
+    "10759": "Action & Adventure",
+    "10762": "Kids",
+    "10763": "News",
+    "10764": "Reality",
+    "10765": "Sci-Fi & Fantasy",
+    "10766": "Soap",
+    "10767": "Talk",
+    "10768": "War & Politics",
+    "10770": "Película de TV"
   }
 }
