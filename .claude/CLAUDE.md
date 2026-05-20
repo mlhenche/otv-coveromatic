@@ -123,6 +123,8 @@ Clave `url_patterns`: JSON con las URLs base de imágenes de Orange TV.
 
 > IMPORTANTE: Filmin no lleva guión bajo (`FLMN10000050694`). La detección usa `.startsWith()`, no split por `_`.
 
+> IMPORTANTE: Algunos contenidos de OTV usan slugs como contentId en lugar de prefijos de proveedor (ej. `hoppers`, `scream-7`, `perfect-days`). Estos **son IDs válidos** — OTV los usa directamente en las URLs de imagen (`/vod/VERTICAL/hoppers_VERTICAL.jpg`). No son errores del parser. La validación con regex de prefijos conocidos los marca como "sospechosos" pero las imágenes responden HTTP 200. No eliminarlos ni desactivarlos automáticamente.
+
 ---
 
 ## URLs de imágenes de Orange TV
