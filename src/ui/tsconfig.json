@@ -8,14 +8,6 @@
         "esModuleInterop": true,
         "skipLibCheck": true,
         "noEmit": true,
-        "baseUrl": ".",
-        "paths": {
-            "@/*": ["./*"]
-        },
-
-        // strict diferido a Fase 2 — ver el plan de optimización.
-        // Encender estos flags (junto con la eliminación de `any`) es la
-        // primera tarea del refactor de código.
         "strict": false,
         "noImplicitAny": false
     },
