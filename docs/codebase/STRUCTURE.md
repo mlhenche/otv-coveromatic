@@ -6,7 +6,7 @@
 
 ```
 covers/
-├── v3/                        # Active plugin version
+├──                         # Active plugin version
 │   ├── src/
 │   │   ├── code.ts            # Plugin backend — Figma sandbox entry point
 │   │   └── ui/
@@ -43,16 +43,16 @@ covers/
 
 | File | Purpose |
 |------|---------|
-| `v3/src/code.ts` | All Figma document manipulation — edit here for new node types, handlers |
-| `v3/src/ui/App.tsx` | Global state, tab routing, sandbox message handling |
-| `v3/src/ui/components/CoverGrid.tsx` | Catalog apply logic — URL building, TMDB fetch, postMessage |
-| `v3/src/ui/components/HtmlPasteTab.tsx` | HTML parser + apply logic for HTML paste tab |
-| `v3/src/ui/hooks/useSupabaseCatalog.ts` | Supabase catalog fetch and normalization |
-| `v3/src/ui/hooks/useTMDB.ts` | All TMDB API hooks |
-| `v3/plugin/manifest.json` | Plugin name, allowed `networkAccess` domains |
-| `v3/vite.config.ts` | Build config, `@` alias → `v3/src/ui/` |
+| `src/code.ts` | All Figma document manipulation — edit here for new node types, handlers |
+| `src/ui/App.tsx` | Global state, tab routing, sandbox message handling |
+| `src/ui/components/CoverGrid.tsx` | Catalog apply logic — URL building, TMDB fetch, postMessage |
+| `src/ui/components/HtmlPasteTab.tsx` | HTML parser + apply logic for HTML paste tab |
+| `src/ui/hooks/useCatalog.ts` | Supabase catalog fetch and normalization |
+| `src/ui/hooks/useTMDB.ts` | All TMDB API hooks |
+| `plugin/manifest.json` | Plugin name, allowed `networkAccess` domains |
+| `vite.config.ts` | Build config, `@` alias → `src/ui/` |
 
-## Component Map (`v3/src/ui/components/`)
+## Component Map (`src/ui/components/`)
 
 | Component | Role |
 |-----------|------|
@@ -73,7 +73,7 @@ covers/
 
 **Files:**
 - React components: PascalCase `.tsx` (`CoverGrid.tsx`, `HtmlPasteTab.tsx`)
-- Hooks: camelCase with `use` prefix `.ts` (`useSupabaseCatalog.ts`)
+- Hooks: camelCase with `use` prefix `.ts` (`useCatalog.ts`)
 - Modules: PascalCase `.ts` for class-like (`LogStore.ts`)
 - CLI scripts: kebab-case `.js` (`sync-to-supabase.js`)
 
@@ -89,12 +89,12 @@ covers/
 
 | Task | Location |
 |------|---------|
-| New Figma card type | `typeFromName()` in `v3/src/code.ts` + `buildOTVUrls()` in `CoverGrid.tsx` |
+| New Figma card type | `typeFromName()` in `src/code.ts` + `buildOTVUrls()` in `CoverGrid.tsx` |
 | New HTML carousel type | Add parser fn + register in `parseHtml()` in `HtmlPasteTab.tsx` |
 | New metadata field | `MovieTvMetadata` interface + `fillMetadata()` in `code.ts` |
-| New external API | New hook in `v3/src/ui/hooks/` + add domain to `manifest.json` |
-| New channel mapping | `CHANNEL_TO_PROVIDER` in `v3/src/code.ts` |
-| New CLI catalog script | `v3/scripts/` following pattern of `add-content.js` |
+| New external API | New hook in `src/ui/hooks/` + add domain to `manifest.json` |
+| New channel mapping | `CHANNEL_TO_PROVIDER` in `src/code.ts` |
+| New CLI catalog script | `scripts/` following pattern of `add-content.js` |
 
 ---
 

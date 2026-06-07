@@ -6,7 +6,7 @@
 
 **Files:**
 - React components: PascalCase `.tsx` (`CoverGrid.tsx`, `HtmlPasteTab.tsx`)
-- Hooks: `use` prefix camelCase `.ts` (`useSupabaseCatalog.ts`, `useTMDB.ts`)
+- Hooks: `use` prefix camelCase `.ts` (`useCatalog.ts`, `useTMDB.ts`)
 - Modules: PascalCase `.ts` for singleton/class-like (`LogStore.ts`)
 - CLI scripts: kebab-case `.js` (`sync-to-supabase.js`, `add-content.js`)
 
@@ -63,7 +63,7 @@
 
 ## Logging
 
-**UI — `Logger` singleton (`v3/src/ui/components/LogStore.ts`):**
+**UI — `Logger` singleton (`src/ui/components/LogStore.ts`):**
 ```typescript
 Logger.add('Context', 'message text', ['tag1', 'tag2'])
 ```

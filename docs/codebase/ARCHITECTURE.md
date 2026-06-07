@@ -16,26 +16,26 @@
 ## Layers
 
 **Figma Sandbox (Backend):**
-- Location: `v3/src/code.ts` → compiled to `v3/plugin/code.js` (do not edit directly)
+- Location: `src/code.ts` → compiled to `plugin/code.js` (do not edit directly)
 - Contains: Selection analysis, node traversal, image application, metadata filling, provider logo resolution, `figma.clientStorage` cache
 - Depends on: Figma Plugin API (`@figma/plugin-typings`)
 
 **React UI (Frontend):**
-- Location: `v3/src/ui/` → compiled to `v3/plugin/ui.html` (single-file bundle, do not edit directly)
+- Location: `src/ui/` → compiled to `plugin/ui.html` (single-file bundle, do not edit directly)
 - Contains: React components, custom hooks, all external API calls
 - Depends on: React 19, `@tanstack/react-query`, Supabase REST API, TMDB API
 
 **Data Hooks:**
-- `v3/src/ui/hooks/useSupabaseCatalog.ts` — React Query wrapper for Supabase (4h stale time)
-- `v3/src/ui/hooks/useTMDB.ts` — React Query wrappers for TMDB API
+- `src/ui/hooks/useCatalog.ts` — React Query wrapper for Supabase (4h stale time)
+- `src/ui/hooks/useTMDB.ts` — React Query wrappers for TMDB API
 
 **CLI Scripts:**
-- `v3/scripts/` — Node.js catalog management; require env vars; never called from within the plugin
+- `scripts/` — Node.js catalog management; require env vars; never called from within the plugin
 
 ## Data Flow
 
 **Catalog Tab (Movies / Series):**
-1. `useSupabaseCatalog` fetches `contents`, `genres`, `config` from Supabase (4h cache)
+1. `useCatalog` fetches `contents`, `genres`, `config` from Supabase (4h cache)
 2. `CoverGrid` filters by tab, search term, genre
 3. Designer clicks item → `handleApply` determines `componentType` from `selectionInfo`
 4. If `componentType` is `unknown`, `Overlays` shows type picker dialog
@@ -62,17 +62,17 @@
 
 **`componentType`** — `card-portrait` | `card-landscape` | `vps` | `slideshow` | `card-chapters` | `unknown`; drives URL building and apply logic
 
-**`ParsedCard` / `ParsedCarousel`** — typed representation of OTV HTML paste content; defined in `v3/src/ui/components/HtmlPasteTab.tsx`
+**`ParsedCard` / `ParsedCarousel`** — typed representation of OTV HTML paste content; defined in `src/ui/components/HtmlPasteTab.tsx`
 
-**`CHANNEL_TO_PROVIDER` map** — translates OTV icon URL channel names to Figma `providerLogoSquare` variant names; `v3/src/code.ts` lines ~91–158; used by `findBestVariantMatch()` (exact → table → case-insensitive → fuzzy → substring)
+**`CHANNEL_TO_PROVIDER` map** — translates OTV icon URL channel names to Figma `providerLogoSquare` variant names; `src/code.ts` lines ~91–158; used by `findBestVariantMatch()` (exact → table → case-insensitive → fuzzy → substring)
 
-**`Metadata` union** — data passed from UI to sandbox for text nodes and variant properties; `MovieTvMetadata` | `PersonMetadata`; defined in `v3/src/code.ts`
+**`Metadata` union** — data passed from UI to sandbox for text nodes and variant properties; `MovieTvMetadata` | `PersonMetadata`; defined in `src/code.ts`
 
 ## Entry Points
 
-- **Backend:** `v3/src/code.ts` — opens UI, registers `selectionchange`, handles all `figma.ui.onmessage` events
-- **UI:** `v3/src/ui/App.tsx` — renders tab shell, global state, routes `pluginMessage` events
-- **Build:** `npm run build` in `v3/` — `tsc` for sandbox, `vite build` for React UI
+- **Backend:** `src/code.ts` — opens UI, registers `selectionchange`, handles all `figma.ui.onmessage` events
+- **UI:** `src/ui/App.tsx` — renders tab shell, global state, routes `pluginMessage` events
+- **Build:** `npm run build` in `` — `tsc` for sandbox, `vite build` for React UI
 
 ## Error Handling
 

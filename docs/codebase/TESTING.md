@@ -11,13 +11,13 @@ The `package.json` test script is a stub:
 "test": "echo \"Error: no test specified\" && exit 1"
 ```
 
-No test runner (Jest, Vitest, etc.) is configured. No test files exist in `v3/src/`.
+No test runner (Jest, Vitest, etc.) is configured. No test files exist in `src/`.
 
 ## Manual Testing Approach
 
 **Plugin UI + sandbox:**
-1. `npm run build` (or `npm run dev` with watch mode) in `v3/`
-2. Load `v3/plugin/manifest.json` in Figma Desktop via Plugins > Development > Import plugin from manifest
+1. `npm run build` (or `npm run dev` with watch mode) in ``
+2. Load `plugin/manifest.json` in Figma Desktop via Plugins > Development > Import plugin from manifest
 3. Test manually in Figma with real DS components
 4. Close and reopen the plugin to reload after each build
 
@@ -48,7 +48,7 @@ No test runner (Jest, Vitest, etc.) is configured. No test files exist in `v3/sr
 cd v3
 npm install -D vitest
 # Add to package.json: "test": "vitest"
-# Create v3/src/__tests__/ for unit tests
+# Create src/__tests__/ for unit tests
 ```
 
 ---
