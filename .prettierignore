@@ -1,0 +1,8 @@
+node_modules
+plugin/code.js
+plugin/ui.html
+catalog/otv-catalog.json
+catalog/OrangeCatalog.html
+channels.html
+update-covers.html
+supabase
