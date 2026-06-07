@@ -21,3 +21,13 @@ node_modules/
 # Local files (never upload to repository)
 gitignore/
 .mcp.json
+
+# Environment / secrets
+.env
+*.env
+!.env.example
+
+# Catalog work files (HTML pasted from orangetv.orange.es)
+catalog/OrangeCatalog.html
+channels.html
+update-covers.html

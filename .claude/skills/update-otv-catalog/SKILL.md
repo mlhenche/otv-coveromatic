@@ -1,21 +1,24 @@
 ---
 name: update-otv-catalog
-description: Actualiza el catálogo de contenidos de Orange TV desde el HTML pegado en OrangeCatalog.html. Ejecuta el parser, añade géneros desde Supabase, y publica en GitHub. Usar cuando el usuario pegue un nuevo HTML de orangetv.orange.es o diga "actualizar catálogo", "subir nuevos contenidos" o "sync catálogo OTV".
+description: Actualiza el catálogo de contenidos de Orange TV desde el HTML pegado en OrangeCatalog.html. Ejecuta el parser, añade géneros y publica en GitHub. Usar cuando el usuario pegue un nuevo HTML de orangetv.orange.es o diga "actualizar catálogo", "subir nuevos contenidos" o "sync catálogo OTV".
 ---
 
 # Actualizar catálogo OTV
 
+> El catálogo es un JSON estático servido desde GitHub raw. No hay Supabase.
+> La única credencial es `TMDB_API_KEY` (opcional, solo para enriquecer entradas nuevas).
+
 ## Prerequisito
 
 El usuario debe haber pegado el HTML de `orangetv.orange.es` en:
-`v3/catalog/OrangeCatalog.html`
+`catalog/OrangeCatalog.html`
 
 ---
 
 ## Paso 1 — Extraer y mergear
 
 ```bash
-cd "v3/catalog"
+cd catalog
 node extract-catalog-v2.js
 ```
 
@@ -43,23 +46,28 @@ curl -s -o /dev/null -w "%{http_code}" \
 ```
 
 - **200** → ID válido, mantener en el catálogo
-- **404** → contentId corrupto, eliminar o desactivar manualmente en `otv-catalog.json`
+- **404** → contentId corrupto, eliminar con `node ../scripts/manage-content.js --remove --contentId "el-id-malo"`
 
-## Paso 3 — Añadir géneros y preparar para GitHub
+## Paso 3 — Enriquecer con TMDB (opcional, para entradas nuevas)
 
-Ejecutar desde la raíz del proyecto:
+Desde la raíz del proyecto, con la API key de TMDB en el entorno (ver `.env.example`):
 
 ```bash
-NODE_TLS_REJECT_UNAUTHORIZED=0 \
-SUPABASE_URL="https://zmzehngquxtqirpjxyhn.supabase.co" \
-SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InptemVobmdxdXh0cWlycGp4eWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1MjU3ODksImV4cCI6MjA4NzEwMTc4OX0.aE19KXi3m0WjmZpxRyLNyETDVI5sAyg0JfLNOe_c4Aw" \
-node "v3/scripts/export-static-catalog.js"
+TMDB_API_KEY="<tu-tmdb-key>" node scripts/enrich-catalog.js --only-missing
 ```
 
-## Paso 4 — Commit y push
+## Paso 4 — Añadir géneros y preparar para GitHub
+
+Desde la raíz del proyecto (sin credenciales: los géneros van embebidos en el script):
 
 ```bash
-git add v3/catalog/otv-catalog.json
+node scripts/export-static-catalog.js
+```
+
+## Paso 5 — Commit y push
+
+```bash
+git add catalog/otv-catalog.json
 git commit -m "chore(catalog): actualizar catálogo OTV — X nuevos, Y actualizados (Z total)"
 git push
 ```
