@@ -1,71 +1,71 @@
-# TODO — CoverOmatic v3
+# TODO — CoverOmatic
 
-## EN CURSO: Fix provider + imágenes en pestaña HTML (card_channel)
+## Bugs activos
 
-### Estado (2026-03-06)
+### Provider no cambia en card_channel
 
-Los cambios aplicados (`upgradeImageUrl`, estrategia 3 `findProviderLogoAncestor`, logging básico) no han resuelto los bugs. Próximo paso: fix case-insensitive + logging diagnóstico.
+`providerLogoSquare` no se actualiza al aplicar fila de canal desde la pestaña HTML.
 
-### Bugs activos
+**Causa raíz probable:** checks `key === 'provider' || key.startsWith('provider#')` son case-sensitive en `isProviderLogoComponent`, `applyProviderLogo` y `findProviderLogoAncestor`. Si Figma usa `"Provider"` con mayúscula, falla silenciosamente.
 
-1. **Provider no cambia en card_channel** — `providerLogoSquare` no se actualiza al aplicar fila de canal
-2. **Algunas cards sin imagen** — slots quedan en blanco tras aplicar desde la pestaña HTML
+Fix en `code.ts`:
+- `isProviderLogoComponent` (~L246) — `k.toLowerCase() === 'provider' || k.toLowerCase().startsWith('provider#')`
+- `applyProviderLogo` (~L202) — lookup case-insensitive + log diagnóstico
+- `findProviderLogoAncestor` (~L270) — mismo fix
 
-### Análisis (code.ts)
+### Algunas cards sin imagen al aplicar desde pestaña HTML
 
-**Jerarquía Figma confirmada:**
-```
-cover(FRAME) → wrapper(FRAME) → epg(INSTANCE) → cardsRow(FRAME) → row_card_channel(FRAME)
-```
-`providerLogoSquare` es hijo de `epg`, con propiedad `provider` tipo VARIANT.
-
-`cachedAllCardIds` NO es el problema — para selecciones no-VPS se resetea a `new Set()`.
-
-**Flujo de búsqueda provider:**
-- S1: dentro de `wrapper` → no lo encuentra (providerLogoSquare es hermano de wrapper)
-- S2: dentro de `epg` → debería funcionar pero falla
-- S3: `findProviderLogoAncestor` → falla si `epg` no expone `provider` a su nivel
-
-**Causa raíz probable:** checks `key === 'provider' || key.startsWith('provider#')` son **case-sensitive** en `isProviderLogoComponent`, `applyProviderLogo` y `findProviderLogoAncestor`. Si Figma usa `"Provider"` con mayúscula, falla silenciosamente.
-
-**Causa raíz imágenes:** URLs de canal/EPG ya tienen `width=3840` (upgradeImageUrl no ayuda). Si `createImageAsync` falla, el `console.warn` añadido lo mostrará. Si `backgroundUrl` es null, la card se filtra y el slot queda sin actualizar.
-
-### Próximos pasos
-
-**1. `isProviderLogoComponent` (~L246)** — check case-insensitive:
-```typescript
-return Object.keys(props).some(k => {
-    const kl = k.toLowerCase();
-    return kl === 'provider' || kl.startsWith('provider#');
-});
-```
-
-**2. `applyProviderLogo` (~L202)** — lookup case-insensitive + log:
-```typescript
-for (const key of Object.keys(props)) {
-    const kl = key.toLowerCase();
-    if (kl === 'provider' || kl.startsWith('provider#')) { providerKey = key; break; }
-}
-console.log(`[applyProvider] logo="${logo.name}" key="${providerKey}" value="${providerValue}"`);
-```
-
-**3. `findProviderLogoAncestor` (~L270)** — mismo fix.
-
-**4. Logging en `apply-multiple-covers-url`** tras cada estrategia para ver dónde falla.
-
-**Verificar:** Figma → Plugins → Development → Open Console → aplicar fila de canal.
+Slots quedan en blanco. Posibles causas: `backgroundUrl` null (la card se filtra antes de aplicar) o `createImageAsync` falla silenciosamente para URLs EPG.
 
 ---
 
 ## Pendiente: tabla `CHANNEL_TO_PROVIDER` incompleta
 
-Tabla en `code.ts` (~L89), ~65 entradas. Necesita validarse contra variantes reales.
+Tabla en `src/lib/channels.ts`, ~65 entradas. Necesita validarse contra variantes reales del DS.
 
 Enlace: https://www.figma.com/design/8DlABzc0EynixwUG0GEG6p/Citrus-recap?node-id=165-43521
 
 Canales sin mapeo: `CMM`, `BBC_*`, `SQUIRREL*`, `BOM`, `SANGRE_FRIA_V2`, `HISTORIA_Y_VIDA`, `NATURE_TIME`, `LOVE_*`, `VIVIR_CON_*`, `INGLES_TOTAL`, `DISNEY_JR`, `NICK_JR`, `BABYTV_WHITE`, `TOON_GOOGLES`, `POCOYO_WHITE`, `ANIME_VISION_*`, `GOL*`, `TOP_BARCA_WHITE`, `MOTORVISION`, `BBC_TOP_GEAR_WHITE`, `TRACE_SPORT_STARS`, `UBEAT`, `GAME_TOON_White`, `MMATV_WHITE`, `FIGHT_BOX_White`, `QUELLO_CONCERTS_WHITE`, `SOL`, `FLAMENCO_AUDITORIO`, `QWEST_TV`, `eitb`, `1+1_WHITE`, `BBOriginals_*`, `NEGOCIOS_TV`, `TV5MONDE`, `FRANCE2`, `FRANCE5`, `SOMOS`
 
-Para completar: abrir Desktop Bridge en Figma → Claude lee variantes via MCP.
+Para completar: abrir Desktop Bridge en Figma → Claude lee variantes via MCP → renombrar variantes para que el exact match resuelva directamente y la tabla pueda eliminarse.
+
+---
+
+## Fase 2 — Refactor de código
+
+> Prerequisito cumplido: esbuild bundlea el backend, tests en src/lib/, tooling activo.
+
+### 1. Trocear `code.ts` (1.231 líneas)
+
+Extraer a módulos dentro de `src/`:
+- Helpers de nodos Figma (buscar capas, aplicar fills, resize)
+- Lógica de provider logo (`applyProviderLogo`, `findProviderLogoAncestor`)
+- Handlers por mensaje (`apply-cover-url`, `apply-multiple-covers-url`, `apply-episode-covers`, etc.)
+
+esbuild los bundlea igual que ahora — el split es solo para legibilidad y testabilidad.
+
+### 2. Extraer apply-logic de `CoverGrid.tsx` (519 líneas)
+
+`applyOTVContent`, `applyRelatedContent`, `applyRandomOTV` y `sendRandomOTVMessage` son lógica de negocio dentro de un componente React. Moverlas a un hook `useApply` o a `src/lib/apply.ts` para poder testearlas sin montar el componente.
+
+### 3. Activar `strict: true` en UI
+
+`src/ui/tsconfig.json` ya tiene el flag listo (solo en `false`). Encenderlo + eliminar todos los `any` explícitos. El compilador guiará el trabajo.
+
+### 4. Tests del parser HTML
+
+`HtmlPasteTab.tsx` parsea HTML con `DOMParser`. Extraer las funciones de parseo puras a `src/lib/html-parser.ts` y cubrirlas con Vitest + entorno jsdom.
+
+### 5. Robustez async
+
+- Error boundaries en React para fallos no capturados
+- Cancelación de fetches al desmontar (AbortController)
+- Throttling de llamadas a TMDB (rate limit 40 req/10s)
+- `useTMDBMultiSearch` y fetches directos en `applyOTVContent` — manejo explícito de errores visibles al usuario (hoy van a `console.error`)
+
+### 6. Componente `card_emission`
+
+El DS aún no tiene componente para emisiones en directo. Ver spec en [docs/specs/card-emission.md](docs/specs/card-emission.md). Una vez exista en Figma, actualizar la detección en `code.ts` y los `switch` de URLs en `CoverGrid.tsx`.
 
 ---
 
