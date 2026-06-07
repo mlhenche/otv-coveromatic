@@ -2,8 +2,18 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 
 const API_BASE = 'https://api.themoviedb.org/3';
 
+export class TmdbAuthError extends Error {
+    constructor() {
+        super('TMDB API key inválida o caducada');
+        this.name = 'TmdbAuthError';
+    }
+}
+
 async function tmdbFetch(url: string) {
     const response = await fetch(url);
+    if (response.status === 401 || response.status === 403) {
+        throw new TmdbAuthError();
+    }
     if (!response.ok) {
         throw new Error(`TMDB HTTP Error: ${response.status}`);
     }

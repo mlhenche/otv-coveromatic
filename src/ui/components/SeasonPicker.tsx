@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useTMDBSeasons, useTMDBEpisodes } from '../hooks/useTMDB';
+import { useTMDBSeasons, useTMDBEpisodes, TmdbAuthError } from '../hooks/useTMDB';
 import { CatalogItem } from './CoverCard';
 
 interface SeasonPickerProps {
@@ -12,10 +12,32 @@ interface SeasonPickerProps {
 export default function SeasonPicker({ apiKey, entry, onClose, selectionInfo }: SeasonPickerProps) {
     const [selectedSeason, setSelectedSeason] = useState<number | null>(null);
 
-    const { data: seasons, isLoading: seasonsLoading } = useTMDBSeasons(apiKey, entry?.tmdbId || null);
-    const { data: episodes, isLoading: episodesLoading } = useTMDBEpisodes(apiKey, entry?.tmdbId || null, selectedSeason);
+    const { data: seasons, isLoading: seasonsLoading, error: seasonsError } = useTMDBSeasons(apiKey, entry?.tmdbId || null);
+    const { data: episodes, isLoading: episodesLoading, error: episodesError } = useTMDBEpisodes(apiKey, entry?.tmdbId || null, selectedSeason);
 
     if (!entry) return null;
+
+    if (seasonsError instanceof TmdbAuthError || episodesError instanceof TmdbAuthError) {
+        return (
+            <div className="season-picker-overlay">
+                <div className="season-picker-card">
+                    <div className="season-picker-header">
+                        <h2 className="season-picker-title">{entry.title}</h2>
+                        <button className="season-picker-close" onClick={onClose}>×</button>
+                    </div>
+                    <div className="season-picker-content">
+                        <div className="season-picker-empty" style={{ padding: '24px 16px', textAlign: 'center' }}>
+                            <div style={{ fontSize: '24px', marginBottom: '8px' }}>🔑</div>
+                            <p>API key de TMDB inválida o caducada.</p>
+                            <p style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                                Actualízala en el icono de llave (arriba a la derecha).
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     const handleApplySingleEpisode = (episode: any) => {
         applyEpisodes([episode]);

@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useCatalog } from '../hooks/useCatalog';
-import { useTMDBPersonSearch, useTMDBCredits } from '../hooks/useTMDB';
+import { useTMDBPersonSearch, useTMDBCredits, TmdbAuthError } from '../hooks/useTMDB';
 import CoverCard, { CatalogItem } from './CoverCard';
 import { shuffle } from '../../lib/shuffle';
 import { buildOTVUrls } from '../../lib/urls';
@@ -35,16 +35,18 @@ export default function CoverGrid({
     const { data: catalogData, isLoading: catalogLoading, error: catalogError } = useCatalog();
 
     // TMDB Person hooks
-    const { data: personsByName, isLoading: personsLoading } = useTMDBPersonSearch(
+    const { data: personsByName, isLoading: personsLoading, error: personsError } = useTMDBPersonSearch(
         apiKey,
         activeTab === 'person' && personSearchMode === 'by-name' ? searchTerm : ''
     );
 
-    const { data: personsByContent, isLoading: creditsLoading } = useTMDBCredits(
+    const { data: personsByContent, isLoading: creditsLoading, error: creditsError } = useTMDBCredits(
         apiKey,
         activeTab === 'person' && personSearchMode === 'by-content' && selectedContentData ? selectedContentData.id : null,
         selectedContentData?.media_type || 'movie'
     );
+
+    const tmdbAuthError = (personsError instanceof TmdbAuthError || creditsError instanceof TmdbAuthError);
 
     const handleApply = (item: any) => {
         if (activeTab === 'person') {
@@ -369,6 +371,20 @@ export default function CoverGrid({
     };
 
     if (activeTab === 'log') return <LogPanel />;
+
+    if (tmdbAuthError) {
+        return (
+            <div className="grid-container">
+                <div className="empty-state">
+                    <span className="icon">🔑</span>
+                    <p>API key de TMDB inválida o caducada.</p>
+                    <p style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                        Actualízala en el icono de llave (arriba a la derecha).
+                    </p>
+                </div>
+            </div>
+        );
+    }
 
     const isLoading =
         (activeTab !== 'person' && catalogLoading) ||
