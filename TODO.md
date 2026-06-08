@@ -56,12 +56,10 @@ esbuild los bundlea igual que ahora — el split es solo para legibilidad y test
 
 `HtmlPasteTab.tsx` parsea HTML con `DOMParser`. Extraer las funciones de parseo puras a `src/lib/html-parser.ts` y cubrirlas con Vitest + entorno jsdom.
 
-### 5. Robustez async
+### 5. Robustez async ✓ (parcial)
 
-- Error boundaries en React para fallos no capturados
-- Cancelación de fetches al desmontar (AbortController)
-- Throttling de llamadas a TMDB (rate limit 40 req/10s)
-- `useTMDBMultiSearch` y fetches directos en `applyOTVContent` — manejo explícito de errores visibles al usuario (hoy van a `console.error`)
+- `useTMDBMultiSearch` en `ControlsBar`: error visible en el dropdown — distingue `TmdbAuthError` de error de red.
+- Descartados: AbortController (react-query ya cancela; fetches puntuales no necesitan cancelación), throttling (flujo serie, sin riesgo de rate limit), error boundaries (fallos son de fetch, no de render).
 
 ### 6. Componente `card_emission`
 

@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useCatalog } from '../hooks/useCatalog';
-import { useTMDBMultiSearch } from '../hooks/useTMDB';
+import { useTMDBMultiSearch, TmdbAuthError } from '../hooks/useTMDB';
 
 interface ControlsBarProps {
     apiKey: string;
@@ -28,7 +28,7 @@ export default function ControlsBar({
 
     // Autocomplete only works when on person tab and searching by content
     const shouldSearchMulti = activeTab === 'person' && personSearchMode === 'by-content';
-    const { data: autocompleteResults, isLoading: autocompleteLoading } = useTMDBMultiSearch(apiKey, shouldSearchMulti ? searchTerm : '');
+    const { data: autocompleteResults, isLoading: autocompleteLoading, error: autocompleteError } = useTMDBMultiSearch(apiKey, shouldSearchMulti ? searchTerm : '');
 
     const genres = useMemo(() => {
         if (!catalogData || (activeTab !== 'movie' && activeTab !== 'tv')) return [];
@@ -84,9 +84,16 @@ export default function ControlsBar({
 
                     {/* Autocomplete Dropdown */}
                     {shouldSearchMulti && searchTerm.length >= 3 && !selectedContentData && (
-                        <div className={`autocomplete-dropdown ${!autocompleteResults && !autocompleteLoading ? 'hidden' : ''}`}>
+                        <div className={`autocomplete-dropdown ${!autocompleteResults && !autocompleteLoading && !autocompleteError ? 'hidden' : ''}`}>
                             {autocompleteLoading && (
                                 <div className="autocomplete-loading"><div className="spinner"></div>Buscando...</div>
+                            )}
+                            {autocompleteError && !autocompleteLoading && (
+                                <div className="autocomplete-empty">
+                                    {autocompleteError instanceof TmdbAuthError
+                                        ? 'API key de TMDB inválida. Actualízala arriba a la derecha.'
+                                        : 'Error al buscar en TMDB. Comprueba tu conexión.'}
+                                </div>
                             )}
                             {autocompleteResults && autocompleteResults.length === 0 && (
                                 <div className="autocomplete-empty">No se encontraron películas ni series</div>
