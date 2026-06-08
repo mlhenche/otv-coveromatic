@@ -2,17 +2,6 @@
 
 ## Bugs activos
 
-### Provider no cambia en card_channel
-
-`providerLogoSquare` no se actualiza al aplicar fila de canal desde la pestaña HTML.
-
-**Causa raíz probable:** checks `key === 'provider' || key.startsWith('provider#')` son case-sensitive en `isProviderLogoComponent`, `applyProviderLogo` y `findProviderLogoAncestor`. Si Figma usa `"Provider"` con mayúscula, falla silenciosamente.
-
-Fix en `code.ts`:
-- `isProviderLogoComponent` (~L246) — `k.toLowerCase() === 'provider' || k.toLowerCase().startsWith('provider#')`
-- `applyProviderLogo` (~L202) — lookup case-insensitive + log diagnóstico
-- `findProviderLogoAncestor` (~L270) — mismo fix
-
 ### Algunas cards sin imagen al aplicar desde pestaña HTML
 
 Slots quedan en blanco. Posibles causas: `backgroundUrl` null (la card se filtra antes de aplicar) o `createImageAsync` falla silenciosamente para URLs EPG.
