@@ -123,286 +123,386 @@
     }
   });
 
+  // src/figma-nodes.ts
+  function isExcluded(node, excludeIds) {
+    if (excludeIds.size === 0) return false;
+    let current = node;
+    while (current && current.type !== "PAGE" && current.type !== "DOCUMENT") {
+      if (excludeIds.has(current.id)) return true;
+      current = current.parent;
+    }
+    return false;
+  }
+  function isCoverNode(node) {
+    return node.name.trim().toLowerCase() === "cover" && "fills" in node;
+  }
+  function isTitleTreatmentNode(node) {
+    const name = node.name.trim().toLowerCase();
+    return (name === "titletreatment" || name === "title treatment" || name === "title_treatment") && "fills" in node;
+  }
+  function findTextNode(parent, name) {
+    if (parent.type === "TEXT" && parent.name.trim().toLowerCase() === name) return parent;
+    if ("findAllWithCriteria" in parent) {
+      const texts = parent.findAllWithCriteria({ types: ["TEXT"] });
+      return texts.find((n) => n.name.trim().toLowerCase() === name) || null;
+    }
+    return null;
+  }
+  function findAllTextNodes(parent, name) {
+    const results = [];
+    if (parent.type === "TEXT" && parent.name.trim().toLowerCase() === name) results.push(parent);
+    if ("findAllWithCriteria" in parent) {
+      const texts = parent.findAllWithCriteria({ types: ["TEXT"] });
+      results.push(...texts.filter((n) => n.name.trim().toLowerCase() === name));
+    }
+    return results;
+  }
+  function findInstanceNode(parent, name) {
+    if (parent.type === "INSTANCE" && parent.name.trim().toLowerCase() === name) return parent;
+    if ("findAllWithCriteria" in parent) {
+      const instances = parent.findAllWithCriteria({ types: ["INSTANCE"] });
+      return instances.find((n) => n.name.trim().toLowerCase() === name) || null;
+    }
+    return null;
+  }
+  function findCoverNodes(nodes, excludeIds = /* @__PURE__ */ new Set()) {
+    const covers = [];
+    for (const node of nodes) {
+      if (isExcluded(node, excludeIds)) continue;
+      if (isCoverNode(node)) covers.push(node);
+      if ("findAll" in node) {
+        const children = node.findAll((child) => isCoverNode(child) && !isExcluded(child, excludeIds));
+        covers.push(...children);
+      }
+    }
+    return covers;
+  }
+  function findTitleTreatmentNodes(nodes, excludeIds = /* @__PURE__ */ new Set()) {
+    const titleTreatments = [];
+    for (const node of nodes) {
+      if (isExcluded(node, excludeIds)) continue;
+      if (isTitleTreatmentNode(node)) titleTreatments.push(node);
+      if ("findAll" in node) {
+        const children = node.findAll((child) => isTitleTreatmentNode(child) && !isExcluded(child, excludeIds));
+        titleTreatments.push(...children);
+      }
+    }
+    return titleTreatments;
+  }
+  function findMetadataScope(coverNode) {
+    let fallback = null;
+    let current = coverNode.parent;
+    while (current && current.type !== "PAGE" && current.type !== "DOCUMENT") {
+      const sceneNode = current;
+      if ("findAllWithCriteria" in sceneNode) {
+        const texts = sceneNode.findAllWithCriteria({ types: ["TEXT"] });
+        if (texts.length > 0) {
+          if (!fallback) fallback = sceneNode;
+          const hasMetadataNode = texts.some((t) => METADATA_NODE_NAMES.has(t.name.trim().toLowerCase()));
+          if (hasMetadataNode) return sceneNode;
+        }
+      }
+      current = sceneNode.parent;
+    }
+    return fallback || coverNode.parent || coverNode;
+  }
+  var METADATA_NODE_NAMES;
+  var init_figma_nodes = __esm({
+    "src/figma-nodes.ts"() {
+      "use strict";
+      METADATA_NODE_NAMES = /* @__PURE__ */ new Set(["title", "rating", "year", "duration", "sinopsis", "genre", "name", "rol", "chapter"]);
+    }
+  });
+
+  // src/provider-logo.ts
+  function applyProviderLogo(logos, providerValue) {
+    let applied = 0;
+    for (const logo of logos) {
+      const props = logo.componentProperties;
+      let providerKey = null;
+      for (const key of Object.keys(props)) {
+        const kl = key.toLowerCase();
+        if (kl === "provider" || kl.startsWith("provider#")) {
+          providerKey = key;
+          break;
+        }
+      }
+      console.log(`[applyProvider] logo="${logo.name}" key="${providerKey}" value="${providerValue}"`);
+      if (!providerKey) continue;
+      let resolvedValue = providerValue;
+      const mainComp = logo.mainComponent;
+      const compSet = mainComp == null ? void 0 : mainComp.parent;
+      if (compSet && compSet.type === "COMPONENT_SET") {
+        const baseKey = providerKey.split("#")[0];
+        const propDef = compSet.componentPropertyDefinitions[baseKey];
+        if ((propDef == null ? void 0 : propDef.type) === "VARIANT" && propDef.variantOptions) {
+          resolvedValue = findBestVariantMatch(providerValue, propDef.variantOptions);
+          if (!resolvedValue) {
+            console.warn(`[provider] No match for "${providerValue}"`);
+            continue;
+          }
+        }
+      }
+      try {
+        if (mainComp) logo.swapComponent(mainComp);
+        logo.setProperties({ [providerKey]: resolvedValue });
+        applied++;
+      } catch (e) {
+        try {
+          logo.setProperties({ [providerKey]: resolvedValue });
+          applied++;
+        } catch (_) {
+        }
+      }
+    }
+    return applied;
+  }
+  function isProviderLogoComponent(node) {
+    if (node.type !== "INSTANCE") return false;
+    const name = node.name.trim().toLowerCase();
+    if (name === "providerlogosquare" || name === "providerlogorectangle") return true;
+    try {
+      const props = node.componentProperties;
+      return Object.keys(props).some((k) => {
+        const kl = k.toLowerCase();
+        return kl === "provider" || kl.startsWith("provider#");
+      });
+    } catch (_) {
+      return false;
+    }
+  }
+  function findNearestInstanceAncestor(node) {
+    let current = node.parent;
+    while (current && current.type !== "PAGE" && current.type !== "DOCUMENT") {
+      if (current.type === "INSTANCE") return current;
+      current = current.parent;
+    }
+    return null;
+  }
+  function findProviderLogoAncestor(node) {
+    let current = node.parent;
+    while (current && current.type !== "PAGE" && current.type !== "DOCUMENT") {
+      if (current.type === "INSTANCE") {
+        try {
+          const props = current.componentProperties;
+          if (Object.keys(props).some((k) => {
+            const kl = k.toLowerCase();
+            return kl === "provider" || kl.startsWith("provider#");
+          })) {
+            return current;
+          }
+        } catch (_) {
+        }
+      }
+      current = current.parent;
+    }
+    return null;
+  }
+  function findProviderLogoNodes(nodes, excludeIds = /* @__PURE__ */ new Set()) {
+    const logos = [];
+    for (const node of nodes) {
+      if (isExcluded(node, excludeIds)) continue;
+      if (isProviderLogoComponent(node)) logos.push(node);
+      if ("findAllWithCriteria" in node) {
+        const instances = node.findAllWithCriteria({ types: ["INSTANCE"] });
+        for (const child of instances) {
+          if (isProviderLogoComponent(child) && !isExcluded(child, excludeIds)) {
+            logos.push(child);
+          }
+        }
+      }
+    }
+    return logos;
+  }
+  var init_provider_logo = __esm({
+    "src/provider-logo.ts"() {
+      "use strict";
+      init_channels();
+      init_figma_nodes();
+    }
+  });
+
+  // src/card-detection.ts
+  function resetCardCache() {
+    _cache.ids.clear();
+  }
+  async function getComponentNameAsync(inst) {
+    var _a;
+    if ((_a = inst.mainComponent) == null ? void 0 : _a.name) return inst.mainComponent.name.toLowerCase();
+    try {
+      const main = await inst.getMainComponentAsync();
+      if (main == null ? void 0 : main.name) return main.name.toLowerCase();
+    } catch (_) {
+    }
+    return "";
+  }
+  function isCardComponentName(name) {
+    const n = name.toLowerCase();
+    return n.includes("card") && (n.includes("portrait") || n.includes("landscape") || n.includes("reparto") || n.includes("chapter"));
+  }
+  function isChapterCardComponent(name) {
+    const n = name.toLowerCase();
+    return n.includes("card") && n.includes("chapter");
+  }
+  function hasCoverChild(node) {
+    if (isCoverNode(node)) return true;
+    if ("findOne" in node) {
+      return !!node.findOne((child) => isCoverNode(child));
+    }
+    return false;
+  }
+  function typeFromName(name) {
+    const n = name.toLowerCase();
+    if (n.includes("card") && n.includes("portrait")) return "card-portrait";
+    if (n.includes("card") && n.includes("landscape")) return "card-landscape";
+    if (n.includes("card") && n.includes("chapter")) return "card-chapters";
+    if (n.includes("slideshow")) return "slideshow";
+    if (n.includes("vps")) return "vps";
+    return "unknown";
+  }
+  function detectTypeSync(nodes) {
+    var _a;
+    let componentType = "unknown";
+    let found = false;
+    for (const node of nodes) {
+      const t = typeFromName(node.name);
+      if (t !== "unknown") return t;
+      if (node.type === "INSTANCE") {
+        const compName = (((_a = node.mainComponent) == null ? void 0 : _a.name) || "").toLowerCase();
+        const t2 = typeFromName(compName);
+        if (t2 !== "unknown") return t2;
+      }
+      if ("findOne" in node) {
+        node.findOne((child) => {
+          var _a2;
+          const ct = typeFromName(child.name);
+          if (ct !== "unknown") {
+            componentType = ct;
+            found = true;
+            return true;
+          }
+          if (child.type === "INSTANCE") {
+            const compName = (((_a2 = child.mainComponent) == null ? void 0 : _a2.name) || "").toLowerCase();
+            const ct2 = typeFromName(compName);
+            if (ct2 !== "unknown") {
+              componentType = ct2;
+              found = true;
+              return true;
+            }
+          }
+          return false;
+        });
+      }
+      if (found) break;
+    }
+    return componentType;
+  }
+  function refreshCardCacheSync(nodes) {
+    var _a, _b;
+    for (const node of nodes) {
+      if (node.type === "INSTANCE") {
+        const compName = (((_a = node.mainComponent) == null ? void 0 : _a.name) || "").toLowerCase();
+        if (isCardComponentName(compName)) _cache.ids.add(node.id);
+      }
+      if ("findAllWithCriteria" in node) {
+        const instances = node.findAllWithCriteria({ types: ["INSTANCE"] });
+        for (const child of instances) {
+          const compName = (((_b = child.mainComponent) == null ? void 0 : _b.name) || "").toLowerCase();
+          if (isCardComponentName(compName)) _cache.ids.add(child.id);
+        }
+      }
+    }
+  }
+  async function refreshCardCache(nodes) {
+    _cache.ids.clear();
+    refreshCardCacheSync(nodes);
+    const instances = [];
+    for (const node of nodes) {
+      if (node.type === "INSTANCE" && !_cache.ids.has(node.id)) {
+        instances.push(node);
+      }
+      if ("findAllWithCriteria" in node) {
+        const children = node.findAllWithCriteria({ types: ["INSTANCE"] });
+        for (const child of children) {
+          if (!_cache.ids.has(child.id)) {
+            instances.push(child);
+          }
+        }
+      }
+    }
+    for (let i = 0; i < instances.length; i += CARD_CACHE_BATCH_SIZE) {
+      const batch = instances.slice(i, i + CARD_CACHE_BATCH_SIZE);
+      const names = await Promise.all(batch.map((inst) => getComponentNameAsync(inst)));
+      for (let j = 0; j < batch.length; j++) {
+        if (isCardComponentName(names[j])) _cache.ids.add(batch[j].id);
+      }
+    }
+  }
+  async function findChapterCardInstancesAsync(nodes) {
+    var _a, _b, _c;
+    const chapterCards = [];
+    const allInstances = [];
+    for (const node of nodes) {
+      if (node.type === "INSTANCE" && !allInstances.includes(node)) {
+        allInstances.push(node);
+      }
+      if ("findAllWithCriteria" in node) {
+        const instances = node.findAllWithCriteria({ types: ["INSTANCE"] });
+        for (const inst of instances) {
+          if (!allInstances.includes(inst)) allInstances.push(inst);
+        }
+      }
+    }
+    const addedIds = /* @__PURE__ */ new Set();
+    for (const inst of allInstances) {
+      if (addedIds.has(inst.id)) continue;
+      const instanceName = inst.name;
+      const syncName = ((_a = inst.mainComponent) == null ? void 0 : _a.name) || "";
+      let isChapter = false;
+      if (isChapterCardComponent(instanceName)) {
+        isChapter = true;
+      } else if (syncName && isChapterCardComponent(syncName)) {
+        isChapter = true;
+      } else if (((_c = (_b = inst.mainComponent) == null ? void 0 : _b.parent) == null ? void 0 : _c.type) === "COMPONENT_SET") {
+        const componentSetName = inst.mainComponent.parent.name;
+        if (isChapterCardComponent(componentSetName)) {
+          isChapter = true;
+        }
+      } else if (!syncName) {
+        const asyncName = await getComponentNameAsync(inst);
+        if (isChapterCardComponent(asyncName)) {
+          isChapter = true;
+        }
+      }
+      if (isChapter && hasCoverChild(inst)) {
+        chapterCards.push(inst);
+        addedIds.add(inst.id);
+      }
+    }
+    return chapterCards;
+  }
+  var _cache, cachedAllCardIds, CARD_CACHE_BATCH_SIZE;
+  var init_card_detection = __esm({
+    "src/card-detection.ts"() {
+      "use strict";
+      init_figma_nodes();
+      _cache = { ids: /* @__PURE__ */ new Set() };
+      cachedAllCardIds = _cache.ids;
+      CARD_CACHE_BATCH_SIZE = 10;
+    }
+  });
+
   // src/code.ts
   var require_code = __commonJS({
     "src/code.ts"() {
       init_channels();
+      init_figma_nodes();
+      init_provider_logo();
+      init_card_detection();
       figma.showUI(__html__, { width: 380, height: 580, themeColors: true });
-      var cachedAllCardIds = /* @__PURE__ */ new Set();
       var selectionVersion = 0;
-      function isExcluded(node, excludeIds) {
-        if (excludeIds.size === 0) return false;
-        let current = node;
-        while (current && current.type !== "PAGE" && current.type !== "DOCUMENT") {
-          if (excludeIds.has(current.id)) return true;
-          current = current.parent;
-        }
-        return false;
-      }
-      function isCoverNode(node) {
-        return node.name.trim().toLowerCase() === "cover" && "fills" in node;
-      }
-      function isTitleTreatmentNode(node) {
-        const name = node.name.trim().toLowerCase();
-        return (name === "titletreatment" || name === "title treatment" || name === "title_treatment") && "fills" in node;
-      }
-      function findTextNode(parent, name) {
-        if (parent.type === "TEXT" && parent.name.trim().toLowerCase() === name) return parent;
-        if ("findAllWithCriteria" in parent) {
-          const texts = parent.findAllWithCriteria({ types: ["TEXT"] });
-          return texts.find((n) => n.name.trim().toLowerCase() === name) || null;
-        }
-        return null;
-      }
-      function findAllTextNodes(parent, name) {
-        const results = [];
-        if (parent.type === "TEXT" && parent.name.trim().toLowerCase() === name) results.push(parent);
-        if ("findAllWithCriteria" in parent) {
-          const texts = parent.findAllWithCriteria({ types: ["TEXT"] });
-          results.push(...texts.filter((n) => n.name.trim().toLowerCase() === name));
-        }
-        return results;
-      }
-      function findInstanceNode(parent, name) {
-        if (parent.type === "INSTANCE" && parent.name.trim().toLowerCase() === name) return parent;
-        if ("findAllWithCriteria" in parent) {
-          const instances = parent.findAllWithCriteria({ types: ["INSTANCE"] });
-          return instances.find((n) => n.name.trim().toLowerCase() === name) || null;
-        }
-        return null;
-      }
-      function applyProviderLogo(logos, providerValue) {
-        let applied = 0;
-        for (const logo of logos) {
-          const props = logo.componentProperties;
-          let providerKey = null;
-          for (const key of Object.keys(props)) {
-            const kl = key.toLowerCase();
-            if (kl === "provider" || kl.startsWith("provider#")) {
-              providerKey = key;
-              break;
-            }
-          }
-          console.log(`[applyProvider] logo="${logo.name}" key="${providerKey}" value="${providerValue}"`);
-          if (!providerKey) continue;
-          let resolvedValue = providerValue;
-          const mainComp = logo.mainComponent;
-          const compSet = mainComp == null ? void 0 : mainComp.parent;
-          if (compSet && compSet.type === "COMPONENT_SET") {
-            const baseKey = providerKey.split("#")[0];
-            const propDef = compSet.componentPropertyDefinitions[baseKey];
-            if ((propDef == null ? void 0 : propDef.type) === "VARIANT" && propDef.variantOptions) {
-              resolvedValue = findBestVariantMatch(providerValue, propDef.variantOptions);
-              if (!resolvedValue) {
-                console.warn(`[provider] No match for "${providerValue}"`);
-                continue;
-              }
-            }
-          }
-          try {
-            if (mainComp) logo.swapComponent(mainComp);
-            logo.setProperties({ [providerKey]: resolvedValue });
-            applied++;
-          } catch (e) {
-            try {
-              logo.setProperties({ [providerKey]: resolvedValue });
-              applied++;
-            } catch (_) {
-            }
-          }
-        }
-        return applied;
-      }
-      function isProviderLogoComponent(node) {
-        if (node.type !== "INSTANCE") return false;
-        const name = node.name.trim().toLowerCase();
-        if (name === "providerlogosquare" || name === "providerlogorectangle") return true;
-        try {
-          const props = node.componentProperties;
-          return Object.keys(props).some((k) => {
-            const kl = k.toLowerCase();
-            return kl === "provider" || kl.startsWith("provider#");
-          });
-        } catch (_) {
-          return false;
-        }
-      }
-      function findNearestInstanceAncestor(node) {
-        let current = node.parent;
-        while (current && current.type !== "PAGE" && current.type !== "DOCUMENT") {
-          if (current.type === "INSTANCE") return current;
-          current = current.parent;
-        }
-        return null;
-      }
-      function findProviderLogoAncestor(node) {
-        let current = node.parent;
-        while (current && current.type !== "PAGE" && current.type !== "DOCUMENT") {
-          if (current.type === "INSTANCE") {
-            try {
-              const props = current.componentProperties;
-              if (Object.keys(props).some((k) => {
-                const kl = k.toLowerCase();
-                return kl === "provider" || kl.startsWith("provider#");
-              })) {
-                return current;
-              }
-            } catch (_) {
-            }
-          }
-          current = current.parent;
-        }
-        return null;
-      }
-      function findProviderLogoNodes(nodes, excludeIds = /* @__PURE__ */ new Set()) {
-        const logos = [];
-        for (const node of nodes) {
-          if (isExcluded(node, excludeIds)) continue;
-          if (isProviderLogoComponent(node)) logos.push(node);
-          if ("findAllWithCriteria" in node) {
-            const instances = node.findAllWithCriteria({ types: ["INSTANCE"] });
-            for (const child of instances) {
-              if (isProviderLogoComponent(child) && !isExcluded(child, excludeIds)) {
-                logos.push(child);
-              }
-            }
-          }
-        }
-        return logos;
-      }
-      async function getComponentNameAsync(inst) {
-        var _a;
-        if ((_a = inst.mainComponent) == null ? void 0 : _a.name) return inst.mainComponent.name.toLowerCase();
-        try {
-          const main = await inst.getMainComponentAsync();
-          if (main == null ? void 0 : main.name) return main.name.toLowerCase();
-        } catch (_) {
-        }
-        return "";
-      }
-      function isCardComponentName(name) {
-        const n = name.toLowerCase();
-        return n.includes("card") && (n.includes("portrait") || n.includes("landscape") || n.includes("reparto") || n.includes("chapter"));
-      }
-      function refreshCardCacheSync(nodes) {
-        var _a, _b;
-        for (const node of nodes) {
-          if (node.type === "INSTANCE") {
-            const compName = (((_a = node.mainComponent) == null ? void 0 : _a.name) || "").toLowerCase();
-            if (isCardComponentName(compName)) cachedAllCardIds.add(node.id);
-          }
-          if ("findAllWithCriteria" in node) {
-            const instances = node.findAllWithCriteria({ types: ["INSTANCE"] });
-            for (const child of instances) {
-              const compName = (((_b = child.mainComponent) == null ? void 0 : _b.name) || "").toLowerCase();
-              if (isCardComponentName(compName)) cachedAllCardIds.add(child.id);
-            }
-          }
-        }
-      }
-      var CARD_CACHE_BATCH_SIZE = 10;
-      async function refreshCardCache(nodes) {
-        cachedAllCardIds = /* @__PURE__ */ new Set();
-        refreshCardCacheSync(nodes);
-        const instances = [];
-        for (const node of nodes) {
-          if (node.type === "INSTANCE" && !cachedAllCardIds.has(node.id)) {
-            instances.push(node);
-          }
-          if ("findAllWithCriteria" in node) {
-            const children = node.findAllWithCriteria({ types: ["INSTANCE"] });
-            for (const child of children) {
-              if (!cachedAllCardIds.has(child.id)) {
-                instances.push(child);
-              }
-            }
-          }
-        }
-        for (let i = 0; i < instances.length; i += CARD_CACHE_BATCH_SIZE) {
-          const batch = instances.slice(i, i + CARD_CACHE_BATCH_SIZE);
-          const names = await Promise.all(batch.map((inst) => getComponentNameAsync(inst)));
-          for (let j = 0; j < batch.length; j++) {
-            if (isCardComponentName(names[j])) cachedAllCardIds.add(batch[j].id);
-          }
-        }
-      }
-      function findCoverNodes(nodes, excludeIds = /* @__PURE__ */ new Set()) {
-        const covers = [];
-        for (const node of nodes) {
-          if (isExcluded(node, excludeIds)) continue;
-          if (isCoverNode(node)) covers.push(node);
-          if ("findAll" in node) {
-            const children = node.findAll((child) => isCoverNode(child) && !isExcluded(child, excludeIds));
-            covers.push(...children);
-          }
-        }
-        return covers;
-      }
-      function findTitleTreatmentNodes(nodes, excludeIds = /* @__PURE__ */ new Set()) {
-        const titleTreatments = [];
-        for (const node of nodes) {
-          if (isExcluded(node, excludeIds)) continue;
-          if (isTitleTreatmentNode(node)) titleTreatments.push(node);
-          if ("findAll" in node) {
-            const children = node.findAll((child) => isTitleTreatmentNode(child) && !isExcluded(child, excludeIds));
-            titleTreatments.push(...children);
-          }
-        }
-        return titleTreatments;
-      }
-      function isChapterCardComponent(name) {
-        const n = name.toLowerCase();
-        return n.includes("card") && n.includes("chapter");
-      }
-      function hasCoverChild(node) {
-        if (isCoverNode(node)) return true;
-        if ("findOne" in node) {
-          return !!node.findOne((child) => isCoverNode(child));
-        }
-        return false;
-      }
-      async function findChapterCardInstancesAsync(nodes) {
-        var _a, _b, _c;
-        const chapterCards = [];
-        const allInstances = [];
-        for (const node of nodes) {
-          if (node.type === "INSTANCE" && !allInstances.includes(node)) {
-            allInstances.push(node);
-          }
-          if ("findAllWithCriteria" in node) {
-            const instances = node.findAllWithCriteria({ types: ["INSTANCE"] });
-            for (const inst of instances) {
-              if (!allInstances.includes(inst)) allInstances.push(inst);
-            }
-          }
-        }
-        const addedIds = /* @__PURE__ */ new Set();
-        for (const inst of allInstances) {
-          if (addedIds.has(inst.id)) continue;
-          const instanceName = inst.name;
-          const syncName = ((_a = inst.mainComponent) == null ? void 0 : _a.name) || "";
-          let isChapter = false;
-          if (isChapterCardComponent(instanceName)) {
-            isChapter = true;
-          } else if (syncName && isChapterCardComponent(syncName)) {
-            isChapter = true;
-          } else if (((_c = (_b = inst.mainComponent) == null ? void 0 : _b.parent) == null ? void 0 : _c.type) === "COMPONENT_SET") {
-            const componentSetName = inst.mainComponent.parent.name;
-            if (isChapterCardComponent(componentSetName)) {
-              isChapter = true;
-            }
-          } else if (!syncName) {
-            const asyncName = await getComponentNameAsync(inst);
-            if (isChapterCardComponent(asyncName)) {
-              isChapter = true;
-            }
-          }
-          if (isChapter && hasCoverChild(inst)) {
-            chapterCards.push(inst);
-            addedIds.add(inst.id);
-          }
-        }
-        return chapterCards;
+      function isPersonMetadata(m) {
+        return "personName" in m;
       }
       async function setTextContent(parent, name, value) {
         const textNode = findTextNode(parent, name);
@@ -420,9 +520,6 @@
           }
           textNode.characters = value;
         }
-      }
-      function isPersonMetadata(m) {
-        return "personName" in m;
       }
       async function fillMetadata(nodes, metadata) {
         for (const node of nodes) {
@@ -515,71 +612,8 @@
           }
         }
       }
-      var METADATA_NODE_NAMES = /* @__PURE__ */ new Set(["title", "rating", "year", "duration", "sinopsis", "genre", "name", "rol", "chapter"]);
-      function findMetadataScope(coverNode) {
-        let fallback = null;
-        let current = coverNode.parent;
-        while (current && current.type !== "PAGE" && current.type !== "DOCUMENT") {
-          const sceneNode = current;
-          if ("findAllWithCriteria" in sceneNode) {
-            const texts = sceneNode.findAllWithCriteria({ types: ["TEXT"] });
-            if (texts.length > 0) {
-              if (!fallback) fallback = sceneNode;
-              const hasMetadataNode = texts.some((t) => METADATA_NODE_NAMES.has(t.name.trim().toLowerCase()));
-              if (hasMetadataNode) return sceneNode;
-            }
-          }
-          current = sceneNode.parent;
-        }
-        return fallback || coverNode.parent || coverNode;
-      }
-      function typeFromName(name) {
-        const n = name.toLowerCase();
-        if (n.includes("card") && n.includes("portrait")) return "card-portrait";
-        if (n.includes("card") && n.includes("landscape")) return "card-landscape";
-        if (n.includes("card") && n.includes("chapter")) return "card-chapters";
-        if (n.includes("slideshow")) return "slideshow";
-        if (n.includes("vps")) return "vps";
-        return "unknown";
-      }
-      function detectTypeSync(nodes) {
-        var _a;
-        let componentType = "unknown";
-        let found = false;
-        for (const node of nodes) {
-          const t = typeFromName(node.name);
-          if (t !== "unknown") return t;
-          if (node.type === "INSTANCE") {
-            const compName = (((_a = node.mainComponent) == null ? void 0 : _a.name) || "").toLowerCase();
-            const t2 = typeFromName(compName);
-            if (t2 !== "unknown") return t2;
-          }
-          if ("findOne" in node) {
-            node.findOne((child) => {
-              var _a2;
-              const ct = typeFromName(child.name);
-              if (ct !== "unknown") {
-                componentType = ct;
-                found = true;
-                return true;
-              }
-              if (child.type === "INSTANCE") {
-                const compName = (((_a2 = child.mainComponent) == null ? void 0 : _a2.name) || "").toLowerCase();
-                const ct2 = typeFromName(compName);
-                if (ct2 !== "unknown") {
-                  componentType = ct2;
-                  found = true;
-                  return true;
-                }
-              }
-              return false;
-            });
-          }
-          if (found) break;
-        }
-        return componentType;
-      }
       async function sendSelection() {
+        var _a;
         const myVersion = ++selectionVersion;
         const selection = figma.currentPage.selection;
         let componentType = detectTypeSync(selection);
@@ -592,13 +626,16 @@
             }
           }
           for (const inst of allInstances) {
-            const compName = await getComponentNameAsync(inst);
-            if (myVersion !== selectionVersion) return;
-            const t = typeFromName(compName);
-            if (t !== "unknown") {
-              componentType = t;
-              break;
+            if ((_a = inst.mainComponent) == null ? void 0 : _a.name) {
+              const compName = inst.mainComponent.name.toLowerCase();
+              const t = detectTypeSync([inst]);
+              if (t !== "unknown") {
+                componentType = t;
+                break;
+              }
+              void compName;
             }
+            if (myVersion !== selectionVersion) return;
           }
         }
         if (myVersion !== selectionVersion) return;
@@ -606,7 +643,7 @@
           await refreshCardCache(selection);
           if (myVersion !== selectionVersion) return;
         } else {
-          cachedAllCardIds = /* @__PURE__ */ new Set();
+          resetCardCache();
         }
         const coverCount = findCoverNodes(selection, cachedAllCardIds).length;
         const titleTreatmentCount = findTitleTreatmentNodes(selection, cachedAllCardIds).length;
@@ -627,8 +664,15 @@
         figma.ui.postMessage({ type: "selection-changed" });
         debouncedSendSelection();
       });
+      function getChannelRowOffset(nodes) {
+        for (const node of nodes) {
+          const n = node.name.trim().toLowerCase().replace(/[\s_-]+/g, "");
+          if (n.includes("row") && n.includes("channel")) return 3;
+        }
+        return 0;
+      }
       figma.ui.onmessage = async (msg) => {
-        var _a, _b, _c, _d;
+        var _a, _b, _c, _d, _e;
         if (msg.type === "get-selection") {
           sendSelection();
         }
@@ -645,12 +689,7 @@
         if (msg.type === "cache-catalog") {
           try {
             const catalogData = msg.data;
-            const cacheEntry = {
-              data: catalogData,
-              timestamp: Date.now()
-            };
-            await figma.clientStorage.setAsync("otv_catalog_cache", cacheEntry);
-            console.log("Catalog cached successfully");
+            await figma.clientStorage.setAsync("otv_catalog_cache", { data: catalogData, timestamp: Date.now() });
           } catch (e) {
             console.error("Error caching catalog:", e);
           }
@@ -658,24 +697,14 @@
         if (msg.type === "get-cached-catalog") {
           try {
             const cacheEntry = await figma.clientStorage.getAsync("otv_catalog_cache");
-            if (cacheEntry) {
-              figma.ui.postMessage({
-                type: "cached-catalog",
-                data: cacheEntry.data,
-                timestamp: cacheEntry.timestamp
-              });
-            } else {
-              figma.ui.postMessage({
-                type: "cached-catalog",
-                data: null
-              });
-            }
-          } catch (e) {
-            console.error("Error loading cached catalog:", e);
             figma.ui.postMessage({
               type: "cached-catalog",
-              data: null
+              data: (_a = cacheEntry == null ? void 0 : cacheEntry.data) != null ? _a : null,
+              timestamp: cacheEntry == null ? void 0 : cacheEntry.timestamp
             });
+          } catch (e) {
+            console.error("Error loading cached catalog:", e);
+            figma.ui.postMessage({ type: "cached-catalog", data: null });
           }
         }
         if (msg.type === "apply-cover" && msg.imageBytes) {
@@ -779,8 +808,8 @@
               }
             }
             if (providerLogos.length > 0) {
-              const channelName = (_a = msg.metadata) == null ? void 0 : _a.channelName;
-              const providerFromId = ((_b = msg.metadata) == null ? void 0 : _b.contentId) ? extractProvider(msg.metadata.contentId) : null;
+              const channelName = (_b = msg.metadata) == null ? void 0 : _b.channelName;
+              const providerFromId = ((_c = msg.metadata) == null ? void 0 : _c.contentId) ? extractProvider(msg.metadata.contentId) : null;
               const providerValue = channelName || providerFromId;
               if (providerValue) applyProviderLogo(providerLogos, providerValue);
             }
@@ -789,13 +818,6 @@
           const ttCount = msg.titleTreatmentUrl ? findTitleTreatmentNodes(selection, cachedAllCardIds).length : 0;
           figma.notify(ttCount > 0 ? `\u2705 Cover y t\xEDtulo aplicados a ${coverNodes.length} elemento(s).` : `\u2705 Cover aplicada a ${coverNodes.length} elemento(s).`);
           figma.ui.postMessage({ type: "apply-done", success: true });
-        }
-        function getChannelRowOffset(nodes) {
-          for (const node of nodes) {
-            const n = node.name.trim().toLowerCase().replace(/[\s_-]+/g, "");
-            if (n.includes("row") && n.includes("channel")) return 3;
-          }
-          return 0;
         }
         if (msg.type === "apply-multiple-covers-url" && msg.coversUrlData) {
           const selection = figma.currentPage.selection;
@@ -842,13 +864,13 @@
             console.log(`[provider S1] cover="${coverNode.name}" scope="${scope2.name}" logos=${logos.length}`);
             if (logos.length === 0) {
               const instAncestor = findNearestInstanceAncestor(coverNode);
-              console.log(`[provider S2] ancestor="${(_c = instAncestor == null ? void 0 : instAncestor.name) != null ? _c : "null"}"`);
+              console.log(`[provider S2] ancestor="${(_d = instAncestor == null ? void 0 : instAncestor.name) != null ? _d : "null"}"`);
               if (instAncestor) logos = findProviderLogoNodes([instAncestor], cachedAllCardIds);
               console.log(`[provider S2] logos=${logos.length}`);
             }
             if (logos.length === 0) {
               const providerAncestor = findProviderLogoAncestor(coverNode);
-              console.log(`[provider S3] providerAncestor="${(_d = providerAncestor == null ? void 0 : providerAncestor.name) != null ? _d : "null"}"`);
+              console.log(`[provider S3] providerAncestor="${(_e = providerAncestor == null ? void 0 : providerAncestor.name) != null ? _e : "null"}"`);
               if (providerAncestor) logos = [providerAncestor];
             }
             const metaRaw = coverData.metadata;
@@ -943,10 +965,10 @@
               const chapterCard = chapterInstances[i];
               const epData = episodesData[i];
               let coverNode = null;
-              if (isCoverNode(chapterCard)) {
+              if ("fills" in chapterCard && chapterCard.name.trim().toLowerCase() === "cover") {
                 coverNode = chapterCard;
               } else if ("findOne" in chapterCard) {
-                coverNode = chapterCard.findOne((child) => isCoverNode(child));
+                coverNode = chapterCard.findOne((child) => child.name.trim().toLowerCase() === "cover" && "fills" in child);
               }
               if (!coverNode) continue;
               if (epData.coverUrl) {
