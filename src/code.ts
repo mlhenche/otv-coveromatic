@@ -1,372 +1,90 @@
-// TMDB Covers — Figma Plugin (Sandbox)
-// This runs in Figma's sandbox and has access to the Figma API.
-// El build lo hace esbuild (--bundle --format=iife), así que los imports se
-// inlinean en plugin/code.js — compatible con el sandbox de Figma.
+// CoverOmatic — Figma Plugin (Sandbox)
+// Corre en el sandbox de Figma. esbuild bundlea todos los imports en plugin/code.js.
 
+import { extractProvider } from './lib/channels';
 import {
-    extractProvider,
-    normalizeChannel,
-    findBestVariantMatch,
-} from './lib/channels';
+    findTextNode, findAllTextNodes, findInstanceNode,
+    findCoverNodes, findTitleTreatmentNodes, findMetadataScope,
+} from './figma-nodes';
+import {
+    applyProviderLogo,
+    findNearestInstanceAncestor, findProviderLogoAncestor, findProviderLogoNodes,
+} from './provider-logo';
+import {
+    cachedAllCardIds, resetCardCache,
+    detectTypeSync, refreshCardCacheSync, refreshCardCache,
+    findChapterCardInstancesAsync,
+} from './card-detection';
 
 figma.showUI(__html__, { width: 380, height: 580, themeColors: true });
 
-// -- Module-level cache: IDs of card instances inside VPS (to exclude from cover search) --
-let cachedAllCardIds = new Set<string>();
-// -- Version counter: cancels stale async sendSelection calls --
 let selectionVersion = 0;
 
-// -- Helper: check if a node or its ancestors are in the exclude set --
-function isExcluded(node: BaseNode, excludeIds: Set<string>): boolean {
-    if (excludeIds.size === 0) return false;
-    let current: BaseNode | null = node;
-    while (current && current.type !== 'PAGE' && current.type !== 'DOCUMENT') {
-        if (excludeIds.has(current.id)) return true;
-        current = current.parent;
-    }
-    return false;
+// -- Handle messages from UI --
+interface MovieTvMetadata {
+    title: string;
+    rating: string;
+    year: string;
+    duration: string;
+    ageRating: string;
+    sinopsis: string;
+    genres?: string[];
+    contentId?: string;
+    schedule?: string;
+    live?: string;
+    channelName?: string;
 }
 
-// -- Check if a node is a valid "cover" target --
-function isCoverNode(node: SceneNode): boolean {
-    return node.name.trim().toLowerCase() === 'cover' && 'fills' in node;
+interface PersonMetadata {
+    personName: string;
+    rol: string;
+    isActor: boolean;
+    contentId?: string;
 }
 
-// -- Check if a node is a valid "titleTreatment" target --
-function isTitleTreatmentNode(node: SceneNode): boolean {
-    const name = node.name.trim().toLowerCase();
-    return (name === 'titletreatment' || name === 'title treatment' || name === 'title_treatment') && 'fills' in node;
+type Metadata = MovieTvMetadata | PersonMetadata;
+
+interface CoverData {
+    imageBytes: number[];
+    titleTreatmentBytes?: number[];
+    metadata: Metadata | null;
 }
 
-// -- Find a text node by name inside a parent (including hidden) --
-function findTextNode(parent: SceneNode, name: string): TextNode | null {
-    if (parent.type === 'TEXT' && parent.name.trim().toLowerCase() === name) return parent as TextNode;
-    if ('findAllWithCriteria' in parent) {
-        const texts = parent.findAllWithCriteria({ types: ['TEXT'] });
-        return texts.find(n => n.name.trim().toLowerCase() === name) || null;
-    }
-    return null;
+interface CoverUrlData {
+    coverUrl: string;
+    imageBytes?: number[];
+    titleTreatmentUrl?: string;
+    metadata: Metadata | null;
 }
 
-// -- Find all text nodes by name inside a parent (including hidden) --
-function findAllTextNodes(parent: SceneNode, name: string): TextNode[] {
-    const results: TextNode[] = [];
-    if (parent.type === 'TEXT' && parent.name.trim().toLowerCase() === name) results.push(parent as TextNode);
-    if ('findAllWithCriteria' in parent) {
-        const texts = parent.findAllWithCriteria({ types: ['TEXT'] });
-        results.push(...texts.filter(n => n.name.trim().toLowerCase() === name));
-    }
-    return results;
+interface EpisodeCoverData {
+    coverUrl: string;
+    metadata: {
+        title: string;
+        chapter: string;
+        duration: string;
+        sinopsis: string;
+    };
 }
 
-// -- Find a component instance by name inside a parent (including hidden) --
-function findInstanceNode(parent: SceneNode, name: string): InstanceNode | null {
-    if (parent.type === 'INSTANCE' && parent.name.trim().toLowerCase() === name) return parent as InstanceNode;
-    if ('findAllWithCriteria' in parent) {
-        const instances = parent.findAllWithCriteria({ types: ['INSTANCE'] });
-        return instances.find(n => n.name.trim().toLowerCase() === name) || null;
-    }
-    return null;
+interface PluginMessage {
+    type: string;
+    imageBytes?: number[];
+    titleTreatmentBytes?: number[];
+    coverUrl?: string;
+    titleTreatmentUrl?: string;
+    apiKey?: string;
+    metadata?: Metadata | null;
+    coversData?: CoverData[];
+    coversUrlData?: CoverUrlData[];
+    episodesData?: EpisodeCoverData[];
+    carouselTitle?: string;
 }
 
-// extractProvider, CHANNEL_TO_PROVIDER, normalizeChannel y findBestVariantMatch
-// viven ahora en src/lib/channels.ts (testeados con Vitest) e importados arriba.
-
-function applyProviderLogo(logos: InstanceNode[], providerValue: string): number {
-    let applied = 0;
-    for (const logo of logos) {
-        const props = logo.componentProperties;
-        let providerKey: string | null = null;
-        for (const key of Object.keys(props)) {
-            const kl = key.toLowerCase();
-            if (kl === 'provider' || kl.startsWith('provider#')) {
-                providerKey = key;
-                break;
-            }
-        }
-        console.log(`[applyProvider] logo="${logo.name}" key="${providerKey}" value="${providerValue}"`);
-        if (!providerKey) continue;
-
-        // Resolve the actual variant value to use (exact or fuzzy match)
-        let resolvedValue: string | null = providerValue;
-        const mainComp = logo.mainComponent;
-        const compSet = mainComp?.parent;
-        if (compSet && compSet.type === 'COMPONENT_SET') {
-            const baseKey = providerKey.split('#')[0];
-            const propDef = (compSet as ComponentSetNode).componentPropertyDefinitions[baseKey];
-            if (propDef?.type === 'VARIANT' && propDef.variantOptions) {
-                resolvedValue = findBestVariantMatch(providerValue, propDef.variantOptions);
-                if (!resolvedValue) {
-                    console.warn(`[provider] No match for "${providerValue}"`);
-                    continue;
-                }
-            }
-        }
-
-        try {
-            if (mainComp) logo.swapComponent(mainComp);
-            logo.setProperties({ [providerKey]: resolvedValue });
-            applied++;
-        } catch (e) {
-            try {
-                logo.setProperties({ [providerKey]: resolvedValue });
-                applied++;
-            } catch (_) {
-                // Valor no válido para este componente — se ignora silenciosamente
-            }
-        }
-    }
-    return applied;
+function isPersonMetadata(m: Metadata): m is PersonMetadata {
+    return 'personName' in m;
 }
 
-// -- Check if node is a provider logo component --
-function isProviderLogoComponent(node: SceneNode): boolean {
-    if (node.type !== 'INSTANCE') return false;
-    const name = node.name.trim().toLowerCase();
-    if (name === 'providerlogosquare' || name === 'providerlogorectangle') return true;
-    // Detecta también por presencia de la propiedad 'provider' (cubre card_channel, card_emission y futuros componentes)
-    try {
-        const props = (node as InstanceNode).componentProperties;
-        return Object.keys(props).some(k => { const kl = k.toLowerCase(); return kl === 'provider' || kl.startsWith('provider#'); });
-    } catch (_) {
-        return false;
-    }
-}
-
-// -- Walk up to find the nearest INSTANCE ancestor (any instance, not just provider ones) --
-function findNearestInstanceAncestor(node: SceneNode): InstanceNode | null {
-    let current: BaseNode | null = node.parent;
-    while (current && current.type !== 'PAGE' && current.type !== 'DOCUMENT') {
-        if (current.type === 'INSTANCE') return current as InstanceNode;
-        current = current.parent;
-    }
-    return null;
-}
-
-// -- Walk up ancestors from a node to find the nearest INSTANCE with a 'provider' componentProperty --
-// Used for card_channel / card_emission where the provider variant is on the card itself, not a child.
-function findProviderLogoAncestor(node: SceneNode): InstanceNode | null {
-    let current: BaseNode | null = node.parent;
-    while (current && current.type !== 'PAGE' && current.type !== 'DOCUMENT') {
-        if (current.type === 'INSTANCE') {
-            try {
-                const props = (current as InstanceNode).componentProperties;
-                if (Object.keys(props).some(k => { const kl = k.toLowerCase(); return kl === 'provider' || kl.startsWith('provider#'); })) {
-                    return current as InstanceNode;
-                }
-            } catch (_) { }
-        }
-        current = current.parent;
-    }
-    return null;
-}
-
-// -- Find all provider logo components in selection --
-function findProviderLogoNodes(nodes: readonly SceneNode[], excludeIds: Set<string> = new Set()): InstanceNode[] {
-    const logos: InstanceNode[] = [];
-    for (const node of nodes) {
-        if (isExcluded(node, excludeIds)) continue;
-        if (isProviderLogoComponent(node)) logos.push(node as InstanceNode);
-        if ('findAllWithCriteria' in node) {
-            const instances = node.findAllWithCriteria({ types: ['INSTANCE'] });
-            for (const child of instances) {
-                if (isProviderLogoComponent(child) && !isExcluded(child, excludeIds)) {
-                    logos.push(child);
-                }
-            }
-        }
-    }
-    return logos;
-}
-
-// -- Async: resolve component name for an instance (works for remote library components) --
-async function getComponentNameAsync(inst: InstanceNode): Promise<string> {
-    if (inst.mainComponent?.name) return inst.mainComponent.name.toLowerCase();
-    try {
-        const main = await inst.getMainComponentAsync();
-        if (main?.name) return main.name.toLowerCase();
-    } catch (_) { }
-    return '';
-}
-
-// -- Returns true if a component name matches a card type (portrait, landscape or reparto) --
-function isCardComponentName(name: string): boolean {
-    const n = name.toLowerCase();
-    return n.includes('card') && (n.includes('portrait') || n.includes('landscape') || n.includes('reparto') || n.includes('chapter'));
-}
-
-// -- Sync: build card cache from nodes using only mainComponent.name (no await).
-// Fast — catches all locally accessible components immediately. --
-function refreshCardCacheSync(nodes: readonly SceneNode[]) {
-    for (const node of nodes) {
-        if (node.type === 'INSTANCE') {
-            const compName = (node.mainComponent?.name || '').toLowerCase();
-            if (isCardComponentName(compName)) cachedAllCardIds.add(node.id);
-        }
-        if ('findAllWithCriteria' in node) {
-            const instances = node.findAllWithCriteria({ types: ['INSTANCE'] });
-            for (const child of instances) {
-                const compName = (child.mainComponent?.name || '').toLowerCase();
-                if (isCardComponentName(compName)) cachedAllCardIds.add(child.id);
-            }
-        }
-    }
-}
-
-// -- Async: extend card cache with remote/library components (getMainComponentAsync).
-// Called at selection time; sync pre-pass already handled by refreshCardCacheSync.
-// Resolves in parallel batches of BATCH_SIZE to avoid blocking the Figma thread. --
-const CARD_CACHE_BATCH_SIZE = 10;
-
-async function refreshCardCache(nodes: readonly SceneNode[]) {
-    cachedAllCardIds = new Set<string>();
-    refreshCardCacheSync(nodes); // immediate sync pass first
-    const instances: InstanceNode[] = [];
-    for (const node of nodes) {
-        if (node.type === 'INSTANCE' && !cachedAllCardIds.has(node.id)) {
-            instances.push(node as InstanceNode);
-        }
-        if ('findAllWithCriteria' in node) {
-            const children = node.findAllWithCriteria({ types: ['INSTANCE'] });
-            for (const child of children) {
-                if (!cachedAllCardIds.has(child.id)) {
-                    instances.push(child);
-                }
-            }
-        }
-    }
-    // Resolve in parallel batches
-    for (let i = 0; i < instances.length; i += CARD_CACHE_BATCH_SIZE) {
-        const batch = instances.slice(i, i + CARD_CACHE_BATCH_SIZE);
-        const names = await Promise.all(batch.map(inst => getComponentNameAsync(inst)));
-        for (let j = 0; j < batch.length; j++) {
-            if (isCardComponentName(names[j])) cachedAllCardIds.add(batch[j].id);
-        }
-    }
-}
-
-// -- Find cover nodes, skipping subtrees rooted at excluded IDs --
-function findCoverNodes(nodes: readonly SceneNode[], excludeIds: Set<string> = new Set()): SceneNode[] {
-    const covers: SceneNode[] = [];
-    for (const node of nodes) {
-        if (isExcluded(node, excludeIds)) continue;
-        if (isCoverNode(node)) covers.push(node);
-        if ('findAll' in node) {
-            const children = node.findAll(child => isCoverNode(child as SceneNode) && !isExcluded(child, excludeIds));
-            covers.push(...(children as SceneNode[]));
-        }
-    }
-    return covers;
-}
-
-// -- Find titleTreatment nodes, skipping subtrees rooted at excluded IDs --
-function findTitleTreatmentNodes(nodes: readonly SceneNode[], excludeIds: Set<string> = new Set()): SceneNode[] {
-    const titleTreatments: SceneNode[] = [];
-    for (const node of nodes) {
-        if (isExcluded(node, excludeIds)) continue;
-        if (isTitleTreatmentNode(node)) titleTreatments.push(node);
-        if ('findAll' in node) {
-            const children = node.findAll(child => isTitleTreatmentNode(child as SceneNode) && !isExcluded(child, excludeIds));
-            titleTreatments.push(...(children as SceneNode[]));
-        }
-    }
-    return titleTreatments;
-}
-
-// -- Helper: check if component name is a chapter card --
-function isChapterCardComponent(name: string): boolean {
-    const n = name.toLowerCase();
-    // Match: card_chapters, card-chapters, CardChapters, etc.
-    // Require both "card" and "chapter" to avoid matching containers like "rowChapters"
-    return n.includes('card') && n.includes('chapter');
-}
-
-// -- Find chapter card instances (sync - uses only mainComponent.name) --
-function findChapterCardInstancesSync(nodes: readonly SceneNode[]): InstanceNode[] {
-    const chapterCards: InstanceNode[] = [];
-    for (const node of nodes) {
-        if (node.type === 'INSTANCE') {
-            const compName = node.mainComponent?.name || '';
-            if (compName && isChapterCardComponent(compName)) chapterCards.push(node);
-        }
-        if ('findAllWithCriteria' in node) {
-            const instances = node.findAllWithCriteria({ types: ['INSTANCE'] });
-            for (const inst of instances) {
-                const compName = inst.mainComponent?.name || '';
-                if (compName && isChapterCardComponent(compName)) chapterCards.push(inst);
-            }
-        }
-    }
-    return chapterCards;
-}
-
-// -- Helper: check if an instance has a "cover" child (confirms it's a real card) --
-function hasCoverChild(node: SceneNode): boolean {
-    if (isCoverNode(node)) return true;
-    if ('findOne' in node) {
-        return !!node.findOne(child => isCoverNode(child as SceneNode));
-    }
-    return false;
-}
-
-// -- Find chapter card instances (async - resolves remote components) --
-async function findChapterCardInstancesAsync(nodes: readonly SceneNode[]): Promise<InstanceNode[]> {
-    const chapterCards: InstanceNode[] = [];
-    const allInstances: InstanceNode[] = [];
-
-    // Collect all instances from the selection tree
-    for (const node of nodes) {
-        if (node.type === 'INSTANCE' && !allInstances.includes(node as InstanceNode)) {
-            allInstances.push(node as InstanceNode);
-        }
-        if ('findAllWithCriteria' in node) {
-            const instances = node.findAllWithCriteria({ types: ['INSTANCE'] });
-            for (const inst of instances) {
-                if (!allInstances.includes(inst)) allInstances.push(inst);
-            }
-        }
-    }
-
-    // Check each instance (check instance name OR component name OR ComponentSet parent name)
-    const addedIds = new Set<string>();
-
-    for (const inst of allInstances) {
-        // Skip if already added (prevent duplicates)
-        if (addedIds.has(inst.id)) continue;
-
-        const instanceName = inst.name;
-        const syncName = inst.mainComponent?.name || '';
-        let isChapter = false;
-
-        // Check instance name, mainComponent name, or ComponentSet parent name
-        if (isChapterCardComponent(instanceName)) {
-            isChapter = true;
-        } else if (syncName && isChapterCardComponent(syncName)) {
-            isChapter = true;
-        } else if (inst.mainComponent?.parent?.type === 'COMPONENT_SET') {
-            const componentSetName = inst.mainComponent.parent.name;
-            if (isChapterCardComponent(componentSetName)) {
-                isChapter = true;
-            }
-        } else if (!syncName) {
-            const asyncName = await getComponentNameAsync(inst);
-            if (isChapterCardComponent(asyncName)) {
-                isChapter = true;
-            }
-        }
-
-        // Only add if it matches AND has a "cover" child (confirms it's a real card,
-        // not a nested sub-component like a chapter badge or indicator)
-        if (isChapter && hasCoverChild(inst)) {
-            chapterCards.push(inst);
-            addedIds.add(inst.id);
-        }
-    }
-
-    return chapterCards;
-}
-
-// -- Helper: set text content on a named text node --
 async function setTextContent(parent: SceneNode, name: string, value: string) {
     const textNode = findTextNode(parent, name);
     if (textNode) {
@@ -376,7 +94,6 @@ async function setTextContent(parent: SceneNode, name: string, value: string) {
                 await figma.loadFontAsync(segment.fontName);
             }
         } else {
-            // Empty text node: no segments, load font from fontName property directly
             const fn = textNode.fontName;
             if (fn !== figma.mixed) {
                 await figma.loadFontAsync(fn as FontName);
@@ -386,12 +103,6 @@ async function setTextContent(parent: SceneNode, name: string, value: string) {
     }
 }
 
-// -- Helper: check if metadata is for a person --
-function isPersonMetadata(m: Metadata): m is PersonMetadata {
-    return 'personName' in m;
-}
-
-// -- Fill metadata text nodes and variant properties in the selection --
 async function fillMetadata(nodes: readonly SceneNode[], metadata: Metadata) {
     for (const node of nodes) {
         if (isPersonMetadata(metadata)) {
@@ -478,86 +189,12 @@ async function fillMetadata(nodes: readonly SceneNode[], metadata: Metadata) {
     }
 }
 
-// -- Known metadata text node names (used by findMetadataScope to validate scope) --
-const METADATA_NODE_NAMES = new Set(['title', 'rating', 'year', 'duration', 'sinopsis', 'genre', 'name', 'rol', 'chapter']);
-
-// -- Find the metadata scope for a cover node --
-// Walks up from the cover, preferring the nearest ancestor that contains
-// at least one text node with a known metadata name. Falls back to the
-// first ancestor with any text if no named match is found.
-function findMetadataScope(coverNode: SceneNode): SceneNode {
-    let fallback: SceneNode | null = null;
-    let current: BaseNode | null = coverNode.parent;
-    while (current && current.type !== 'PAGE' && current.type !== 'DOCUMENT') {
-        const sceneNode = current as SceneNode;
-        if ('findAllWithCriteria' in sceneNode) {
-            const texts = sceneNode.findAllWithCriteria({ types: ['TEXT'] });
-            if (texts.length > 0) {
-                if (!fallback) fallback = sceneNode;
-                const hasMetadataNode = texts.some(t => METADATA_NODE_NAMES.has(t.name.trim().toLowerCase()));
-                if (hasMetadataNode) return sceneNode;
-            }
-        }
-        current = sceneNode.parent;
-    }
-    return fallback || (coverNode.parent as SceneNode) || coverNode;
-}
-
-// -- Detect component type from a node name --
-function typeFromName(name: string): string {
-    const n = name.toLowerCase();
-    if (n.includes('card') && n.includes('portrait')) return 'card-portrait';
-    if (n.includes('card') && n.includes('landscape')) return 'card-landscape';
-    if (n.includes('card') && n.includes('chapter')) return 'card-chapters';
-    if (n.includes('slideshow')) return 'slideshow';
-    if (n.includes('vps')) return 'vps';
-    return 'unknown';
-}
-
-// -- Synchronous type detection from selection: walks entire tree, checks node names
-// and mainComponent.name (sync). Called at apply time to avoid race conditions. --
-function detectTypeSync(nodes: readonly SceneNode[]): string {
-    let componentType = 'unknown';
-    let found = false;
-    for (const node of nodes) {
-        const t = typeFromName(node.name);
-        if (t !== 'unknown') return t;
-        if (node.type === 'INSTANCE') {
-            const compName = (node.mainComponent?.name || '').toLowerCase();
-            const t2 = typeFromName(compName);
-            if (t2 !== 'unknown') return t2;
-        }
-        if ('findOne' in node) {
-            node.findOne(child => {
-                const ct = typeFromName(child.name);
-                if (ct !== 'unknown') { componentType = ct; found = true; return true; }
-                if (child.type === 'INSTANCE') {
-                    const compName = ((child as InstanceNode).mainComponent?.name || '').toLowerCase();
-                    const ct2 = typeFromName(compName);
-                    if (ct2 !== 'unknown') { componentType = ct2; found = true; return true; }
-                }
-                return false;
-            });
-        }
-        if (found) break;
-    }
-    return componentType;
-}
-
-// -- Send current selection info to UI --
-// Pass 1 (sync): full tree walk — node names + sync mainComponent.name.
-//   walkTree visits parent before children, so a VPS frame is detected before
-//   any nested card instances inside it.
-// Pass 2 (async): full tree walk — getMainComponentAsync for remote/library
-//   instances that had null mainComponent in Pass 1.
-// Version counter discards stale results when selection changes mid-async.
 async function sendSelection() {
     const myVersion = ++selectionVersion;
     const selection = figma.currentPage.selection;
 
     let componentType = detectTypeSync(selection);
 
-    // Pass 2 — full tree walk, async (getMainComponentAsync for remote/library instances)
     if (componentType === 'unknown') {
         const allInstances: InstanceNode[] = [];
         for (const node of selection) {
@@ -567,36 +204,35 @@ async function sendSelection() {
             }
         }
         for (const inst of allInstances) {
-            const compName = await getComponentNameAsync(inst);
-            if (myVersion !== selectionVersion) return; // stale — newer selection started
-            const t = typeFromName(compName);
-            if (t !== 'unknown') { componentType = t; break; }
+            if (inst.mainComponent?.name) {
+                const compName = inst.mainComponent.name.toLowerCase();
+                const t = detectTypeSync([inst]);
+                if (t !== 'unknown') { componentType = t; break; }
+                void compName;
+            }
+            if (myVersion !== selectionVersion) return;
         }
     }
 
-    if (myVersion !== selectionVersion) return; // stale — discard
+    if (myVersion !== selectionVersion) return;
 
-    // For VPS: resolve card instance IDs so cover search skips them
     if (componentType === 'vps') {
         await refreshCardCache(selection);
         if (myVersion !== selectionVersion) return;
     } else {
-        cachedAllCardIds = new Set<string>();
+        resetCardCache();
     }
 
     const coverCount = findCoverNodes(selection, cachedAllCardIds).length;
     const titleTreatmentCount = findTitleTreatmentNodes(selection, cachedAllCardIds).length;
 
-    // Always count chapter card instances (even if componentType is unknown/frame)
-    // This handles: single card, multiple cards, or frame containing cards
     const chapterInstances = await findChapterCardInstancesAsync(selection);
-    if (myVersion !== selectionVersion) return; // stale check
+    if (myVersion !== selectionVersion) return;
     const chapterCardCount = chapterInstances.length;
 
     figma.ui.postMessage({ type: 'selection-info', count: selection.length, coverCount, titleTreatmentCount, componentType, chapterCardCount });
 }
 
-// -- Debounced selection handler: batches rapid selection changes --
 let selectionTimer: ReturnType<typeof setTimeout> | null = null;
 function debouncedSendSelection() {
     if (selectionTimer) clearTimeout(selectionTimer);
@@ -606,72 +242,17 @@ function debouncedSendSelection() {
     }, 120);
 }
 
-// -- Listen to selection changes --
 figma.on('selectionchange', () => {
-    // Immediately notify UI to reset componentType (prevents stale type being used at apply time)
     figma.ui.postMessage({ type: 'selection-changed' });
     debouncedSendSelection();
 });
 
-// -- Handle messages from UI --
-interface MovieTvMetadata {
-    title: string;
-    rating: string;
-    year: string;
-    duration: string;
-    ageRating: string;
-    sinopsis: string;
-    genres?: string[];
-    contentId?: string;
-    schedule?: string;
-    live?: string;
-    channelName?: string;
-}
-
-interface PersonMetadata {
-    personName: string;
-    rol: string;
-    isActor: boolean;
-    contentId?: string;
-}
-
-type Metadata = MovieTvMetadata | PersonMetadata;
-
-interface CoverData {
-    imageBytes: number[];
-    titleTreatmentBytes?: number[];
-    metadata: Metadata | null;
-}
-
-interface CoverUrlData {
-    coverUrl: string;
-    imageBytes?: number[];
-    titleTreatmentUrl?: string;
-    metadata: Metadata | null;
-}
-
-interface EpisodeCoverData {
-    coverUrl: string;
-    metadata: {
-        title: string;
-        chapter: string;
-        duration: string;
-        sinopsis: string;
-    };
-}
-
-interface PluginMessage {
-    type: string;
-    imageBytes?: number[];
-    titleTreatmentBytes?: number[];
-    coverUrl?: string;
-    titleTreatmentUrl?: string;
-    apiKey?: string;
-    metadata?: Metadata | null;
-    coversData?: CoverData[];
-    coversUrlData?: CoverUrlData[];
-    episodesData?: EpisodeCoverData[];
-    carouselTitle?: string;
+function getChannelRowOffset(nodes: readonly SceneNode[]): number {
+    for (const node of nodes) {
+        const n = node.name.trim().toLowerCase().replace(/[\s_-]+/g, '');
+        if (n.includes('row') && n.includes('channel')) return 3;
+    }
+    return 0;
 }
 
 figma.ui.onmessage = async (msg: PluginMessage) => {
@@ -692,43 +273,26 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
         figma.ui.postMessage({ type: 'loaded-api-key', apiKey: storedKey || '' });
     }
 
-    // -- Cache catalog (loaded from GitHub raw JSON) --
     if (msg.type === 'cache-catalog') {
         try {
             const catalogData = (msg as any).data;
-            const cacheEntry = {
-                data: catalogData,
-                timestamp: Date.now()
-            };
-            await figma.clientStorage.setAsync('otv_catalog_cache', cacheEntry);
-            console.log('Catalog cached successfully');
+            await figma.clientStorage.setAsync('otv_catalog_cache', { data: catalogData, timestamp: Date.now() });
         } catch (e) {
             console.error('Error caching catalog:', e);
         }
     }
 
-    // -- Get cached catalog (v3) --
     if (msg.type === 'get-cached-catalog') {
         try {
             const cacheEntry = await figma.clientStorage.getAsync('otv_catalog_cache');
-            if (cacheEntry) {
-                figma.ui.postMessage({
-                    type: 'cached-catalog',
-                    data: cacheEntry.data,
-                    timestamp: cacheEntry.timestamp
-                });
-            } else {
-                figma.ui.postMessage({
-                    type: 'cached-catalog',
-                    data: null
-                });
-            }
-        } catch (e) {
-            console.error('Error loading cached catalog:', e);
             figma.ui.postMessage({
                 type: 'cached-catalog',
-                data: null
+                data: cacheEntry?.data ?? null,
+                timestamp: cacheEntry?.timestamp,
             });
+        } catch (e) {
+            console.error('Error loading cached catalog:', e);
+            figma.ui.postMessage({ type: 'cached-catalog', data: null });
         }
     }
 
@@ -777,13 +341,10 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
             : `✅ Cover aplicada a ${coverNodes.length} elemento(s).`);
     }
 
-    // -- Apply cover via URL (OTV CDN) --
     if (msg.type === 'apply-cover-url' && msg.coverUrl) {
         const selection = figma.currentPage.selection;
         const coverUrl = msg.coverUrl;
 
-        // If VPS, run sync card cache pass at apply time to handle timing gaps
-        // (the async refreshCardCache in sendSelection may not have completed yet)
         if (detectTypeSync(selection) === 'vps') refreshCardCacheSync(selection);
 
         const coverNodes = findCoverNodes(selection, cachedAllCardIds);
@@ -794,8 +355,6 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
             return;
         }
 
-        // 1. Cargar imagen principal (único punto de fallo que muestra error al usuario)
-        // Preferimos imageBytes (pre-fetched en la UI con cookies de sesión OTV, necesario para EPG)
         let image: Image;
         try {
             if (msg.imageBytes) {
@@ -814,7 +373,6 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
             }
         }
 
-        // 2. Title treatment (opcional, falla silenciosamente)
         if (msg.titleTreatmentUrl) {
             try {
                 const ttImage = await figma.createImageAsync(msg.titleTreatmentUrl);
@@ -827,7 +385,6 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
             } catch (_) { }
         }
 
-        // 3. Metadata (falla silenciosamente)
         if (msg.metadata) {
             try {
                 const scopesDone = new Set<string>();
@@ -841,11 +398,9 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
             } catch (_) { }
         }
 
-        // 4. Provider logo (falla silenciosamente)
         try {
             let providerLogos = findProviderLogoNodes(selection, cachedAllCardIds);
             if (providerLogos.length === 0) {
-                // Fallback: walk up from each cover looking for an INSTANCE with 'provider' property
                 for (const cn of coverNodes) {
                     const pa = findProviderLogoAncestor(cn);
                     if (pa) { providerLogos = [pa]; break; }
@@ -866,16 +421,6 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
         figma.ui.postMessage({ type: 'apply-done', success: true });
     }
 
-    // -- Detect if selection is a channel row (skip first 3 covers) --
-    function getChannelRowOffset(nodes: readonly SceneNode[]): number {
-        for (const node of nodes) {
-            const n = node.name.trim().toLowerCase().replace(/[\s_-]+/g, '');
-            if (n.includes('row') && n.includes('channel')) return 3;
-        }
-        return 0;
-    }
-
-    // -- Apply multiple covers via URL (OTV CDN) --
     if (msg.type === 'apply-multiple-covers-url' && msg.coversUrlData) {
         const selection = figma.currentPage.selection;
         const coverNodes = findCoverNodes(selection, cachedAllCardIds);
@@ -897,7 +442,6 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
             const coverData = coversUrlData[i];
 
             try {
-                // Preferimos imageBytes (pre-fetched en la UI con cookies de sesión OTV, necesario para EPG)
                 const image = coverData.imageBytes
                     ? figma.createImage(new Uint8Array(coverData.imageBytes))
                     : await figma.createImageAsync(coverData.coverUrl);
@@ -923,21 +467,16 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
                 await fillMetadata([scope], coverData.metadata);
             }
 
-            // Apply provider logo: prefer channelName from HTML paste, fallback to contentId prefix
-            // Search strategy: metadata scope first, then nearest INSTANCE ancestor (covers card_channel where
-            // providerLogoSquare is a sibling of wrapper inside the card instance, not inside metadata scope)
             const scope2 = findMetadataScope(coverNode);
             let logos = findProviderLogoNodes([scope2], cachedAllCardIds);
             console.log(`[provider S1] cover="${coverNode.name}" scope="${scope2.name}" logos=${logos.length}`);
             if (logos.length === 0) {
-                // Expand search to nearest INSTANCE ancestor of cover
                 const instAncestor = findNearestInstanceAncestor(coverNode);
                 console.log(`[provider S2] ancestor="${instAncestor?.name ?? 'null'}"`);
                 if (instAncestor) logos = findProviderLogoNodes([instAncestor], cachedAllCardIds);
                 console.log(`[provider S2] logos=${logos.length}`);
             }
             if (logos.length === 0) {
-                // Last resort: walk up ancestors looking for an INSTANCE with a 'provider' property
                 const providerAncestor = findProviderLogoAncestor(coverNode);
                 console.log(`[provider S3] providerAncestor="${providerAncestor?.name ?? 'null'}"`);
                 if (providerAncestor) logos = [providerAncestor];
@@ -953,11 +492,9 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
             }
         }
 
-        // Apply carousel title to Row_title node if present
         if (msg.carouselTitle) {
             for (const node of selection) {
                 let applied = false;
-                // Try component text property first (e.g. "título de la row", "row_title")
                 if (node.type === 'INSTANCE') {
                     const props = node.componentProperties;
                     for (const [key, prop] of Object.entries(props)) {
@@ -973,7 +510,6 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
                         }
                     }
                 }
-                // Fallback: find a text node named row_title
                 if (!applied) {
                     try {
                         await setTextContent(node, 'row_title', msg.carouselTitle);
@@ -1032,12 +568,10 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
         figma.notify(`✅ ${applyCount} cover(s) aplicadas con contenido aleatorio.`);
     }
 
-    // -- Apply episode covers to card_chapters --
     if (msg.type === 'apply-episode-covers' && msg.episodesData) {
         const selection = figma.currentPage.selection;
         const episodesData = msg.episodesData;
 
-        // Find chapter card instances (not just covers - this handles custom instance names)
         const chapterInstances = await findChapterCardInstancesAsync(selection);
 
         if (chapterInstances.length === 0) {
@@ -1052,16 +586,16 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
             for (let i = 0; i < applyCount; i++) {
                 const chapterCard = chapterInstances[i];
                 const epData = episodesData[i];
+
                 let coverNode: SceneNode | null = null;
-                if (isCoverNode(chapterCard)) {
+                if ('fills' in chapterCard && chapterCard.name.trim().toLowerCase() === 'cover') {
                     coverNode = chapterCard;
                 } else if ('findOne' in chapterCard) {
-                    coverNode = chapterCard.findOne(child => isCoverNode(child as SceneNode)) as SceneNode | null;
+                    coverNode = chapterCard.findOne(child => child.name.trim().toLowerCase() === 'cover' && 'fills' in child) as SceneNode | null;
                 }
 
-                if (!coverNode) continue; // Skip if no cover found in this card
+                if (!coverNode) continue;
 
-                // Apply still image
                 if (epData.coverUrl) {
                     const image = await figma.createImageAsync(epData.coverUrl);
                     if ('fills' in coverNode) {
@@ -1071,7 +605,6 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
                     }
                 }
 
-                // Apply episode metadata to the card instance (not just the cover scope)
                 if (epData.metadata) {
                     const fields = [
                         { name: 'title', value: epData.metadata.title },
@@ -1098,7 +631,6 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
     }
 };
 
-// -- Initial selection + send stored API key --
 sendSelection();
 (async () => {
     const storedKey = await figma.clientStorage.getAsync('tmdb_api_key');
