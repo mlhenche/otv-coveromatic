@@ -20,37 +20,13 @@ Para completar: abrir Desktop Bridge en Figma → Claude lee variantes via MCP �
 
 ---
 
-## Fase 2 — Refactor de código
+## Pendiente
 
-> Prerequisito cumplido: esbuild bundlea el backend, tests en src/lib/, tooling activo.
+### Activar `strict: true` en UI
 
-### 1. Trocear `code.ts` (1.231 líneas)
+`src/ui/tsconfig.json` tiene el flag en `false`. Encenderlo + eliminar todos los `any` explícitos. El compilador guiará el trabajo.
 
-Extraer a módulos dentro de `src/`:
-- Helpers de nodos Figma (buscar capas, aplicar fills, resize)
-- Lógica de provider logo (`applyProviderLogo`, `findProviderLogoAncestor`)
-- Handlers por mensaje (`apply-cover-url`, `apply-multiple-covers-url`, `apply-episode-covers`, etc.)
-
-esbuild los bundlea igual que ahora — el split es solo para legibilidad y testabilidad.
-
-### 2. Extraer apply-logic de `CoverGrid.tsx` (519 líneas)
-
-`applyOTVContent`, `applyRelatedContent`, `applyRandomOTV` y `sendRandomOTVMessage` son lógica de negocio dentro de un componente React. Moverlas a un hook `useApply` o a `src/lib/apply.ts` para poder testearlas sin montar el componente.
-
-### 3. Activar `strict: true` en UI
-
-`src/ui/tsconfig.json` ya tiene el flag listo (solo en `false`). Encenderlo + eliminar todos los `any` explícitos. El compilador guiará el trabajo.
-
-### 4. Tests del parser HTML
-
-`HtmlPasteTab.tsx` parsea HTML con `DOMParser`. Extraer las funciones de parseo puras a `src/lib/html-parser.ts` y cubrirlas con Vitest + entorno jsdom.
-
-### 5. Robustez async ✓ (parcial)
-
-- `useTMDBMultiSearch` en `ControlsBar`: error visible en el dropdown — distingue `TmdbAuthError` de error de red.
-- Descartados: AbortController (react-query ya cancela; fetches puntuales no necesitan cancelación), throttling (flujo serie, sin riesgo de rate limit), error boundaries (fallos son de fetch, no de render).
-
-### 6. Componente `card_emission`
+### Componente `card_emission`
 
 El DS aún no tiene componente para emisiones en directo. Ver spec en [docs/specs/card-emission.md](docs/specs/card-emission.md). Una vez exista en Figma, actualizar la detección en `code.ts` y los `switch` de URLs en `CoverGrid.tsx`.
 
